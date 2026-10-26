@@ -93,7 +93,9 @@ export function ActShareCardModal({
     ctx.fillText(
       actNumber === 1
         ? "WATIKAH KELAYAKAN CALON"
-        : "POSTER KEMPEN RASMI YB",
+        : actNumber === 3
+          ? "PENYATA KIRAAN UNDI"
+          : "POSTER KEMPEN RASMI YB",
       W / 2,
       105
     );
@@ -103,7 +105,9 @@ export function ActShareCardModal({
     ctx.fillText(
       actNumber === 1
         ? "PILIHAN RAYA UMUM KE-16 (GE16)"
-        : "JUARA TURUN PADANG & PHOTO-OP GE16",
+        : actNumber === 3
+          ? "BORANG 14 · MALAM KIRAAN UNDI"
+          : "JUARA TURUN PADANG & PHOTO-OP GE16",
       W / 2,
       128
     );
@@ -166,21 +170,55 @@ export function ActShareCardModal({
     ctx.textAlign = "left";
     ctx.font = "12px sans-serif";
     ctx.fillStyle = "#94A3B8";
-    ctx.fillText(actNumber === 1 ? "Status Deposit SPR (RM10k):" : "Kuey Teow Digoreng:", 85, 562);
+    ctx.fillText(
+      actNumber === 1
+        ? "Status Deposit SPR (RM10k):"
+        : actNumber === 3
+          ? "Undi Sah Pada Borang 14:"
+          : "Kuey Teow Digoreng:",
+      85,
+      562
+    );
     ctx.textAlign = "right";
     ctx.fillStyle = "#10B981";
     ctx.font = "bold 14px sans-serif";
-    ctx.fillText(actNumber === 1 ? (livesRemaining > 0 ? "LULUS BAYAR ✅" : "HANGUS ❌") : "14 PINGGAN 🍜", W - 85, 562);
+    ctx.fillText(
+      actNumber === 1
+        ? livesRemaining > 0
+          ? "LULUS BAYAR ✅"
+          : "HANGUS ❌"
+        : actNumber === 3
+          ? "TEPAT 112 ✅"
+          : "14 PINGGAN 🍜",
+      W - 85,
+      562
+    );
 
     // Row 3: Status Perkara 47/48 vs Kempen
     ctx.textAlign = "left";
     ctx.font = "12px sans-serif";
     ctx.fillStyle = "#94A3B8";
-    ctx.fillText(actNumber === 1 ? "Kelayakan Perkara 47 & 48:" : "Had Masa Kempen (11:59PM):", 85, 596);
+    ctx.fillText(
+      actNumber === 1
+        ? "Kelayakan Perkara 47 & 48:"
+        : actNumber === 3
+          ? "Agen Pengiraan Undi:"
+          : "Had Masa Kempen (11:59PM):",
+      85,
+      596
+    );
     ctx.textAlign = "right";
     ctx.fillStyle = "#38BDF8";
     ctx.font = "bold 13px sans-serif";
-    ctx.fillText(actNumber === 1 ? "SAH & BEBAS MUFLIS 📜" : "PATUH PERATURAN SPR ⏱️", W - 85, 596);
+    ctx.fillText(
+      actNumber === 1
+        ? "SAH & BEBAS MUFLIS 📜"
+        : actNumber === 3
+          ? "HADIR & SAH 🗳️"
+          : "PATUH PERATURAN SPR ⏱️",
+      W - 85,
+      596
+    );
 
     // Row 4: Gelaran Pencapaian
     ctx.textAlign = "left";
@@ -190,7 +228,15 @@ export function ActShareCardModal({
     ctx.textAlign = "right";
     ctx.fillStyle = "#E2E8F0";
     ctx.font = "bold 13px sans-serif";
-    ctx.fillText(actNumber === 1 ? "Calon Harapan Rakyat ⭐" : "Raja Photo-Op Pasar Malam 🏆", W - 85, 630);
+    ctx.fillText(
+      actNumber === 1
+        ? "Calon Harapan Rakyat ⭐"
+        : actNumber === 3
+          ? "Juru Kira Malam PRU 📒"
+          : "Raja Photo-Op Pasar Malam 🏆",
+      W - 85,
+      630
+    );
 
     // 7. BIG OFFICIAL PARODY STAMP (Rotated)
     ctx.save();

@@ -19,6 +19,7 @@ import { GorengKueyTeowGame } from "./minigames/GorengKueyTeow";
 import { PotongRebenGame } from "./minigames/PotongReben";
 import { PayungBosGame } from "./minigames/PayungBos";
 import { PacakBenderaGame } from "./minigames/PacakBendera";
+import { Borang14Game } from "./minigames/Borang14";
 import { CONSTITUTION_FACTS } from "./facts";
 import { drawPixelCandidate } from "./pixelAvatar";
 import { ActShareCardModal } from "./ActShareCardModal";
@@ -53,6 +54,10 @@ const RHYTHMIC_CALLS: Record<MicrogameId, { call: string[]; hit: string }> = {
   pacak_bendera: {
     call: ["IKAT...", "...TIANG...", "...LAMPU?!"],
     hit: "PACAK BENDERA! 🚩",
+  },
+  borang_14: {
+    call: ["KIRA...", "...UNDI...", "...BORANG 14?!"],
+    hit: "CATAT TEPAT! 🗳️",
   },
 };
 
@@ -94,6 +99,14 @@ const MICROGAMES_ACT2: { id: MicrogameId; prompt: string; subtext: string }[] = 
     id: "pacak_bendera",
     prompt: "IKAT BENDERA!",
     subtext: "Gantung bendera parti sebelum jam 11:59 malam!",
+  },
+];
+
+const MICROGAMES_ACT3: { id: MicrogameId; prompt: string; subtext: string }[] = [
+  {
+    id: "borang_14",
+    prompt: "KIRA BORANG 14!",
+    subtext: "Ketuk ikatan kertas undi pada beat ke-4 hingga tepat 112!",
   },
 ];
 
@@ -208,6 +221,12 @@ export function CukupJumlahGame() {
     setScreen("microgame");
   };
 
+  const handleStartAct3 = () => {
+    setCurrentAct(3);
+    setCurrentGameIndex(0);
+    setScreen("microgame");
+  };
+
   const handleMicrogameComplete = (success: boolean) => {
     if (timerRef.current) clearInterval(timerRef.current);
     setLastGameSuccess(success);
@@ -224,7 +243,8 @@ export function CukupJumlahGame() {
     setScreen("microgame_result");
   };
 
-  const activeMicrogameList = currentAct === 1 ? MICROGAMES_ACT1 : MICROGAMES_ACT2;
+  const activeMicrogameList =
+    currentAct === 1 ? MICROGAMES_ACT1 : currentAct === 2 ? MICROGAMES_ACT2 : MICROGAMES_ACT3;
 
   const handleNextMicrogame = () => {
     if (lives <= 0) {
@@ -240,8 +260,11 @@ export function CukupJumlahGame() {
       if (currentAct === 1) {
         setScreen("act1_complete");
         setShowShareModal(true);
-      } else {
+      } else if (currentAct === 2) {
         setScreen("act2_complete");
+        setShowShareModal(true);
+      } else {
+        setScreen("act3_complete");
         setShowShareModal(true);
       }
     }
@@ -389,6 +412,12 @@ export function CukupJumlahGame() {
               {currentMicrogame.id === "pacak_bendera" && profile && (
                 <PacakBenderaGame
                   partyId={profile.party}
+                  onComplete={handleMicrogameComplete}
+                />
+              )}
+              {currentMicrogame.id === "borang_14" && (
+                <Borang14Game
+                  currentBeat={currentBeat}
                   onComplete={handleMicrogameComplete}
                 />
               )}
@@ -545,15 +574,71 @@ export function CukupJumlahGame() {
               </button>
 
               <button
-                onClick={() => {
-                  alert("Tahniah menamatkan Bab 1 & Bab 2! Bab 3 (Hari Mengundi) akan datang!");
-                  setScreen("customizer");
-                }}
-                className="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-700 transition cursor-pointer"
+                onClick={() => setScreen("act3_intro")}
+                className="py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition cursor-pointer"
               >
-                Main Semula 🔄
+                Masuk Bab 3: Malam Kiraan Undi ➔
               </button>
             </div>
+          </div>
+        )}
+
+        {screen === "act3_intro" && profile && (
+          <div className="max-w-md mx-auto text-center bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-4">
+            <div className="inline-block px-3 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full text-xs font-black uppercase tracking-wider">
+              BAB 3: MALAM KIRAAN UNDI
+            </div>
+            <h2 className="text-2xl font-black text-white">
+              Peti Undi Dibuka!
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Saluran ditutup. Ketua Tempat Mengundi membentang Borang 14. Kira ikatan kertas undi pada beat ke-4 sehingga jumlah undi sah tepat 112.
+            </p>
+
+            <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800 text-left text-xs space-y-1.5 font-mono">
+              <div className="text-amber-400 font-bold">Misi Pantas Bab 3:</div>
+              <div>1. Kira Borang 14 (Penyata Pengundian)</div>
+            </div>
+
+            <button
+              onClick={handleStartAct3}
+              className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black text-sm rounded-2xl shadow-lg transition transform active:scale-95 cursor-pointer"
+            >
+              MULA KIRAAN UNDI! 🗳️
+            </button>
+          </div>
+        )}
+
+        {screen === "act3_complete" && (
+          <div className="max-w-md mx-auto text-center bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-4">
+            <div className="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-2xl mx-auto flex items-center justify-center border border-amber-500/30 text-3xl">
+              🗳️
+            </div>
+            <h2 className="text-2xl font-black text-white">
+              BORANG 14 DISAHKAN!
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Tahniah <span className="font-bold text-amber-400">{profile?.name}</span>! Penyata pengundian dicatat tepat. Agen pengiraan undi mengangguk, dan salinan borang diserahkan.
+            </p>
+
+            <div className="bg-slate-950 p-4 rounded-2xl border border-amber-500/40 text-left space-y-2">
+              <div className="flex items-center gap-2 text-xs font-black text-amber-400 uppercase tracking-wide">
+                <BookOpen className="w-4 h-4" /> Fakta Sah SPR (Bab 3)
+              </div>
+              <div className="text-xs font-bold text-white">
+                {CONSTITUTION_FACTS.act3_borang14.article}
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                {CONSTITUTION_FACTS.act3_borang14.didYouKnow}
+              </p>
+            </div>
+
+            <button
+              onClick={() => setScreen("customizer")}
+              className="w-full py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-700 transition cursor-pointer"
+            >
+              Main Semula 🔄
+            </button>
           </div>
         )}
 
@@ -587,13 +672,21 @@ export function CukupJumlahGame() {
         <ActShareCardModal
           profile={profile}
           actNumber={currentAct}
-          actTitle={currentAct === 1 ? "Hari Penamaan Calon" : "Tempoh Berkempen"}
+          actTitle={
+            currentAct === 1
+              ? "Hari Penamaan Calon"
+              : currentAct === 2
+                ? "Tempoh Berkempen"
+                : "Malam Kiraan Undi"
+          }
           seatsWon={seatsWon}
           livesRemaining={lives}
           onContinue={() => {
             setShowShareModal(false);
             if (currentAct === 1) {
               setScreen("act2_intro");
+            } else if (currentAct === 2) {
+              setScreen("act3_intro");
             }
           }}
         />

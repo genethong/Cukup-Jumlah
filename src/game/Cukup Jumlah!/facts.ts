@@ -28,4 +28,13 @@ export const CONSTITUTION_FACTS: Record<string, ConstitutionFact> = {
     fullReference:
       "Peraturan-Peraturan Pilihan Raya (Penjalanan Pilihan Raya) 1981 & Akta Kesalahan Pilihan Raya 1954 (Seksyen 26B).",
   },
+  act3_borang14: {
+    id: "act3_borang14",
+    article: "Borang 14, Peraturan-Peraturan Pilihan Raya (Penjalanan Pilihan Raya) 1981",
+    title: "Penyata Pengundian Selepas Pengiraan Undi",
+    didYouKnow:
+      "Borang 14 ialah penyata rasmi yang diisi Ketua Tempat Mengundi selepas kiraan undi di saluran. Ia merekod undi setiap calon, kertas undi ditolak, dan jumlah kertas undi. Agen pengiraan undi berhak menyaksikan kiraan itu dan menerima salinan borang.",
+    fullReference:
+      "Peraturan-Peraturan Pilihan Raya (Penjalanan Pilihan Raya) 1981, Borang 14 (Penyata Pengundian Selepas Pengiraan Undi).",
+  },
 };

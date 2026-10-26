@@ -123,6 +123,8 @@ export type GameScreen =
   | "act1_complete"
   | "act2_intro"
   | "act2_complete"
+  | "act3_intro"
+  | "act3_complete"
   | "game_over";
 
 export type MicrogameId =
@@ -132,4 +134,5 @@ export type MicrogameId =
   | "goreng_kueyteow"
   | "potong_reben"
   | "payung_bos"
-  | "pacak_bendera";
+  | "pacak_bendera"
+  | "borang_14";
