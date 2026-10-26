@@ -1,5 +1,6 @@
 {
-  "name": "app-builder-workspace",
+  "name": "cukup-jumlah",
+  "description": "Cukup Jumlah! - Satirical Malaysian political rhythm-microgame",
   "private": true,
   "sideEffects": false,
   "type": "module",

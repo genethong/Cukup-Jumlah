@@ -3,7 +3,7 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "Cari Makan Double-Park";
+const APP_NAME = "Cukup Jumlah!";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -13,9 +13,9 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       {
         name: "description",
-        content: "A one-thumb Klang Valley parking puzzle. Unblock the alley before the boss eats without you.",
+        content: "Satirical Malaysian political microgame. Secure 112 seats before losing your RM10,000 candidate deposit!",
       },
-      { name: "theme-color", content: "#1C1F1A" },
+      { name: "theme-color", content: "#152a20" },
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },

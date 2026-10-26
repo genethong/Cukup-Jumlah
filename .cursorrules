@@ -1,0 +1,15 @@
+# Cukup Jumlah!
+
+This repository is **Cukup Jumlah!** (https://github.com/genethong/Cukup-Jumlah).
+
+## Project Overview
+A satirical Malaysian political rhythm-microgame inspired by *WarioWare* and *Rhythm Heaven*, themed around Malaysian elections (Pilihan Raya Umum / PRU), nomination day, campaign walkabouts, and securing 112 seats in Dewan Rakyat.
+
+- **Primary Codebase:** `src/game/Cukup Jumlah!/`
+- **Main Entry Point:** `src/routes/index.tsx` -> `CukupJumlahGame`
+- **Design Formula:**
+  - 1B: Majalah Satira / Datuk Lat & Gila-Gila Caricatures
+  - 2A: Sekolah Kebangsaan (SK) Classroom Frame (Papan Hitam, Meja Kayu, Peti Undi)
+  - 3A: 3x RM10,000 Cash Deposit Bundles (Wang Deposit SPR)
+  - 4A: Slapstick Satire & Action SFX bursts
+  - Rhythm Layer: 125 BPM "Say the Word on Beat" call-and-response engine

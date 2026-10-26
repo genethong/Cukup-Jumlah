@@ -1,6 +1,6 @@
-# Cari Makan Double-Park
+# 🇲🇾 Cukup Jumlah!
 
-Portrait parking puzzle. You drive the yellow Myvi. Drag the other cars straight along their lane, honk the rider from your seat, and read the windshield digits to unlock a locked car.
+Satirical Malaysian political rhythm-microgame. Build your candidate, survive the fast-twitch crises of Nomination Day and the campaign trail, and race to 112 Parliament seats before losing your RM10,000 candidate cash deposit!
 
 ## Run
 
@@ -9,4 +9,4 @@ npm install
 npm run dev
 ```
 
-Open the local dev URL. Play is one-thumb: drag a car along its axle, honk when a rider blocks the exit row, tap a locked car and match the digits shown on the glass.
+Open the local preview URL. Play is one-thumb: groove to the 125 BPM kompang rhythm, tap on beat to screen candidate eligibility dossiers, stir photo-op char kuey teow, and shield VIPs from monsoon storms.
