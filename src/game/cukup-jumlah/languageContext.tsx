@@ -18,25 +18,17 @@ const LanguageContext = createContext<LanguageContextType>({
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Language>(() => {
-    if (typeof window !== "undefined" && typeof localStorage !== "undefined" && typeof localStorage.getItem === "function") {
-      try {
-        const saved = localStorage.getItem("cukup_jumlah_lang");
-        if (saved === "ms" || saved === "en") return saved;
-      } catch {
-        // Ignore localStorage error
-      }
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("cukup_jumlah_lang");
+      if (saved === "ms" || saved === "en") return saved;
     }
     return "ms"; // Default to Malay first!
   });
 
   const setLang = (newLang: Language) => {
     setLangState(newLang);
-    if (typeof window !== "undefined" && typeof localStorage !== "undefined" && typeof localStorage.setItem === "function") {
-      try {
-        localStorage.setItem("cukup_jumlah_lang", newLang);
-      } catch {
-        // Ignore localStorage error
-      }
+    if (typeof window !== "undefined") {
+      localStorage.setItem("cukup_jumlah_lang", newLang);
     }
   };
 

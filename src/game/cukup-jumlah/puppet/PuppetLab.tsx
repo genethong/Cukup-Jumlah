@@ -57,7 +57,7 @@ const OUTFITS: { id: OutfitId; label: string }[] = [
 ];
 
 const LOWERS: { id: LowerId | null; label: string }[] = [
-  { id: null, label: "Asal" },
+  { id: null, label: "Tiada" },
   { id: "jeans", label: "Jeans" },
   { id: "songket_samping", label: "Samping" },
   { id: "sarong", label: "Kain" },
@@ -69,9 +69,9 @@ const FOOTWEAR: { id: FootwearId; label: string }[] = [
 ];
 
 const CAST: PuppetConfig[] = [
-  { gender: "m", tone: "tone_6", head: "m_head_1", headwear: "songkok", outfit: "baju_melayu", lower: "songket_samping", footwear: "default" },
-  { gender: "m", tone: "tone_6", head: "m_head_1", headwear: null, outfit: "tshirt", lower: "jeans", footwear: "sneakers" },
-  { gender: "m", tone: "tone_6", head: "m_head_1", headwear: null, outfit: "hoodie", lower: "jeans", footwear: "sneakers" },
+  { gender: "m", tone: "tone_6", head: "m_head_1", headwear: "songkok", outfit: "baju_melayu", lower: "songket_samping" },
+  { gender: "f", tone: "tone_4", head: "f_head_1", headwear: "tudung", outfit: "baju_kurung", lower: "sarong" },
+  { gender: "m", tone: "tone_2", head: "m_head_2", headwear: "baseball_cap", outfit: "business_suit", lower: null },
 ];
 
 type Burst = { index: number; anim: Extract<PuppetAnim, "hop" | "rod-wiggle">; token: number };

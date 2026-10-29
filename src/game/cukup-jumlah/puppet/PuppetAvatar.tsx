@@ -141,7 +141,7 @@ function headUrl(headId: string, tone: string): string {
  */
 function trouserUrl(outfit: OutfitId, lower: LowerId | null): string | null {
   if (lower === "jeans") return "/puppet/trousers/jeans.webp";
-  if (outfit === "tshirt" || outfit === "hoodie") return "/puppet/trousers/jeans.webp";
+  if (outfit === "tshirt" || outfit === "hoodie") return null;
   return `/puppet/trousers/${outfit}.webp`;
 }
 
