@@ -34,4 +34,4 @@ npm run build
 
 ## How changes get in
 
-`main` is the live game. Do not commit straight to it. See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch and pull-request steps, including the preview link to playtest before merging.
+`main` is the live game. Do not commit straight to it. See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch and pull-request steps. Each pull request gets its own preview link on GitHub; play that before merging.
