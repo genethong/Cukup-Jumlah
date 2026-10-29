@@ -1,0 +1,16 @@
+---
+description: Locked rules for Cukup Jumlah! microgame
+globs: ["src/cukup-jumlah/**/*.tsx", "src/cukup-jumlah/**/*.ts"]
+alwaysApply: false
+---
+
+# Cukup Jumlah! Rules
+
+- Art style must follow the Game Design Document: Lat / Gila-Gila caricatures only. Thick 3–4px black ink strokes, bulbous noses, bulging eyes, flying sweat beads, comic panels with 4px black borders and hard drop shadows.
+- Screen frame must stay as Sekolah Kebangsaan classroom (chalkboard top HUD, wooden desk arena, acrylic ballot box bottom HUD).
+- Lives system: 3× RM10,000 cash deposit bundles. Failures must show the red stamp effect.
+- Rhythm: Always keep 125 BPM (480 ms per beat). Minigame actions must align to the 4-beat call-and-response.
+- Every minigame component must implement the `onComplete(success: boolean)` contract.
+- Civic education: Tie gameplay to real Malaysian election mechanics (Articles 47 & 48, Borang 14, SPR deposit rules, 112 seats).
+- TypeScript: Strict mode, no `any` types. Functional components only.
+- After any changes, verify with `npm run typecheck` and `npm run build`.

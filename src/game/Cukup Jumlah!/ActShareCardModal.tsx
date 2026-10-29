@@ -94,7 +94,9 @@ export function ActShareCardModal({
       actNumber === 1
         ? "WATIKAH KELAYAKAN CALON"
         : actNumber === 3
-          ? "PENYATA KIRAAN UNDI"
+          ? seatsWon >= 112
+            ? "WATIKAH KERAJAAN BARU"
+            : "PENYATA KIRAAN UNDI"
           : "POSTER KEMPEN RASMI YB",
       W / 2,
       105
@@ -106,7 +108,9 @@ export function ActShareCardModal({
       actNumber === 1
         ? "PILIHAN RAYA UMUM KE-16 (GE16)"
         : actNumber === 3
-          ? "BORANG 14 · MALAM KIRAAN UNDI"
+          ? seatsWon >= 112
+            ? "MAJORITI DEWAN RAKYAT · CUKUP 112 JUMLAH!"
+            : "KEPUTUSAN RASMI BORANG 14 SPR"
           : "JUARA TURUN PADANG & PHOTO-OP GE16",
       W / 2,
       128
@@ -232,7 +236,9 @@ export function ActShareCardModal({
       actNumber === 1
         ? "Calon Harapan Rakyat ⭐"
         : actNumber === 3
-          ? "Juru Kira Malam PRU 📒"
+          ? seatsWon >= 112
+            ? "YAB Perdana Menteri Baru 👑"
+            : "Tokoh Rundingan Kerusi 🤝"
           : "Raja Photo-Op Pasar Malam 🏆",
       W - 85,
       630
@@ -243,14 +249,15 @@ export function ActShareCardModal({
     ctx.translate(W - 130, 240);
     ctx.rotate((12 * Math.PI) / 180);
 
-    ctx.strokeStyle = "#DC2626"; // Red official stamp
+    const stampColor = actNumber === 3 && seatsWon >= 112 ? "#16A34A" : "#DC2626";
+    ctx.strokeStyle = stampColor;
     ctx.lineWidth = 4;
     ctx.strokeRect(-80, -25, 160, 50);
 
-    ctx.fillStyle = "#DC2626";
+    ctx.fillStyle = stampColor;
     ctx.textAlign = "center";
     ctx.font = "900 18px sans-serif";
-    ctx.fillText("DILULUSKAN!", 0, 2);
+    ctx.fillText(actNumber === 3 && seatsWon >= 112 ? "CUKUP JUMLAH!" : "DILULUSKAN!", 0, 2);
 
     ctx.font = "bold 9px sans-serif";
     ctx.fillText("SPR PARODI MALAYSIA", 0, 16);
@@ -260,17 +267,27 @@ export function ActShareCardModal({
     ctx.textAlign = "center";
     ctx.fillStyle = "#E2E8F0";
     ctx.font = "bold 13px sans-serif";
-    ctx.fillText("🏛️ Celik Perlembagaan (Bab 1)", W / 2, 705);
+    ctx.fillText(
+      actNumber === 3
+        ? "🏛️ Celik Perlembagaan (Bab 3: Perkara 43)"
+        : "🏛️ Celik Perlembagaan (Bab 1)",
+      W / 2,
+      705
+    );
 
     ctx.fillStyle = "#94A3B8";
     ctx.font = "11px sans-serif";
     ctx.fillText(
-      "Perkara 47: Syarat calon mesti warganegara berumur 18 tahun ke atas.",
+      actNumber === 3
+        ? "Perkara 43(2)(a): Pelantikan PM yang mendapat kepercayaan majoriti dewan."
+        : "Perkara 47: Syarat calon mesti warganegara berumur 18 tahun ke atas.",
       W / 2,
       728
     );
     ctx.fillText(
-      "Seksyen 19: Deposit RM10,000 selamat selagi raih minima 1/8 undi!",
+      actNumber === 3
+        ? "112 kerusi daripada 222 kerusi Parlimen adalah syarat sah membentuk kerajaan!"
+        : "Peraturan 8: Deposit RM10,000 selamat selagi raih melebihi 1/8 undi sah!",
       W / 2,
       746
     );

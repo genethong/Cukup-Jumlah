@@ -65,19 +65,34 @@ export const PARTIES: Record<PartyId, PartyInfo> = {
 };
 
 export type HeadwearType =
+  | "none"
   | "songkok"
   | "songkok_senget"
-  | "tudung"
   | "kopiah"
+  | "turban"
+  | "cap"
+  | "tudung"
+  | "tudung_bawal"
   | "pomade"
-  | "topi_jerami";
+  | "topi_jerami"
+  | string;
 
 export type OutfitType =
+  | "suit"
   | "baju_melayu"
-  | "batik"
+  | "baju_tang"
+  | "samfoo"
+  | "kurta"
+  | "polo"
   | "baju_kurung"
+  | "saree"
+  | "cheongsam"
+  | "blazer"
+  | "kemeja_kempen"
+  | "batik"
   | "kot_formal"
-  | "jaket_banjir";
+  | "jaket_banjir"
+  | string;
 
 export type PropType =
   | "briefcase"
@@ -96,12 +111,66 @@ export type QuirkType =
   | "janji_manis"
   | "sensitif";
 
+export const TALENT_DETAILS: Record<TalentType, { name: string; icon: string; description: string }> = {
+  lidah_manis: {
+    name: "Lidah Manis",
+    icon: "🍯",
+    description: "+1.5s masa berfikir ekstra",
+  },
+  mesra_rakyat: {
+    name: "Mesra Rakyat",
+    icon: "🤝",
+    description: "Zon toleransi & hit window lebih luas",
+  },
+  pakar_kira: {
+    name: "Pakar Kira",
+    icon: "🧮",
+    description: "Bantuan baki kalkulator deposit & undi",
+  },
+  muka_tembok: {
+    name: "Muka Tembok",
+    icon: "🧱",
+    description: "Mula dengan 4 bundle deposit tunai",
+  },
+};
+
+export const QUIRK_DETAILS: Record<QuirkType, { name: string; icon: string; description: string }> = {
+  kaki_zzz: {
+    name: "Kaki Zzz",
+    icon: "😴",
+    description: "Tertidur: Perlu ketuk untuk celik",
+  },
+  janji_manis: {
+    name: "Janji Manis",
+    icon: "📢",
+    description: "Pengundi menjerit minta peruntukan",
+  },
+  sensitif: {
+    name: "Sensitif",
+    icon: "🌶️",
+    description: "Tekanan masa tinggi (-1.0s pada jam)",
+  },
+};
+
 export interface CandidateProfile {
   name: string;
   gender: "male" | "female";
   party: PartyId;
   headwear: HeadwearType;
+  headwearColor?: string;
+  headwearShadow?: string;
+  headwearLight?: string;
   outfit: OutfitType;
+  clothesColor?: string;
+  clothesShadow?: string;
+  clothesLight?: string;
+  skinIndex?: number;
+  hair?: string;
+  hairColor?: "black" | "brown" | "grey";
+  mouth?: string;
+  faceMark?: string;
+  accessory?: string;
+  bg?: string;
   prop: PropType;
   talent: TalentType;
   quirk: QuirkType;
@@ -125,14 +194,28 @@ export type GameScreen =
   | "act2_complete"
   | "act3_intro"
   | "act3_complete"
+  | "endgame_victory"
+  | "endgame_hung"
+  | "unity_negotiation"
+  | "endgame_opposition"
   | "game_over";
 
 export type MicrogameId =
   | "semak_borang"
   | "bayar_deposit"
   | "cop_watikah"
+  | "pecut_spr"
+  | "rebut_kamera"
   | "goreng_kueyteow"
   | "potong_reben"
   | "payung_bos"
   | "pacak_bendera"
-  | "borang_14";
+  | "perang_speaker"
+  | "turap_jalan"
+  | "baling_baju"
+  | "cuci_longkang"
+  | "celup_dakwat"
+  | "tapis_undi_rosak"
+  | "blackout_peti"
+  | "borang_14"
+  | "runding_perpaduan";

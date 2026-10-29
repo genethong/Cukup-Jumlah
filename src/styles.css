@@ -5,6 +5,7 @@
 @import "@fontsource/fraunces/600.css";
 @import "@fontsource/fraunces/700.css";
 @import "@fontsource/fraunces/600-italic.css";
+@import "@fontsource/oswald/600.css";
 
 :root {
   --in-oklab: ;
@@ -21,6 +22,7 @@
 @theme {
   --font-sans: "Outfit", "Avenir Next", system-ui, sans-serif;
   --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-tally: "Oswald", "Impact", sans-serif;
   --color-ink: #141612;
   --color-asphalt: #1c1f1a;
   --color-panel: #262920;
@@ -30,6 +32,17 @@
   --color-mamak: #1f8a5b;
   --color-kopi: #e07a3d;
   --color-gold: #e6b325;
+}
+
+.font-tally {
+  font-family: var(--font-tally);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.font-comic {
+  font-family: "Impact", "Arial Black", sans-serif;
+  letter-spacing: -0.03em;
 }
 
 @layer base {
@@ -53,6 +66,55 @@
     color: var(--color-fg);
     font-family: var(--font-sans);
   }
+}
+
+/* Comic & Malaysian Retro Arcade Visual Utilities */
+.comic-shadow {
+  box-shadow: 4px 4px 0px 0px rgba(15, 23, 42, 1);
+}
+
+.comic-shadow-sm {
+  box-shadow: 2px 2px 0px 0px rgba(15, 23, 42, 1);
+}
+
+.comic-shadow-lg {
+  box-shadow: 6px 6px 0px 0px rgba(15, 23, 42, 1);
+}
+
+.comic-shadow-gold {
+  box-shadow: 4px 4px 0px 0px rgba(217, 119, 6, 1);
+}
+
+.comic-halftone {
+  background-image: radial-gradient(rgba(15, 23, 42, 0.15) 1.5px, transparent 1.5px);
+  background-size: 8px 8px;
+}
+
+.comic-scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+}
+
+.gold-foil-shine {
+  background: linear-gradient(
+    135deg,
+    #fef08a 0%,
+    #f59e0b 25%,
+    #fef08a 50%,
+    #d97706 75%,
+    #fef08a 100%
+  );
+  background-size: 200% 200%;
+  animation: shine 3s infinite linear;
+}
+
+@keyframes shine {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .safe-top {

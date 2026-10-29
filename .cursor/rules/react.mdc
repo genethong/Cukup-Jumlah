@@ -1,0 +1,14 @@
+---
+description: React + TypeScript conventions
+globs: ["**/*.tsx", "**/*.ts"]
+alwaysApply: false
+---
+
+# React & TypeScript Rules
+
+- Use functional components with TypeScript.
+- Prefer named exports.
+- Define props with interfaces.
+- No class components.
+- Keep components focused and readable.
+- Follow the existing game structure under `src/game/Cukup Jumlah!/`.

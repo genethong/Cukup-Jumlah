@@ -137,6 +137,17 @@ Each microgame lasts between **4.0s to 8.0s** (with an initial 1.5s reading buff
   * *Satirical Lore:* SPR campaigning rules strictly require all flag installations to halt at 11:59 PM.
   * *Mechanic:* Tap 4 times to knot party flags with red tali rafia onto bamboo poles under sodium streetlight glow before midnight strikes.
 
+### Act 3: Malam Kiraan Undi & Rundingan SD
+* **8. Borang 14 (Penyata Pengundian SPR):**
+  * *Prompt:* `KIRA BORANG 14!`
+  * *Satirical Lore:* Polling station tally verification with polling agents (PACA) at closing time.
+  * *Mechanic:* Tap ballot stacks on beat 4 to record valid votes precisely up to the target.
+
+* **9. Tolak Beg SD (2 AM Mamak Statutory Declaration Exchange):**
+  * *Prompt:* `TOLAK BEG SD!`
+  * *Satirical Lore:* Late-night coalition dealmaking at a 24-hour mamak stall over teh tarik and roti canai.
+  * *Mechanic:* Regulate the briefcase slide momentum and release on beat 4 into ally YB's target catch zone, avoiding kuah dhal and paparazzi flashes.
+
 ---
 
 ## 6. Progression, Win & Loss Conditions
@@ -172,7 +183,9 @@ src/game/Cukup Jumlah!/
     ├── GorengKueyTeow.tsx    # Press photo-op rapid stir game
     ├── PayungBos.tsx         # Rainstorm VIP umbrella slider game
     ├── PotongReben.tsx       # Ribbon cutting ceremony game
-    └── PacakBendera.tsx      # Bamboo pole flag knotting game
+    ├── PacakBendera.tsx      # Bamboo pole flag knotting game
+    ├── Borang14.tsx          # Polling station Borang 14 tally game
+    └── TolakBegSD.tsx        # 2 AM Mamak Statutory Declaration briefcase exchange
 ```
 
 ---
@@ -184,7 +197,8 @@ src/game/Cukup Jumlah!/
   * ✅ Live dev server running on `0.0.0.0:8080`.
   * ✅ Production build and TypeScript checks passing cleanly.
   * ✅ Automated browser smoke tests verified on desktop and mobile viewports.
+  * ✅ **Milestone 1 Completed:** Act 3 *Malam Kiraan Undi & Rundingan SD* (`Borang14` PACA tally & `TolakBegSD` 2 AM Mamak exchange).
+  * ✅ **Milestone 3 Completed:** Candidate Talents & Quirks active gameplay modifiers (Lidah Manis, Mesra Rakyat, Pakar Kira, Muka Tembok, Kaki Zzz, Janji Manis, Sensitif).
+  * ✅ **Milestone 4 Completed:** The Grand "Cukup Jumlah!" Victory Sequence (`EndgameScreen.tsx`) with Istana Negara royal audience, interactive "Songkok Senget" bow, and Parlimen Tergantung (Hung Parliament) branch.
 * **Upcoming Milestones (For Collaborating Agents):**
-  * **Milestone 1:** Add Act 3: *Malam Kiraan Undi* (Borang 14 PACA tallying microgame & 2 AM Mamak Statutory Declaration briefcase exchange).
-  * **Milestone 2:** Implement local high-score leaderboard (`localStorage`) tracking fastest time to 112 seats.
-  * **Milestone 3:** Add additional candidate buff/quirk interactions in minigame timing.
+  * **Milestone 2:** Implement local high-score leaderboard (`localStorage`) tracking career campaigns, fastest times to 112 seats, and deposit bundles preserved.
