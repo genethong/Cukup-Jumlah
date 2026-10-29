@@ -147,7 +147,7 @@ The visual style is defined by a hybrid design philosophy: **Retro Sunday Newspr
   * Hand-inked vector starbursts with halftone dot patterns and 5px drop shadows.
   * Dynamically flashes **`PADU! ⭐`** on perfect beats and **`HILANG DEPOSIT 💸`** on misses.
 
-### 4.2 The 3D Voxel Engine (`src/game/Cukup Jumlah!/voxel/`)
+### 4.2 The 3D Voxel Engine (`src/game/cukup-jumlah/voxel/`)
 Characters are rendered using an isometric **Three.js** WebGL pipeline designed to emulate the clean, vibrant voxel aesthetic of *Crossy Road*:
 
 1. **Clean Block Archetype (`voxelBuilder.ts`):**
@@ -270,7 +270,7 @@ src/
 │   └── __root.tsx                        # HTML root document & global shell
 ├── styles.css                            # Tailwind v4 configuration & comic drop-shadow tokens
 └── game/
-    └── Cukup Jumlah!/
+    └── cukup-jumlah/
         ├── CukupJumlahGame.tsx           # Central orchestrator: state, loop, metronome & screens
         ├── SekolahFrame.tsx              # Classroom/newsprint HUD, deposits, timer & ballot meter
         ├── YbCustomizer.tsx              # Candidate builder, traits, quirks & live 3D preview
