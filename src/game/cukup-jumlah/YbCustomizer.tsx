@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { UserCheck, Sparkles, Dices, ChevronLeft, ChevronRight, Box } from "lucide-react";
 import type {
   CandidateProfile,
@@ -12,12 +13,7 @@ import type {
 import { PARTIES } from "./types";
 import { SKIN_PALETTE, COLOR_SWATCHES, BG_SWATCHES } from "./pixelAvatar";
 import { useLanguage } from "./languageContext";
-import { VoxelComparisonViewer } from "./voxel/VoxelComparisonViewer";
 import { VoxelSinglePreview } from "./voxel/VoxelSinglePreview";
-import { StageComparisonViewer } from "./voxel/StageComparisonViewer";
-import { HeadGridInspector } from "./voxel/HeadGridInspector";
-import type { VoxelStyleOption } from "./voxel/voxelBuilder";
-import type { StageStyleOption } from "./voxel/stageBuilder";
 
 interface CustomizerProps {
   onStartGame: (profile: CandidateProfile) => void;
@@ -76,11 +72,7 @@ export function YbCustomizer({ onStartGame }: CustomizerProps) {
   const [talent, setTalent] = useState<TalentType>("lidah_manis");
   const [quirk, setQuirk] = useState<QuirkType>("janji_manis");
 
-  // 3D Voxel Crossy Road Aesthetic Showcase State
-  const [show3DComparison, setShow3DComparison] = useState(true);
-  const [showcaseTab, setShowcaseTab] = useState<"head" | "character" | "stage">("head");
-  const [voxelStyle, setVoxelStyle] = useState<VoxelStyleOption>("A");
-  const [stageStyle, setStageStyle] = useState<StageStyleOption>("1");
+  const voxelStyle = "A" as const;
 
   const currentProfile: CandidateProfile = {
     name,
@@ -251,106 +243,37 @@ export function YbCustomizer({ onStartGame }: CustomizerProps) {
         </div>
       </header>
 
-      {/* 1.5 3D CROSSY ROAD VOXEL AESTHETIC SHOWCASE BANNER */}
-      <div className="flex-shrink-0 bg-amber-400 border-2.5 border-slate-950 rounded-2xl p-2.5 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 z-10">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🕹️</span>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-comic font-black text-xs text-slate-950 uppercase tracking-wide">
-                {t("SHIFT ESTETIK: 3D CROSSY ROAD", "AESTHETIC SHIFT: 3D CROSSY ROAD")}
-              </span>
-              <span className="bg-emerald-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded uppercase shadow-sm">
-                STEP 4: DIORAMA STAGE
-              </span>
-            </div>
-            <p className="text-[10px] text-slate-900 font-medium leading-tight">
-              {t("Bandingkan 3 format pentas minigame 3D secara langsung dalam pelayar!", "Compare 3 minigame 3D stage formats directly in your browser!")}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          {/* Showcase Tabs */}
-          <div className="inline-flex rounded-xl bg-slate-950 p-0.5 border border-slate-900">
-            <button
-              type="button"
-              onClick={() => {
-                setShowcaseTab("head");
-                setShow3DComparison(true);
-              }}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-comic font-black transition cursor-pointer ${
-                showcaseTab === "head" && show3DComparison
-                  ? "bg-amber-400 text-slate-950 shadow"
-                  : "text-slate-300 hover:text-white"
-              }`}
-            >
-              🎯 FEATURE 1: KEPALA & MUKA
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowcaseTab("character");
-                setShow3DComparison(true);
-              }}
-              className={`px-2 py-1 rounded-lg text-[10px] font-comic font-black transition cursor-pointer ${
-                showcaseTab === "character" && show3DComparison
-                  ? "bg-amber-400 text-slate-950 shadow"
-                  : "text-slate-300 hover:text-white"
-              }`}
-            >
-              👤 YB MODEL
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowcaseTab("stage");
-                setShow3DComparison(true);
-              }}
-              className={`px-2 py-1 rounded-lg text-[10px] font-comic font-black transition cursor-pointer ${
-                showcaseTab === "stage" && show3DComparison
-                  ? "bg-amber-400 text-slate-950 shadow"
-                  : "text-slate-300 hover:text-white"
-              }`}
-            >
-              🏛️ PENTAS
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setShow3DComparison((prev) => !prev)}
-            className="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 font-comic font-black text-xs border border-slate-950 cursor-pointer transition"
+      <nav
+        aria-label={t("Makmal 3D", "3D lab")}
+        className="flex-shrink-0 flex items-center justify-between gap-2 z-10"
+      >
+        <span className="font-comic font-black text-[10px] uppercase tracking-wide text-slate-500">
+          {t("Makmal 3D", "3D lab")}
+        </span>
+        <div className="inline-flex rounded-xl bg-slate-950 p-0.5 border border-slate-900">
+          <Link
+            to="/dev"
+            search={{ lab: "head" }}
+            className="px-2.5 py-1 rounded-lg text-[10px] font-comic font-black text-slate-300 hover:text-white"
           >
-            {show3DComparison ? "✕" : "BUKA 3D"}
-          </button>
+            🎯 {t("KEPALA", "HEAD")}
+          </Link>
+          <Link
+            to="/dev"
+            search={{ lab: "character" }}
+            className="px-2 py-1 rounded-lg text-[10px] font-comic font-black text-slate-300 hover:text-white"
+          >
+            👤 {t("YB MODEL", "YB MODEL")}
+          </Link>
+          <Link
+            to="/dev"
+            search={{ lab: "stage" }}
+            className="px-2 py-1 rounded-lg text-[10px] font-comic font-black text-slate-300 hover:text-white"
+          >
+            🏛️ {t("PENTAS", "STAGE")}
+          </Link>
         </div>
-      </div>
-
-      {/* Live 3D Comparison Drawer / Section */}
-      {show3DComparison && (
-        <div className="flex-shrink-0 z-10 animate-in fade-in zoom-in-95 duration-200">
-          {showcaseTab === "head" ? (
-            <HeadGridInspector />
-          ) : showcaseTab === "stage" ? (
-            <StageComparisonViewer
-              profile={currentProfile}
-              selectedStage={stageStyle}
-              onSelectStage={(stage) => setStageStyle(stage)}
-              onClose={() => setShow3DComparison(false)}
-            />
-          ) : (
-            <VoxelComparisonViewer
-              profile={currentProfile}
-              selectedStyle={voxelStyle}
-              onSelectStyle={(style) => {
-                setVoxelStyle(style);
-              }}
-              onClose={() => setShow3DComparison(false)}
-            />
-          )}
-        </div>
-      )}
+      </nav>
 
       {/* 2. TOP HERO DOSSIER CARD (HERO OF THE CUSTOMIZER - BIGGER AVATAR) */}
       <section className="flex-shrink-0 bg-white border-3 border-slate-950 rounded-2xl p-2.5 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] relative z-10">
