@@ -1,3 +1,7 @@
+/**
+ * @deprecated Retained for the 2D passport textures and the legacy voxel builder.
+ * New scenes should use the recipe palette in `voxel/core/palette.ts`.
+ */
 import * as THREE from "three";
 import type { CandidateProfile } from "../types";
 import { PARTIES } from "../types";

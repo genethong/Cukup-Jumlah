@@ -1,0 +1,32 @@
+{
+  "hero": {
+    "ready": true,
+    "voxels": 112092,
+    "characterVoxels": 28450,
+    "triangles": 49518,
+    "drawCalls": 22,
+    "renderedTriangles": 98448,
+    "fps": 0,
+    "quality": "high"
+  },
+  "desktop": {
+    "ready": true,
+    "voxels": 112092,
+    "characterVoxels": 28450,
+    "triangles": 49518,
+    "drawCalls": 22,
+    "renderedTriangles": 98448,
+    "fps": 7.970667941972946,
+    "quality": "high"
+  },
+  "throttled": {
+    "ready": true,
+    "voxels": 112092,
+    "characterVoxels": 28450,
+    "triangles": 49518,
+    "drawCalls": 22,
+    "renderedTriangles": 98448,
+    "fps": 4.04073056408553,
+    "quality": "high"
+  }
+}

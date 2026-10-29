@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { UserCheck, Sparkles, Dices, ChevronLeft, ChevronRight, Box } from "lucide-react";
 import type {
@@ -14,6 +14,7 @@ import { PARTIES } from "./types";
 import { SKIN_PALETTE, COLOR_SWATCHES, BG_SWATCHES } from "./pixelAvatar";
 import { useLanguage } from "./languageContext";
 import { VoxelSinglePreview } from "./voxel/VoxelSinglePreview";
+import { VoxelYbPortrait } from "./voxel/VoxelPocPreview";
 
 interface CustomizerProps {
   onStartGame: (profile: CandidateProfile) => void;
@@ -73,6 +74,10 @@ export function YbCustomizer({ onStartGame }: CustomizerProps) {
   const [quirk, setQuirk] = useState<QuirkType>("janji_manis");
 
   const voxelStyle = "A" as const;
+  const [voxelV2, setVoxelV2] = useState(false);
+  useEffect(() => {
+    setVoxelV2(new URLSearchParams(window.location.search).get("voxel") === "v2");
+  }, []);
 
   const currentProfile: CandidateProfile = {
     name,
@@ -298,12 +303,16 @@ export function YbCustomizer({ onStartGame }: CustomizerProps) {
           {/* Passport Photo Frame with Pure 3D Voxel Avatar */}
           <div className="relative flex-shrink-0 flex flex-col items-center">
             <div className="p-1 bg-[#fdf8ee] border-2.5 border-slate-950 rounded-xl shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] -rotate-1 relative">
-              <VoxelSinglePreview
-                profile={currentProfile}
-                styleOption={voxelStyle}
-                size={142}
-                className="rounded-lg overflow-hidden"
-              />
+              {voxelV2 ? (
+                <VoxelYbPortrait profile={currentProfile} size={142} />
+              ) : (
+                <VoxelSinglePreview
+                  profile={currentProfile}
+                  styleOption={voxelStyle}
+                  size={142}
+                  className="rounded-lg overflow-hidden"
+                />
+              )}
               {/* 3D Voxel Tag */}
               <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded-md bg-slate-950/85 text-amber-300 font-comic font-black text-[9px] border border-amber-400 shadow-sm pointer-events-none flex items-center gap-0.5">
                 <Box className="w-2.5 h-2.5 text-amber-400" />

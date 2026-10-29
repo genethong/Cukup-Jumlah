@@ -1,5 +1,10 @@
 import * as THREE from "three";
 import type { CandidateProfile } from "../types";
+/**
+ * @deprecated The 6-box canvas-skin builder. The true-voxel pipeline lives in
+ * `voxel/core` and `voxel/avatar` (`buildVoxelYB`). Kept for the candidacy
+ * passport until `?voxel=v2` becomes the default.
+ */
 import { createCleanSkinTextures } from "./voxelSkin";
 
 export type VoxelStyleOption = "A" | "B" | "C";
