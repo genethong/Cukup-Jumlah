@@ -544,6 +544,137 @@
           17
         ]
       }
+    },
+    "outfits/tshirt": {
+      "file": "parts/outfits/tshirt.webp",
+      "size": [
+        441,
+        561
+      ],
+      "pins": {
+        "neck": [
+          221,
+          35
+        ],
+        "shoulder_L": [
+          62,
+          136
+        ],
+        "shoulder_R": [
+          377,
+          136
+        ],
+        "hip_L": [
+          66,
+          512
+        ],
+        "hip_R": [
+          372,
+          512
+        ]
+      }
+    },
+    "outfits/hoodie": {
+      "file": "parts/outfits/hoodie.webp",
+      "size": [
+        441,
+        561
+      ],
+      "pins": {
+        "neck": [
+          221,
+          35
+        ],
+        "shoulder_L": [
+          62,
+          136
+        ],
+        "shoulder_R": [
+          377,
+          136
+        ],
+        "hip_L": [
+          66,
+          512
+        ],
+        "hip_R": [
+          372,
+          512
+        ]
+      }
+    },
+    "sleeves/tshirt_upper": {
+      "file": "parts/sleeves/tshirt_upper.webp",
+      "size": [
+        106,
+        140
+      ],
+      "pins": {
+        "shoulder": [
+          53,
+          41
+        ]
+      }
+    },
+    "sleeves/hoodie_upper": {
+      "file": "parts/sleeves/hoodie_upper.webp",
+      "size": [
+        106,
+        205
+      ],
+      "pins": {
+        "shoulder": [
+          53,
+          41
+        ]
+      }
+    },
+    "sleeves/hoodie_forearm": {
+      "file": "parts/sleeves/hoodie_forearm.webp",
+      "size": [
+        114,
+        292
+      ],
+      "pins": {
+        "elbow": [
+          57,
+          17
+        ]
+      }
+    },
+    "trousers/jeans": {
+      "file": "parts/trousers/jeans.webp",
+      "size": [
+        107,
+        360
+      ],
+      "pins": {
+        "hip": [
+          55,
+          43
+        ],
+        "knee": [
+          46,
+          185
+        ],
+        "ankle": [
+          42,
+          315
+        ]
+      }
+    },
+    "footwear/sneakers": {
+      "file": "parts/footwear/sneakers.webp",
+      "size": [
+        200,
+        148
+      ],
+      "pins": {
+        "ankle": [
+          44,
+          56
+        ]
+      }
     }
   },
   "draw_order": [
@@ -649,6 +780,13 @@
     ],
     "batik_shirt": [
       "upper"
+    ],
+    "tshirt": [
+      "upper"
+    ],
+    "hoodie": [
+      "upper",
+      "forearm"
     ]
   }
 }

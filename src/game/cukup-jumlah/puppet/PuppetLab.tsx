@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { PuppetAvatar } from "./PuppetAvatar";
 import {
+  type FootwearId,
   type HeadId,
   type HeadwearId,
   type LowerId,
@@ -51,18 +52,26 @@ const OUTFITS: { id: OutfitId; label: string }[] = [
   { id: "batik_shirt", label: "Batik" },
   { id: "business_suit", label: "Suit" },
   { id: "baju_kurung", label: "Baju Kurung" },
+  { id: "tshirt", label: "T-shirt" },
+  { id: "hoodie", label: "Hoodie" },
 ];
 
 const LOWERS: { id: LowerId | null; label: string }[] = [
-  { id: null, label: "Tiada" },
+  { id: null, label: "Asal" },
+  { id: "jeans", label: "Jeans" },
   { id: "songket_samping", label: "Samping" },
   { id: "sarong", label: "Kain" },
 ];
 
+const FOOTWEAR: { id: FootwearId; label: string }[] = [
+  { id: "default", label: "Kaki Ayam" },
+  { id: "sneakers", label: "Sneakers" },
+];
+
 const CAST: PuppetConfig[] = [
-  { gender: "m", tone: "tone_6", head: "m_head_1", headwear: "songkok", outfit: "baju_melayu", lower: "songket_samping" },
-  { gender: "f", tone: "tone_4", head: "f_head_1", headwear: "tudung", outfit: "baju_kurung", lower: "sarong" },
-  { gender: "m", tone: "tone_2", head: "m_head_2", headwear: "baseball_cap", outfit: "business_suit", lower: null },
+  { gender: "m", tone: "tone_6", head: "m_head_1", headwear: "songkok", outfit: "baju_melayu", lower: "songket_samping", footwear: "default" },
+  { gender: "m", tone: "tone_6", head: "m_head_1", headwear: null, outfit: "tshirt", lower: "jeans", footwear: "sneakers" },
+  { gender: "m", tone: "tone_6", head: "m_head_1", headwear: null, outfit: "hoodie", lower: "jeans", footwear: "sneakers" },
 ];
 
 type Burst = { index: number; anim: Extract<PuppetAnim, "hop" | "rod-wiggle">; token: number };
@@ -103,6 +112,7 @@ function randomConfig(current?: PuppetConfig): PuppetConfig {
     headwear: pick(HATS).id,
     outfit: pick(OUTFITS).id,
     lower: pick(LOWERS).id,
+    footwear: pick(FOOTWEAR).id,
   };
 }
 
@@ -389,14 +399,21 @@ export function PuppetLab() {
               onChange={(outfit) => update({ outfit })}
             />
 
-            {/* Kain */}
+            {/* Seluar/Kain */}
             <Picker
-              legend="Kain"
+              legend="Seluar/Kain"
               options={LOWERS}
               value={active.lower}
               onChange={(lower) => update({ lower })}
             />
 
+            {/* Kasut */}
+            <Picker
+              legend="Kasut"
+              options={FOOTWEAR}
+              value={active.footwear ?? "default"}
+              onChange={(footwear) => update({ footwear })}
+            />
 
           </div>
         </section>

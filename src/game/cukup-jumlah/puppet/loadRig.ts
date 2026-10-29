@@ -39,9 +39,17 @@ export type HeadId = "m_head_1" | "m_head_2" | "m_head_3" | "f_head_1" | "f_head
 
 export type HeadwearId = "songkok" | "ketayap" | "turban" | "baseball_cap" | "tudung";
 
-export type OutfitId = "baju_melayu" | "batik_shirt" | "business_suit" | "baju_kurung";
+export type OutfitId =
+  | "baju_melayu"
+  | "batik_shirt"
+  | "business_suit"
+  | "baju_kurung"
+  | "tshirt"
+  | "hoodie";
 
-export type LowerId = "songket_samping" | "sarong";
+export type LowerId = "songket_samping" | "sarong" | "jeans";
+
+export type FootwearId = "default" | "sneakers";
 
 export type ToneId =
   | "tone_1"
@@ -62,6 +70,7 @@ export type PuppetConfig = {
   headwear: HeadwearId | null;
   outfit: OutfitId;
   lower: LowerId | null;
+  footwear?: FootwearId;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

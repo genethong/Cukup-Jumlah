@@ -5,6 +5,7 @@ import {
   toneForHead,
   tonePartUrl,
   type BasePartName,
+  type FootwearId,
   type LowerId,
   type OutfitId,
   type PuppetConfig,
@@ -138,7 +139,9 @@ function headUrl(headId: string, tone: string): string {
  * Cloth legs on the leg pins. Kurung with a sarong still wears the teal
  * overlay so a gap beside the kain cannot show bare skin.
  */
-function trouserUrl(outfit: OutfitId, _lower: LowerId | null): string | null {
+function trouserUrl(outfit: OutfitId, lower: LowerId | null): string | null {
+  if (lower === "jeans") return "/puppet/trousers/jeans.webp";
+  if (outfit === "tshirt" || outfit === "hoodie") return "/puppet/trousers/jeans.webp";
   return `/puppet/trousers/${outfit}.webp`;
 }
 
@@ -147,6 +150,7 @@ function Leg({
   tone,
   outfit,
   lower,
+  footwear,
   torsoX,
   torsoY,
 }: {
@@ -154,11 +158,19 @@ function Leg({
   tone: string;
   outfit: OutfitId;
   lower: LowerId | null;
+  footwear?: FootwearId;
   torsoX: number;
   torsoY: number;
 }) {
   const leg = rig.parts["base/leg"];
-  const foot = rig.parts["base/foot"];
+  const foot =
+    footwear === "sneakers" && rig.parts["footwear/sneakers"]
+      ? rig.parts["footwear/sneakers"]
+      : rig.parts["base/foot"];
+  const footSrc =
+    footwear === "sneakers"
+      ? "/puppet/footwear/sneakers.webp"
+      : tonePartUrl(tone, "foot");
   const hip = rig.parts["base/torso"].pins[side === "L" ? "hip_L" : "hip_R"];
   const mirror = side === "R";
   const trousers = trouserUrl(outfit, lower);
@@ -210,7 +222,7 @@ function Leg({
         }}
       >
         <img
-          src={tonePartUrl(tone, "foot")}
+          src={footSrc}
           alt=""
           draggable={false}
           width={foot.size[0]}
@@ -433,6 +445,7 @@ export function PuppetAvatar({
               tone={tone}
               outfit={config.outfit}
               lower={config.lower}
+              footwear={config.footwear}
               torsoX={torsoX}
               torsoY={torsoY}
             />
@@ -441,6 +454,7 @@ export function PuppetAvatar({
               tone={tone}
               outfit={config.outfit}
               lower={config.lower}
+              footwear={config.footwear}
               torsoX={torsoX}
               torsoY={torsoY}
             />

@@ -4,8 +4,15 @@ import type { HeadId, LowerId, OutfitId, PuppetConfig } from "./loadRig";
 import type { PuppetPose } from "./motion";
 
 const HEADS: HeadId[] = ["m_head_1", "m_head_2", "m_head_3", "f_head_1", "f_head_2"];
-const OUTFITS: OutfitId[] = ["baju_melayu", "batik_shirt", "business_suit", "baju_kurung"];
-const LOWERS: (LowerId | null)[] = [null, "songket_samping", "sarong"];
+const OUTFITS: OutfitId[] = [
+  "baju_melayu",
+  "batik_shirt",
+  "business_suit",
+  "baju_kurung",
+  "tshirt",
+  "hoodie",
+];
+const LOWERS: (LowerId | null)[] = [null, "jeans", "songket_samping", "sarong"];
 
 const MID_SWAY: PuppetPose = {
   sway: 2.6,
@@ -25,6 +32,7 @@ function Cell({ config, pose }: { config: PuppetConfig; pose?: PuppetPose }) {
         {config.head}
         <br />
         {config.outfit} · {config.lower ?? "tiada"}
+        {config.footwear === "sneakers" ? " · kasut" : ""}
       </figcaption>
     </figure>
   );
@@ -39,7 +47,17 @@ function Grid({ pose }: { pose?: PuppetPose }) {
             LOWERS.map((lower) => (
               <Cell
                 key={`${head}-${outfit}-${lower ?? "none"}`}
-                config={{ head, tone: "tone_4", headwear: null, outfit, lower }}
+                config={{
+                  head,
+                  tone: "tone_4",
+                  headwear: null,
+                  outfit,
+                  lower,
+                  footwear:
+                    outfit === "tshirt" || outfit === "hoodie" || lower === "jeans"
+                      ? "sneakers"
+                      : "default",
+                }}
                 pose={pose}
               />
             )),
