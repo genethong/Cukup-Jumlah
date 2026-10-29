@@ -166,7 +166,7 @@ Each microgame lasts between **4.0s to 8.0s** (with an initial 1.5s reading buff
 ## 7. Codebase File Structure
 
 ```
-src/game/Cukup Jumlah!/
+src/game/cukup-jumlah/
 ├── CukupJumlahGame.tsx       # Main game state orchestrator, loop, and screen routing
 ├── SekolahFrame.tsx          # Green chalkboard HUD, metronome dots, deposit & ballot box
 ├── comicAvatar.tsx           # Datuk Lat / Gila-Gila hand-inked SVG caricature generator

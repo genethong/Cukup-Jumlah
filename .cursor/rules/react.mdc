@@ -11,4 +11,4 @@ alwaysApply: false
 - Define props with interfaces.
 - No class components.
 - Keep components focused and readable.
-- Follow the existing game structure under `src/game/Cukup Jumlah!/`.
+- Follow the existing game structure under `src/game/cukup-jumlah/`.

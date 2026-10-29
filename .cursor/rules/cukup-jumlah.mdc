@@ -1,6 +1,6 @@
 ---
 description: Locked rules for Cukup Jumlah! microgame
-globs: ["src/cukup-jumlah/**/*.tsx", "src/cukup-jumlah/**/*.ts"]
+globs: ["src/game/cukup-jumlah/**/*.tsx", "src/game/cukup-jumlah/**/*.ts"]
 alwaysApply: false
 ---
 
