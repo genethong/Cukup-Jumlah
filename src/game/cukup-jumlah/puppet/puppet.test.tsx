@@ -85,12 +85,11 @@ describe("puppet rig", () => {
 
     const ankle = legJointY(puppetRig, "ankle", 0);
     const knee = legJointY(puppetRig, "knee", 0);
-    const footTop = ankle - puppetRig.parts["base/foot"].pins.ankle[1] * FOOT_SCALE;
+    const shoeTop =
+      ankle + (100 - puppetRig.parts["base/foot"].pins.ankle[1]) * FOOT_SCALE;
     const sarongHem = lowerHemY(puppetRig, "sarong", 0);
     const sampingHem = lowerHemY(puppetRig, "songket_samping", 0);
-    expect(sarongHem).toBeLessThan(ankle);
-    expect(sarongHem).toBeGreaterThan(knee);
-    expect(Math.abs(sarongHem - footTop)).toBeLessThan(8);
+    expect(sarongHem).toBeGreaterThan(shoeTop);
     expect(sampingHem).toBeCloseTo(knee, 0);
   });
 
@@ -202,7 +201,7 @@ describe("PuppetAvatar", () => {
     expect(srcs.some((src) => src.includes("headwear/"))).toBe(false);
   });
 
-  it("leaves kurung with a sarong bare-legged", () => {
+  it("covers kurung legs under a sarong so the shin cannot show skin", () => {
     const { container } = render(
       <PuppetAvatar
         config={{
@@ -215,7 +214,7 @@ describe("PuppetAvatar", () => {
       />,
     );
     const srcs = imageSrcs(container);
-    expect(srcs.some((src) => src.includes("/puppet/trousers/"))).toBe(false);
+    expect(srcs.some((src) => src.includes("/puppet/trousers/baju_kurung.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("/puppet/lower/sarong.webp"))).toBe(true);
   });
 });

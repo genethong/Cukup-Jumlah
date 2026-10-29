@@ -81,16 +81,40 @@ export function legJointY(rig: PuppetRig, joint: "knee" | "ankle", torsoY: numbe
   return torsoY + hip + (pin[1] - leg.pins.hip[1]);
 }
 
+/** Opaque body of the sarong bitmap (it is inset inside the PNG). */
+const SARONG_CONTENT = { left: 54, right: 404 };
+
+/** The sarong stays this wide until this fraction of its height, then tapers to a point. */
+const SARONG_WIDE_FRAC = 0.94;
+
 /**
  * Hem of a lower garment, derived from the leg pins.
- * Sarong stops at the top of the scaled foot so only the shoe shows.
+ * The sarong's wide body (not the pointed tip) lands on the top of the shoe.
  * Samping stops at the knee pin.
  */
 export function lowerHemY(rig: PuppetRig, lowerId: string, torsoY: number): number {
   if (lowerId === "songket_samping") return legJointY(rig, "knee", torsoY);
   const ankle = legJointY(rig, "ankle", torsoY);
   const foot = rig.parts["base/foot"];
-  return ankle - foot.pins.ankle[1] * FOOT_SCALE - 4;
+  // The foot sprite is bare skin from the top down to about y=100; the brown
+  // shoe starts there. The hem has to cover that instep, not stop at the pin.
+  const shoeLeatherY = 100;
+  const shoeTop = ankle + (shoeLeatherY - foot.pins.ankle[1]) * FOOT_SCALE;
+  const hipY = torsoY + rig.parts["base/torso"].pins.hip_L[1];
+  const waistY = hipY + (rig.placement.lower_waist_dy_from_hips.sarong ?? 0);
+  // The wide body of the kain (before the centre tail) meets the leather.
+  return waistY + (shoeTop - waistY + 48) / SARONG_WIDE_FRAC;
+}
+
+/** Horizontal scale that lets the sarong cover both legs, outer edge to outer edge. */
+export function sarongScaleX(rig: PuppetRig): number {
+  const leg = rig.parts["base/leg"];
+  const hipL = rig.parts["base/torso"].pins.hip_L[0];
+  const hipR = rig.parts["base/torso"].pins.hip_R[0];
+  const left = hipL - leg.pins.hip[0] - 22;
+  const right = hipR + (leg.size[0] - leg.pins.hip[0]) + 22;
+  const contentW = SARONG_CONTENT.right - SARONG_CONTENT.left;
+  return Math.max(1, (right - left) / contentW);
 }
 
 export type LowerDraw = { x: number; y: number; w: number; h: number };
@@ -111,10 +135,11 @@ export function lowerDraw(
   const waistY = top + part.pins.waist[1];
   const naturalDrop = Math.max(1, part.size[1] - part.pins.waist[1]);
   const scaleY = Math.max(0.05, (lowerHemY(rig, lowerId, torsoY) - waistY) / naturalDrop);
+  const scaleX = lowerId === "sarong" ? sarongScaleX(rig) : 1;
   return {
-    x: waistX - part.pins.waist[0],
+    x: waistX - part.pins.waist[0] * scaleX,
     y: waistY - part.pins.waist[1] * scaleY,
-    w: part.size[0],
+    w: part.size[0] * scaleX,
     h: part.size[1] * scaleY,
   };
 }

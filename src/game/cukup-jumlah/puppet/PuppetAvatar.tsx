@@ -130,9 +130,11 @@ function Arm({
   );
 }
 
-/** Cloth legs for every outfit except kurung worn with a sarong. */
-function trouserUrl(outfit: OutfitId, lower: LowerId | null): string | null {
-  if (outfit === "baju_kurung" && lower === "sarong") return null;
+/**
+ * Cloth legs on the leg pins. Kurung with a sarong still wears the teal
+ * overlay so a gap beside the kain cannot show bare skin.
+ */
+function trouserUrl(outfit: OutfitId, _lower: LowerId | null): string | null {
   return `/puppet/trousers/${outfit}.webp`;
 }
 
