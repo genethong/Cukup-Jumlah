@@ -1,654 +1,654 @@
 {
- "parts": {
-  "base/torso": {
-   "file": "parts/base/torso.webp",
-   "size": [
-    440,
-    560
-   ],
-   "pins": {
-    "neck": [
-     220,
-     34
-    ],
-    "shoulder_L": [
-     62,
-     135
-    ],
-    "shoulder_R": [
-     377,
-     135
-    ],
-    "hip_L": [
-     65,
-     512
-    ],
-    "hip_R": [
-     371,
-     512
-    ]
-   }
+  "parts": {
+    "base/torso": {
+      "file": "parts/base/torso.webp",
+      "size": [
+        440,
+        560
+      ],
+      "pins": {
+        "neck": [
+          220,
+          34
+        ],
+        "shoulder_L": [
+          62,
+          135
+        ],
+        "shoulder_R": [
+          377,
+          135
+        ],
+        "hip_L": [
+          65,
+          512
+        ],
+        "hip_R": [
+          371,
+          512
+        ]
+      }
+    },
+    "base/upper_arm": {
+      "file": "parts/base/upper_arm.webp",
+      "size": [
+        98,
+        230
+      ],
+      "pins": {
+        "shoulder": [
+          49,
+          41
+        ],
+        "elbow": [
+          49,
+          196
+        ]
+      }
+    },
+    "base/forearm_hand": {
+      "file": "parts/base/forearm_hand.webp",
+      "size": [
+        92,
+        300
+      ],
+      "pins": {
+        "elbow": [
+          51,
+          32
+        ],
+        "wrist": [
+          52,
+          210
+        ]
+      }
+    },
+    "base/leg": {
+      "file": "parts/base/leg.webp",
+      "size": [
+        107,
+        360
+      ],
+      "pins": {
+        "hip": [
+          55,
+          43
+        ],
+        "knee": [
+          46,
+          185
+        ],
+        "ankle": [
+          42,
+          315
+        ]
+      }
+    },
+    "base/foot": {
+      "file": "parts/base/foot.webp",
+      "size": [
+        200,
+        148
+      ],
+      "pins": {
+        "ankle": [
+          44,
+          56
+        ]
+      }
+    },
+    "heads/m_head_1": {
+      "file": "parts/heads/m_head_1.webp",
+      "size": [
+        404,
+        512
+      ],
+      "pins": {
+        "neck": [
+          203,
+          468
+        ],
+        "crown": [
+          202,
+          4
+        ],
+        "hat_brim": [
+          202,
+          143
+        ],
+        "face_center": [
+          202,
+          259
+        ]
+      },
+      "skin_source_mean": [
+        208,
+        150,
+        79
+      ]
+    },
+    "heads/m_head_2": {
+      "file": "parts/heads/m_head_2.webp",
+      "size": [
+        369,
+        512
+      ],
+      "pins": {
+        "neck": [
+          186,
+          426
+        ],
+        "crown": [
+          184,
+          4
+        ],
+        "hat_brim": [
+          184,
+          130
+        ],
+        "face_center": [
+          184,
+          236
+        ]
+      },
+      "skin_source_mean": [
+        222,
+        166,
+        94
+      ]
+    },
+    "heads/f_head_2": {
+      "file": "parts/heads/f_head_2.webp",
+      "size": [
+        367,
+        512
+      ],
+      "pins": {
+        "neck": [
+          186,
+          470
+        ],
+        "crown": [
+          183,
+          4
+        ],
+        "hat_brim": [
+          183,
+          143
+        ],
+        "face_center": [
+          183,
+          260
+        ]
+      },
+      "skin_source_mean": [
+        157,
+        99,
+        46
+      ]
+    },
+    "heads/f_head_1": {
+      "file": "parts/heads/f_head_1.webp",
+      "size": [
+        398,
+        512
+      ],
+      "pins": {
+        "neck": [
+          199,
+          474
+        ],
+        "crown": [
+          199,
+          5
+        ],
+        "hat_brim": [
+          199,
+          145
+        ],
+        "face_center": [
+          199,
+          262
+        ]
+      },
+      "skin_source_mean": [
+        216,
+        160,
+        89
+      ]
+    },
+    "heads/m_head_3": {
+      "file": "parts/heads/m_head_3.webp",
+      "size": [
+        395,
+        512
+      ],
+      "pins": {
+        "neck": [
+          201,
+          470
+        ],
+        "crown": [
+          197,
+          4
+        ],
+        "hat_brim": [
+          197,
+          143
+        ],
+        "face_center": [
+          197,
+          260
+        ]
+      },
+      "skin_source_mean": [
+        207,
+        150,
+        81
+      ]
+    },
+    "headwear/songkok": {
+      "file": "parts/headwear/songkok.webp",
+      "size": [
+        291,
+        216
+      ],
+      "pins": {
+        "brim": [
+          145,
+          208
+        ]
+      }
+    },
+    "headwear/tudung": {
+      "file": "parts/headwear/tudung.webp",
+      "size": [
+        469,
+        650
+      ],
+      "pins": {
+        "face_hole_center": [
+          235,
+          277
+        ]
+      }
+    },
+    "headwear/ketayap": {
+      "file": "parts/headwear/ketayap.webp",
+      "size": [
+        283,
+        195
+      ],
+      "pins": {
+        "brim": [
+          141,
+          187
+        ]
+      }
+    },
+    "headwear/turban": {
+      "file": "parts/headwear/turban.webp",
+      "size": [
+        346,
+        230
+      ],
+      "pins": {
+        "brim": [
+          173,
+          222
+        ]
+      }
+    },
+    "headwear/baseball_cap": {
+      "file": "parts/headwear/baseball_cap.webp",
+      "size": [
+        336,
+        146
+      ],
+      "pins": {
+        "brim": [
+          168,
+          138
+        ]
+      }
+    },
+    "outfits/baju_melayu": {
+      "file": "parts/outfits/baju_melayu.webp",
+      "size": [
+        441,
+        561
+      ],
+      "pins": {
+        "neck": [
+          221,
+          35
+        ],
+        "shoulder_L": [
+          62,
+          136
+        ],
+        "shoulder_R": [
+          377,
+          136
+        ],
+        "hip_L": [
+          66,
+          512
+        ],
+        "hip_R": [
+          372,
+          512
+        ]
+      }
+    },
+    "outfits/batik_shirt": {
+      "file": "parts/outfits/batik_shirt.webp",
+      "size": [
+        441,
+        561
+      ],
+      "pins": {
+        "neck": [
+          221,
+          35
+        ],
+        "shoulder_L": [
+          62,
+          136
+        ],
+        "shoulder_R": [
+          377,
+          136
+        ],
+        "hip_L": [
+          66,
+          512
+        ],
+        "hip_R": [
+          372,
+          512
+        ]
+      }
+    },
+    "outfits/business_suit": {
+      "file": "parts/outfits/business_suit.webp",
+      "size": [
+        441,
+        562
+      ],
+      "pins": {
+        "neck": [
+          221,
+          35
+        ],
+        "shoulder_L": [
+          62,
+          136
+        ],
+        "shoulder_R": [
+          377,
+          136
+        ],
+        "hip_L": [
+          66,
+          512
+        ],
+        "hip_R": [
+          372,
+          512
+        ]
+      }
+    },
+    "outfits/baju_kurung": {
+      "file": "parts/outfits/baju_kurung.webp",
+      "size": [
+        440,
+        588
+      ],
+      "pins": {
+        "neck": [
+          220,
+          36
+        ],
+        "shoulder_L": [
+          62,
+          136
+        ],
+        "shoulder_R": [
+          377,
+          136
+        ],
+        "hip_L": [
+          65,
+          513
+        ],
+        "hip_R": [
+          371,
+          513
+        ]
+      }
+    },
+    "lower/songket_samping": {
+      "file": "parts/lower/songket_samping.webp",
+      "size": [
+        382,
+        427
+      ],
+      "pins": {
+        "waist": [
+          191,
+          8
+        ]
+      }
+    },
+    "lower/sarong": {
+      "file": "parts/lower/sarong.webp",
+      "size": [
+        458,
+        697
+      ],
+      "pins": {
+        "waist": [
+          229,
+          8
+        ]
+      }
+    },
+    "sleeves/baju_melayu_upper": {
+      "file": "parts/sleeves/baju_melayu_upper.webp",
+      "size": [
+        88,
+        205
+      ],
+      "pins": {
+        "shoulder": [
+          44,
+          29
+        ]
+      }
+    },
+    "sleeves/baju_melayu_forearm": {
+      "file": "parts/sleeves/baju_melayu_forearm.webp",
+      "size": [
+        110,
+        199
+      ],
+      "pins": {
+        "elbow": [
+          55,
+          17
+        ]
+      }
+    },
+    "sleeves/business_suit_upper": {
+      "file": "parts/sleeves/business_suit_upper.webp",
+      "size": [
+        87,
+        205
+      ],
+      "pins": {
+        "shoulder": [
+          44,
+          28
+        ]
+      }
+    },
+    "sleeves/business_suit_forearm": {
+      "file": "parts/sleeves/business_suit_forearm.webp",
+      "size": [
+        110,
+        202
+      ],
+      "pins": {
+        "elbow": [
+          55,
+          20
+        ]
+      }
+    },
+    "sleeves/baju_kurung_upper": {
+      "file": "parts/sleeves/baju_kurung_upper.webp",
+      "size": [
+        82,
+        205
+      ],
+      "pins": {
+        "shoulder": [
+          41,
+          22
+        ]
+      }
+    },
+    "sleeves/baju_kurung_forearm": {
+      "file": "parts/sleeves/baju_kurung_forearm.webp",
+      "size": [
+        110,
+        203
+      ],
+      "pins": {
+        "elbow": [
+          55,
+          21
+        ]
+      }
+    },
+    "sleeves/batik_shirt_upper": {
+      "file": "parts/sleeves/batik_shirt_upper.webp",
+      "size": [
+        122,
+        150
+      ],
+      "pins": {
+        "shoulder": [
+          60,
+          17
+        ]
+      }
+    }
   },
-  "base/upper_arm": {
-   "file": "parts/base/upper_arm.webp",
-   "size": [
-    98,
-    230
-   ],
-   "pins": {
-    "shoulder": [
-     49,
-     41
-    ],
-    "elbow": [
-     49,
-     196
-    ]
-   }
+  "draw_order": [
+    "leg x2",
+    "foot x2",
+    "lower:sarong",
+    "torso",
+    "outfit",
+    "lower:songket_samping",
+    "head",
+    "headwear",
+    "upper_arm x2",
+    "sleeve_upper x2",
+    "forearm_hand x2",
+    "sleeve_forearm x2"
+  ],
+  "joints": {
+    "torso.neck": "head.neck",
+    "torso.shoulder_L/R": "upper_arm.shoulder",
+    "upper_arm.elbow": "forearm_hand.elbow",
+    "torso.hip_L/R": "leg.hip (also lower.waist centred between hips, offset up ~40px)",
+    "leg.ankle": "foot.ankle",
+    "head.hat_brim": "headwear.brim",
+    "head.face_center": "tudung.face_hole_center"
   },
-  "base/forearm_hand": {
-   "file": "parts/base/forearm_hand.webp",
-   "size": [
-    92,
-    300
-   ],
-   "pins": {
-    "elbow": [
-     51,
-     32
-    ],
-    "wrist": [
-     52,
-     210
-    ]
-   }
+  "notes": "Left-side limbs: mirror horizontally (x -> width-1-x). Outfits share the base torso pin layout and replace/overlay the torso.",
+  "skin": {
+    "method": "HSV mask recolour: pixels with hue 12-45deg, sat 0.22-0.78, value>0.30, excluding a circle of radius pin_radius around every pin (brass), get RGB multiplied by target/source_mean_skin. Pre-baked results in parts/base_tones/<tone>/. Outfits and sleeves are NOT tinted (their gold/orange batik falls in the same hue range); their small skin neck tab is hidden under the head.",
+    "tones": {
+      "tone_1": [
+        246,
+        218,
+        186
+      ],
+      "tone_2": [
+        236,
+        196,
+        154
+      ],
+      "tone_3": [
+        214,
+        164,
+        114
+      ],
+      "tone_4": [
+        196,
+        136,
+        84
+      ],
+      "tone_5": [
+        178,
+        118,
+        71
+      ],
+      "tone_6": [
+        160,
+        100,
+        58
+      ],
+      "tone_7": [
+        118,
+        70,
+        40
+      ],
+      "tone_8": [
+        86,
+        52,
+        32
+      ]
+    },
+    "base_tones_dir": "parts/base_tones/<tone>/<part>.webp"
   },
-  "base/leg": {
-   "file": "parts/base/leg.webp",
-   "size": [
-    107,
-    360
-   ],
-   "pins": {
-    "hip": [
-     55,
-     43
-    ],
-    "knee": [
-     46,
-     185
-    ],
-    "ankle": [
-     42,
-     315
-    ]
-   }
+  "placement": {
+    "headwear_brim_dy": {
+      "songkok": 15,
+      "ketayap": 15,
+      "turban": 15,
+      "baseball_cap": 12
+    },
+    "headwear_note": "place headwear.brim at head.hat_brim + (0, dy)",
+    "tudung": "place tudung.face_hole_center at head.face_center",
+    "lower_waist_dy_from_hips": {
+      "songket_samping": -110,
+      "sarong": -60
+    },
+    "lower_note": "waist pin x = torso centre, y = torso hip pin y + dy",
+    "sleeve_upper": "sleeves/<outfit>_upper.shoulder -> torso.shoulder_*",
+    "sleeve_forearm": "sleeves/<outfit>_forearm.elbow -> upper_arm.elbow (same point as forearm_hand.elbow)",
+    "mirror": "right-side limbs, sleeves and the right foot are mirrored horizontally"
   },
-  "base/foot": {
-   "file": "parts/base/foot.webp",
-   "size": [
-    200,
-    148
-   ],
-   "pins": {
-    "ankle": [
-     44,
-     56
+  "sleeves": {
+    "baju_melayu": [
+      "upper",
+      "forearm"
+    ],
+    "business_suit": [
+      "upper",
+      "forearm"
+    ],
+    "baju_kurung": [
+      "upper",
+      "forearm"
+    ],
+    "batik_shirt": [
+      "upper"
     ]
-   }
-  },
-  "heads/m_head_1": {
-   "file": "parts/heads/m_head_1.webp",
-   "size": [
-    404,
-    512
-   ],
-   "pins": {
-    "neck": [
-     203,
-     468
-    ],
-    "crown": [
-     202,
-     4
-    ],
-    "hat_brim": [
-     202,
-     143
-    ],
-    "face_center": [
-     202,
-     259
-    ]
-   },
-   "skin_source_mean": [
-    208,
-    150,
-    79
-   ]
-  },
-  "heads/m_head_2": {
-   "file": "parts/heads/m_head_2.webp",
-   "size": [
-    369,
-    512
-   ],
-   "pins": {
-    "neck": [
-     186,
-     426
-    ],
-    "crown": [
-     184,
-     4
-    ],
-    "hat_brim": [
-     184,
-     130
-    ],
-    "face_center": [
-     184,
-     236
-    ]
-   },
-   "skin_source_mean": [
-    222,
-    166,
-    94
-   ]
-  },
-  "heads/f_head_2": {
-   "file": "parts/heads/f_head_2.webp",
-   "size": [
-    367,
-    512
-   ],
-   "pins": {
-    "neck": [
-     186,
-     470
-    ],
-    "crown": [
-     183,
-     4
-    ],
-    "hat_brim": [
-     183,
-     143
-    ],
-    "face_center": [
-     183,
-     260
-    ]
-   },
-   "skin_source_mean": [
-    157,
-    99,
-    46
-   ]
-  },
-  "heads/f_head_1": {
-   "file": "parts/heads/f_head_1.webp",
-   "size": [
-    398,
-    512
-   ],
-   "pins": {
-    "neck": [
-     199,
-     474
-    ],
-    "crown": [
-     199,
-     5
-    ],
-    "hat_brim": [
-     199,
-     145
-    ],
-    "face_center": [
-     199,
-     262
-    ]
-   },
-   "skin_source_mean": [
-    216,
-    160,
-    89
-   ]
-  },
-  "heads/m_head_3": {
-   "file": "parts/heads/m_head_3.webp",
-   "size": [
-    395,
-    512
-   ],
-   "pins": {
-    "neck": [
-     201,
-     470
-    ],
-    "crown": [
-     197,
-     4
-    ],
-    "hat_brim": [
-     197,
-     143
-    ],
-    "face_center": [
-     197,
-     260
-    ]
-   },
-   "skin_source_mean": [
-    207,
-    150,
-    81
-   ]
-  },
-  "headwear/songkok": {
-   "file": "parts/headwear/songkok.webp",
-   "size": [
-    291,
-    216
-   ],
-   "pins": {
-    "brim": [
-     145,
-     208
-    ]
-   }
-  },
-  "headwear/tudung": {
-   "file": "parts/headwear/tudung.webp",
-   "size": [
-    469,
-    650
-   ],
-   "pins": {
-    "face_hole_center": [
-     235,
-     277
-    ]
-   }
-  },
-  "headwear/ketayap": {
-   "file": "parts/headwear/ketayap.webp",
-   "size": [
-    283,
-    195
-   ],
-   "pins": {
-    "brim": [
-     141,
-     187
-    ]
-   }
-  },
-  "headwear/turban": {
-   "file": "parts/headwear/turban.webp",
-   "size": [
-    348,
-    278
-   ],
-   "pins": {
-    "brim": [
-     174,
-     270
-    ]
-   }
-  },
-  "headwear/baseball_cap": {
-   "file": "parts/headwear/baseball_cap.webp",
-   "size": [
-    384,
-    364
-   ],
-   "pins": {
-    "brim": [
-     192,
-     356
-    ]
-   }
-  },
-  "outfits/baju_melayu": {
-   "file": "parts/outfits/baju_melayu.webp",
-   "size": [
-    441,
-    561
-   ],
-   "pins": {
-    "neck": [
-     221,
-     35
-    ],
-    "shoulder_L": [
-     62,
-     136
-    ],
-    "shoulder_R": [
-     377,
-     136
-    ],
-    "hip_L": [
-     66,
-     512
-    ],
-    "hip_R": [
-     372,
-     512
-    ]
-   }
-  },
-  "outfits/batik_shirt": {
-   "file": "parts/outfits/batik_shirt.webp",
-   "size": [
-    441,
-    561
-   ],
-   "pins": {
-    "neck": [
-     221,
-     35
-    ],
-    "shoulder_L": [
-     62,
-     136
-    ],
-    "shoulder_R": [
-     377,
-     136
-    ],
-    "hip_L": [
-     66,
-     512
-    ],
-    "hip_R": [
-     372,
-     512
-    ]
-   }
-  },
-  "outfits/business_suit": {
-   "file": "parts/outfits/business_suit.webp",
-   "size": [
-    441,
-    562
-   ],
-   "pins": {
-    "neck": [
-     221,
-     35
-    ],
-    "shoulder_L": [
-     62,
-     136
-    ],
-    "shoulder_R": [
-     377,
-     136
-    ],
-    "hip_L": [
-     66,
-     512
-    ],
-    "hip_R": [
-     372,
-     512
-    ]
-   }
-  },
-  "outfits/baju_kurung": {
-   "file": "parts/outfits/baju_kurung.webp",
-   "size": [
-    440,
-    588
-   ],
-   "pins": {
-    "neck": [
-     220,
-     36
-    ],
-    "shoulder_L": [
-     62,
-     136
-    ],
-    "shoulder_R": [
-     377,
-     136
-    ],
-    "hip_L": [
-     65,
-     513
-    ],
-    "hip_R": [
-     371,
-     513
-    ]
-   }
-  },
-  "lower/songket_samping": {
-   "file": "parts/lower/songket_samping.webp",
-   "size": [
-    382,
-    427
-   ],
-   "pins": {
-    "waist": [
-     191,
-     8
-    ]
-   }
-  },
-  "lower/sarong": {
-   "file": "parts/lower/sarong.webp",
-   "size": [
-    458,
-    697
-   ],
-   "pins": {
-    "waist": [
-     229,
-     8
-    ]
-   }
-  },
-  "sleeves/baju_melayu_upper": {
-   "file": "parts/sleeves/baju_melayu_upper.webp",
-   "size": [
-    88,
-    205
-   ],
-   "pins": {
-    "shoulder": [
-     44,
-     29
-    ]
-   }
-  },
-  "sleeves/baju_melayu_forearm": {
-   "file": "parts/sleeves/baju_melayu_forearm.webp",
-   "size": [
-    110,
-    292
-   ],
-   "pins": {
-    "elbow": [
-     55,
-     17
-    ]
-   }
-  },
-  "sleeves/business_suit_upper": {
-   "file": "parts/sleeves/business_suit_upper.webp",
-   "size": [
-    87,
-    205
-   ],
-   "pins": {
-    "shoulder": [
-     44,
-     28
-    ]
-   }
-  },
-  "sleeves/business_suit_forearm": {
-   "file": "parts/sleeves/business_suit_forearm.webp",
-   "size": [
-    110,
-    347
-   ],
-   "pins": {
-    "elbow": [
-     55,
-     20
-    ]
-   }
-  },
-  "sleeves/baju_kurung_upper": {
-   "file": "parts/sleeves/baju_kurung_upper.webp",
-   "size": [
-    82,
-    205
-   ],
-   "pins": {
-    "shoulder": [
-     41,
-     22
-    ]
-   }
-  },
-  "sleeves/baju_kurung_forearm": {
-   "file": "parts/sleeves/baju_kurung_forearm.webp",
-   "size": [
-    110,
-    361
-   ],
-   "pins": {
-    "elbow": [
-     55,
-     21
-    ]
-   }
-  },
-  "sleeves/batik_shirt_upper": {
-   "file": "parts/sleeves/batik_shirt_upper.webp",
-   "size": [
-    122,
-    150
-   ],
-   "pins": {
-    "shoulder": [
-     60,
-     17
-    ]
-   }
   }
- },
- "draw_order": [
-  "leg x2",
-  "foot x2",
-  "lower:sarong",
-  "torso",
-  "outfit",
-  "lower:songket_samping",
-  "head",
-  "headwear",
-  "upper_arm x2",
-  "sleeve_upper x2",
-  "forearm_hand x2",
-  "sleeve_forearm x2"
- ],
- "joints": {
-  "torso.neck": "head.neck",
-  "torso.shoulder_L/R": "upper_arm.shoulder",
-  "upper_arm.elbow": "forearm_hand.elbow",
-  "torso.hip_L/R": "leg.hip (also lower.waist centred between hips, offset up ~40px)",
-  "leg.ankle": "foot.ankle",
-  "head.hat_brim": "headwear.brim",
-  "head.face_center": "tudung.face_hole_center"
- },
- "notes": "Left-side limbs: mirror horizontally (x -> width-1-x). Outfits share the base torso pin layout and replace/overlay the torso.",
- "skin": {
-  "method": "HSV mask recolour: pixels with hue 12-45deg, sat 0.22-0.78, value>0.30, excluding a circle of radius pin_radius around every pin (brass), get RGB multiplied by target/source_mean_skin. Pre-baked results in parts/base_tones/<tone>/. Outfits and sleeves are NOT tinted (their gold/orange batik falls in the same hue range); their small skin neck tab is hidden under the head.",
-  "tones": {
-   "tone_1": [
-    246,
-    218,
-    186
-   ],
-   "tone_2": [
-    236,
-    196,
-    154
-   ],
-   "tone_3": [
-    214,
-    164,
-    114
-   ],
-   "tone_4": [
-    196,
-    136,
-    84
-   ],
-   "tone_5": [
-    178,
-    118,
-    71
-   ],
-   "tone_6": [
-    160,
-    100,
-    58
-   ],
-   "tone_7": [
-    118,
-    70,
-    40
-   ],
-   "tone_8": [
-    86,
-    52,
-    32
-   ]
-  },
-  "base_tones_dir": "parts/base_tones/<tone>/<part>.webp"
- },
- "placement": {
-  "headwear_brim_dy": {
-   "songkok": 15,
-   "ketayap": 15,
-   "turban": 55,
-   "baseball_cap": 70
-  },
-  "headwear_note": "place headwear.brim at head.hat_brim + (0, dy)",
-  "tudung": "place tudung.face_hole_center at head.face_center",
-  "lower_waist_dy_from_hips": {
-   "songket_samping": -110,
-   "sarong": -60
-  },
-  "lower_note": "waist pin x = torso centre, y = torso hip pin y + dy",
-  "sleeve_upper": "sleeves/<outfit>_upper.shoulder -> torso.shoulder_*",
-  "sleeve_forearm": "sleeves/<outfit>_forearm.elbow -> upper_arm.elbow (same point as forearm_hand.elbow)",
-  "mirror": "right-side limbs, sleeves and the right foot are mirrored horizontally"
- },
- "sleeves": {
-  "baju_melayu": [
-   "upper",
-   "forearm"
-  ],
-  "business_suit": [
-   "upper",
-   "forearm"
-  ],
-  "baju_kurung": [
-   "upper",
-   "forearm"
-  ],
-  "batik_shirt": [
-   "upper"
-  ]
- }
 }

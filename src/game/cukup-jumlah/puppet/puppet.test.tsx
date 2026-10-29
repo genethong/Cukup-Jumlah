@@ -32,8 +32,8 @@ describe("puppet rig", () => {
     expect(puppetRig.placement.headwear_brim_dy).toEqual({
       songkok: 15,
       ketayap: 15,
-      turban: 55,
-      baseball_cap: 70,
+      turban: 15,
+      baseball_cap: 12,
     });
     expect(puppetRig.placement.lower_waist_dy_from_hips).toEqual({
       songket_samping: -110,
@@ -57,7 +57,7 @@ describe("puppet rig", () => {
 
   it("places songkok, samping, and sarong from the rig offsets", () => {
     expect(headwearOrigin(puppetRig, "m_head_1", "songkok", 0, 0)).toEqual([74, -484]);
-    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-548);
+    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-388);
     expect(lowerOrigin(puppetRig, "songket_samping", 0, 0)).toEqual([29, 394]);
     expect(lowerOrigin(puppetRig, "sarong", 0, 0)).toEqual([-9, 444]);
   });
@@ -119,7 +119,7 @@ describe("puppet rig", () => {
     expect(files.every((file) => file.endsWith(".webp"))).toBe(true);
     expect(fs.existsSync(path.join(root, "base"))).toBe(false);
     const bytes = files.reduce((sum, file) => sum + fs.statSync(file).size, 0);
-    expect(bytes).toBeLessThan(1_500_000);
+    expect(bytes).toBeLessThan(2_500_000);
 
     for (const [id, part] of Object.entries(puppetRig.parts)) {
       if (id.startsWith("base/")) continue;
@@ -173,7 +173,7 @@ describe("PuppetAvatar", () => {
       />,
     );
     const srcs = imageSrcs(container);
-    expect(srcs.some((src) => src.includes("/puppet/heads/m_head_1.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("/puppet/heads/tone_6/m_head_1.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("/puppet/base_tones/tone_6/torso.webp"))).toBe(
       true,
     );

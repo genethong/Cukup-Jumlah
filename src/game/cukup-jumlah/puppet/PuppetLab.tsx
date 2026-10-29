@@ -35,60 +35,7 @@ const GENDERS: { id: "m" | "f"; label: string }[] = [
   { id: "f", label: "Perempuan" },
 ];
 
-const FACE_SHAPES = [
-  { id: "round", label: "Bulat" },
-  { id: "oval", label: "Bujur" },
-  { id: "square", label: "Petak" },
-  { id: "long", label: "Panjang" },
-];
 
-const EYES = [
-  { id: "normal", label: "Biasa" },
-  { id: "narrow", label: "Kecil" },
-  { id: "biground", label: "Bulat" },
-  { id: "sleepy", label: "Kuyu" },
-];
-
-const BROWS = [
-  { id: "thin", label: "Nipis" },
-  { id: "thick", label: "Tebal" },
-  { id: "bushy", label: "Lebat" },
-  { id: "arched", label: "Lengkung" },
-];
-
-const NOSES = [
-  { id: "small", label: "Kecil" },
-  { id: "round", label: "Bulat" },
-  { id: "wide", label: "Lebar" },
-  { id: "pointy", label: "Mancung" },
-];
-
-const EXPRESSIONS = [
-  { id: "smile", label: "Senyum" },
-  { id: "smug", label: "Bangga" },
-  { id: "laugh", label: "Ketawa" },
-  { id: "nervous", label: "Gementar" },
-  { id: "angry", label: "Marah" },
-  { id: "shocked", label: "Terkejut" },
-];
-
-const HAIR_M = [
-  { id: "sidepart", label: "Belah tepi" },
-  { id: "crewcut", label: "Pendek" },
-  { id: "slickback", label: "Kemas" },
-  { id: "curly", label: "Keriting" },
-  { id: "manbun", label: "Sanggul" },
-  { id: "bald", label: "Botak" },
-];
-
-const HAIR_F = [
-  { id: "longstraight", label: "Lurus" },
-  { id: "bob", label: "Bob" },
-  { id: "ponytail", label: "Ekor kuda" },
-  { id: "bun", label: "Sanggul" },
-  { id: "curly", label: "Keriting" },
-  { id: "pixie", label: "Pendek" },
-];
 
 const HATS: { id: HeadwearId | null; label: string }[] = [
   { id: null, label: "Tiada" },
@@ -180,13 +127,7 @@ export function PuppetLab() {
   const [selected, setSelected] = useState(1);
   const [burst, setBurst] = useState<Burst | null>(null);
 
-  // Modular preview states (scaffolded for face layer controls)
-  const [faceShape, setFaceShape] = useState("round");
-  const [eyes, setEyes] = useState("normal");
-  const [brows, setBrows] = useState("thin");
-  const [nose, setNose] = useState("small");
-  const [expression, setExpression] = useState("smile");
-  const [hair, setHair] = useState("sidepart");
+
 
   const trigger = (index: number, anim: Burst["anim"]) => {
     const token = Date.now() + Math.random();
@@ -217,7 +158,7 @@ export function PuppetLab() {
   const active = cast[selected] ?? cast[0];
   const activeGender = active.gender ?? (active.head.startsWith("f_") ? "f" : "m");
   const availableHeads = HEADS.filter((h) => h.gender === activeGender);
-  const hairOptions = activeGender === "m" ? HAIR_M : HAIR_F;
+
 
   return (
     <div className="h-dvh overflow-x-hidden overflow-y-auto text-[#24170f]">
@@ -428,53 +369,7 @@ export function PuppetLab() {
               onChange={(lower) => update({ lower })}
             />
 
-            {/* Bentuk Muka (Modular control scaffold) */}
-            <Picker
-              legend="Bentuk Muka"
-              options={FACE_SHAPES}
-              value={faceShape}
-              onChange={setFaceShape}
-            />
 
-            {/* Mata (Modular control scaffold) */}
-            <Picker
-              legend="Mata"
-              options={EYES}
-              value={eyes}
-              onChange={setEyes}
-            />
-
-            {/* Kening (Modular control scaffold) */}
-            <Picker
-              legend="Kening"
-              options={BROWS}
-              value={brows}
-              onChange={setBrows}
-            />
-
-            {/* Hidung (Modular control scaffold) */}
-            <Picker
-              legend="Hidung"
-              options={NOSES}
-              value={nose}
-              onChange={setNose}
-            />
-
-            {/* Ekspresi (Modular control scaffold) */}
-            <Picker
-              legend="Ekspresi"
-              options={EXPRESSIONS}
-              value={expression}
-              onChange={setExpression}
-            />
-
-            {/* Rambut (Modular control scaffold) */}
-            <Picker
-              legend="Rambut"
-              options={hairOptions}
-              value={hair}
-              onChange={setHair}
-            />
           </div>
         </section>
       </div>

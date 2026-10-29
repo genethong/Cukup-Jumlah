@@ -130,6 +130,10 @@ function Arm({
   );
 }
 
+function headUrl(headId: string, tone: string): string {
+  return `/puppet/heads/${tone}/${headId}.webp`;
+}
+
 /**
  * Cloth legs on the leg pins. Kurung with a sarong still wears the teal
  * overlay so a gap beside the kain cannot show bare skin.
@@ -187,6 +191,7 @@ function Leg({
             maxWidth: "none",
             pointerEvents: "none",
             userSelect: "none",
+            zIndex: 2,
           }}
         />
       )}
@@ -200,6 +205,7 @@ function Leg({
           // The right leg is already mirrored about the hip; this second flip
           // cancels that for the foot only, so right toes stay to the right.
           transform: `rotate(var(--foot-${side.toLowerCase()})) scaleX(-1) scale(${FOOT_SCALE})`,
+          zIndex: 1,
           willChange: "transform",
         }}
       >
@@ -472,7 +478,7 @@ export function PuppetAvatar({
               }}
             >
               <img
-                src={rigFileUrl(head.file)}
+                src={headUrl(config.head, tone)}
                 alt=""
                 draggable={false}
                 width={head.size[0]}
