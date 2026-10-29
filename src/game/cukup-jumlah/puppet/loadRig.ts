@@ -19,7 +19,7 @@ export type PuppetRig = {
   skin: {
     method: string;
     tones: Record<string, [number, number, number]>;
-    head_tone: Record<string, string>;
+    head_tone?: Record<string, string>;
     base_tones_dir: string;
   };
   placement: {
@@ -35,12 +35,7 @@ export type PuppetRig = {
   sleeves: Record<string, string[]>;
 };
 
-export type HeadId =
-  | "malay_man"
-  | "malay_woman"
-  | "chinese_man"
-  | "indian_woman"
-  | "kadazan_man";
+export type HeadId = "m_head_1" | "m_head_2" | "m_head_3" | "f_head_1" | "f_head_2";
 
 export type HeadwearId = "songkok" | "ketayap" | "turban" | "baseball_cap" | "tudung";
 
@@ -48,11 +43,21 @@ export type OutfitId = "baju_melayu" | "batik_shirt" | "business_suit" | "baju_k
 
 export type LowerId = "songket_samping" | "sarong";
 
-export type ToneId = "light" | "tan" | "golden" | "medium_brown" | "dark";
+export type ToneId =
+  | "tone_1"
+  | "tone_2"
+  | "tone_3"
+  | "tone_4"
+  | "tone_5"
+  | "tone_6"
+  | "tone_7"
+  | "tone_8";
 
 export type BasePartName = "torso" | "upper_arm" | "forearm_hand" | "leg" | "foot";
 
 export type PuppetConfig = {
+  gender?: "m" | "f";
+  tone: ToneId;
   head: HeadId;
   headwear: HeadwearId | null;
   outfit: OutfitId;
@@ -83,8 +88,8 @@ export function loadRig(data: unknown): PuppetRig {
   if (!isRecord(placement.headwear_brim_dy) || !isRecord(placement.lower_waist_dy_from_hips)) {
     throw new Error("rig.json placement is missing headwear or lower offsets");
   }
-  if (!isRecord(skin.head_tone) || !isRecord(skin.tones)) {
-    throw new Error("rig.json skin is missing head_tone or tones");
+  if (!isRecord(skin.tones)) {
+    throw new Error("rig.json skin is missing tones");
   }
   if (typeof placement.mirror !== "string" || !/right/i.test(placement.mirror)) {
     throw new Error("rig.json placement.mirror must describe the right-side mirror");
@@ -107,11 +112,13 @@ export function loadRig(data: unknown): PuppetRig {
     parts[id] = { file: raw.file, size, pins };
   }
 
-  for (const [head, tone] of Object.entries(skin.head_tone)) {
-    if (typeof tone !== "string" || !isRecord(skin.tones) || !(tone in skin.tones)) {
-      throw new Error(`rig.json head ${head} points at an unknown tone`);
+  if (isRecord(skin.head_tone)) {
+    for (const [head, tone] of Object.entries(skin.head_tone)) {
+      if (typeof tone !== "string" || !isRecord(skin.tones) || !(tone in skin.tones)) {
+        throw new Error(`rig.json head ${head} points at an unknown tone`);
+      }
+      if (!parts[`heads/${head}`]) throw new Error(`rig.json is missing heads/${head}`);
     }
-    if (!parts[`heads/${head}`]) throw new Error(`rig.json is missing heads/${head}`);
   }
   for (const id of Object.keys(placement.headwear_brim_dy)) {
     if (!parts[`headwear/${id}`]) throw new Error(`rig.json offset for missing headwear/${id}`);
@@ -155,7 +162,6 @@ export function tonePartUrl(tone: string, part: BasePartName): string {
 }
 
 export function toneForHead(rig: PuppetRig, head: string): string {
-  const tone = rig.skin.head_tone[head];
-  if (!tone) throw new Error(`No body tone for head ${head}`);
-  return tone;
+  const tone = rig.skin.head_tone?.[head];
+  return tone ?? "tone_4";
 }

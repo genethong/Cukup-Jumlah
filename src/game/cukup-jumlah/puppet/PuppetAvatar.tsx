@@ -342,7 +342,7 @@ export function PuppetAvatar({
   const motionRef = useRef<HTMLDivElement>(null);
   usePuppetMotion(motionRef, anim, pose, bpm);
 
-  const tone = toneForHead(rig, config.head);
+  const tone = config.tone ?? toneForHead(rig, config.head);
   const { torsoX, torsoY, hipX, hipY } = frame;
   const neck = rig.parts["base/torso"].pins.neck;
   const neckX = torsoX + neck[0];

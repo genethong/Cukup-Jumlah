@@ -2,22 +2,92 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { PuppetAvatar } from "./PuppetAvatar";
 import {
-  puppetRig,
-  toneForHead,
   type HeadId,
   type HeadwearId,
   type LowerId,
   type OutfitId,
   type PuppetConfig,
+  type ToneId,
 } from "./loadRig";
 import { PUPPET_BPM, beatPhase, type PuppetAnim } from "./motion";
 
-const HEADS: { id: HeadId; label: string }[] = [
-  { id: "malay_man", label: "Lelaki Melayu" },
-  { id: "malay_woman", label: "Wanita Melayu" },
-  { id: "chinese_man", label: "Lelaki Cina" },
-  { id: "indian_woman", label: "Wanita India" },
-  { id: "kadazan_man", label: "Lelaki Kadazan" },
+const HEADS: { id: HeadId; gender: "m" | "f"; label: string }[] = [
+  { id: "m_head_1", gender: "m", label: "Kepala L1" },
+  { id: "m_head_2", gender: "m", label: "Kepala L2" },
+  { id: "m_head_3", gender: "m", label: "Kepala L3" },
+  { id: "f_head_1", gender: "f", label: "Kepala P1" },
+  { id: "f_head_2", gender: "f", label: "Kepala P2" },
+];
+
+const TONES: { id: ToneId; hex: string; label: string }[] = [
+  { id: "tone_1", hex: "#F6DABA", label: "1" },
+  { id: "tone_2", hex: "#ECC49A", label: "2" },
+  { id: "tone_3", hex: "#D6A472", label: "3" },
+  { id: "tone_4", hex: "#C48854", label: "4" },
+  { id: "tone_5", hex: "#B27647", label: "5" },
+  { id: "tone_6", hex: "#A0643A", label: "6" },
+  { id: "tone_7", hex: "#764628", label: "7" },
+  { id: "tone_8", hex: "#563420", label: "8" },
+];
+
+const GENDERS: { id: "m" | "f"; label: string }[] = [
+  { id: "m", label: "Lelaki" },
+  { id: "f", label: "Perempuan" },
+];
+
+const FACE_SHAPES = [
+  { id: "round", label: "Bulat" },
+  { id: "oval", label: "Bujur" },
+  { id: "square", label: "Petak" },
+  { id: "long", label: "Panjang" },
+];
+
+const EYES = [
+  { id: "normal", label: "Biasa" },
+  { id: "narrow", label: "Kecil" },
+  { id: "biground", label: "Bulat" },
+  { id: "sleepy", label: "Kuyu" },
+];
+
+const BROWS = [
+  { id: "thin", label: "Nipis" },
+  { id: "thick", label: "Tebal" },
+  { id: "bushy", label: "Lebat" },
+  { id: "arched", label: "Lengkung" },
+];
+
+const NOSES = [
+  { id: "small", label: "Kecil" },
+  { id: "round", label: "Bulat" },
+  { id: "wide", label: "Lebar" },
+  { id: "pointy", label: "Mancung" },
+];
+
+const EXPRESSIONS = [
+  { id: "smile", label: "Senyum" },
+  { id: "smug", label: "Bangga" },
+  { id: "laugh", label: "Ketawa" },
+  { id: "nervous", label: "Gementar" },
+  { id: "angry", label: "Marah" },
+  { id: "shocked", label: "Terkejut" },
+];
+
+const HAIR_M = [
+  { id: "sidepart", label: "Belah tepi" },
+  { id: "crewcut", label: "Pendek" },
+  { id: "slickback", label: "Kemas" },
+  { id: "curly", label: "Keriting" },
+  { id: "manbun", label: "Sanggul" },
+  { id: "bald", label: "Botak" },
+];
+
+const HAIR_F = [
+  { id: "longstraight", label: "Lurus" },
+  { id: "bob", label: "Bob" },
+  { id: "ponytail", label: "Ekor kuda" },
+  { id: "bun", label: "Sanggul" },
+  { id: "curly", label: "Keriting" },
+  { id: "pixie", label: "Pendek" },
 ];
 
 const HATS: { id: HeadwearId | null; label: string }[] = [
@@ -42,18 +112,10 @@ const LOWERS: { id: LowerId | null; label: string }[] = [
   { id: "sarong", label: "Kain" },
 ];
 
-const TONE_LABEL: Record<string, string> = {
-  light: "cerah",
-  tan: "sawo",
-  golden: "emas",
-  medium_brown: "sederhana",
-  dark: "gelap",
-};
-
 const CAST: PuppetConfig[] = [
-  { head: "malay_man", headwear: "songkok", outfit: "baju_melayu", lower: "songket_samping" },
-  { head: "malay_woman", headwear: "tudung", outfit: "baju_kurung", lower: "sarong" },
-  { head: "chinese_man", headwear: "baseball_cap", outfit: "business_suit", lower: null },
+  { gender: "m", tone: "tone_6", head: "m_head_1", headwear: "songkok", outfit: "baju_melayu", lower: "songket_samping" },
+  { gender: "f", tone: "tone_4", head: "f_head_1", headwear: "tudung", outfit: "baju_kurung", lower: "sarong" },
+  { gender: "m", tone: "tone_2", head: "m_head_2", headwear: "baseball_cap", outfit: "business_suit", lower: null },
 ];
 
 type Burst = { index: number; anim: Extract<PuppetAnim, "hop" | "rod-wiggle">; token: number };
@@ -63,8 +125,12 @@ function pick<T>(items: readonly T[]): T {
 }
 
 function randomConfig(): PuppetConfig {
+  const gender: "m" | "f" = Math.random() > 0.5 ? "m" : "f";
+  const headsForGender = HEADS.filter((h) => h.gender === gender);
   return {
-    head: pick(HEADS).id,
+    gender,
+    tone: pick(TONES).id,
+    head: pick(headsForGender).id,
     headwear: pick(HATS).id,
     outfit: pick(OUTFITS).id,
     lower: pick(LOWERS).id,
@@ -114,6 +180,14 @@ export function PuppetLab() {
   const [selected, setSelected] = useState(1);
   const [burst, setBurst] = useState<Burst | null>(null);
 
+  // Modular preview states (scaffolded for face layer controls)
+  const [faceShape, setFaceShape] = useState("round");
+  const [eyes, setEyes] = useState("normal");
+  const [brows, setBrows] = useState("thin");
+  const [nose, setNose] = useState("small");
+  const [expression, setExpression] = useState("smile");
+  const [hair, setHair] = useState("sidepart");
+
   const trigger = (index: number, anim: Burst["anim"]) => {
     const token = Date.now() + Math.random();
     setSelected(index);
@@ -125,11 +199,25 @@ export function PuppetLab() {
 
   const update = (patch: Partial<PuppetConfig>) => {
     setCast((current) =>
-      current.map((config, index) => (index === selected ? { ...config, ...patch } : config)),
+      current.map((config, index) => {
+        if (index !== selected) return config;
+        const next = { ...config, ...patch };
+        // When gender changes, ensure head matches gender
+        if (patch.gender && patch.gender !== config.gender) {
+          const availableHeads = HEADS.filter((h) => h.gender === patch.gender);
+          if (!availableHeads.some((h) => h.id === next.head)) {
+            next.head = availableHeads[0].id;
+          }
+        }
+        return next;
+      }),
     );
   };
 
   const active = cast[selected] ?? cast[0];
+  const activeGender = active.gender ?? (active.head.startsWith("f_") ? "f" : "m");
+  const availableHeads = HEADS.filter((h) => h.gender === activeGender);
+  const hairOptions = activeGender === "m" ? HAIR_M : HAIR_F;
 
   return (
     <div className="h-dvh overflow-x-hidden overflow-y-auto text-[#24170f]">
@@ -187,8 +275,8 @@ export function PuppetLab() {
           />
           <div className="grid min-h-[300px] w-full flex-1 grid-cols-3 items-stretch gap-1 sm:min-h-[420px] sm:gap-4">
             {cast.map((config, index) => {
-              const tone = toneForHead(puppetRig, config.head);
               const anim: PuppetAnim = burst?.index === index ? burst.anim : "idle";
+              const currentToneHex = TONES.find((t) => t.id === config.tone)?.hex ?? "#C48854";
               return (
                 <div key={index} className="flex h-full min-w-0 flex-col">
                   <button
@@ -204,8 +292,12 @@ export function PuppetLab() {
                   </button>
                   <p className="truncate px-1 text-center text-[11px] font-semibold text-[#4a3018] sm:text-xs">
                     {headLabel(config.head)}
-                    <span className="mt-0.5 block font-normal text-[#6d5138]">
-                      kulit {TONE_LABEL[tone] ?? tone}
+                    <span className="mt-0.5 flex items-center justify-center gap-1.5 font-normal text-[#6d5138]">
+                      <span
+                        className="inline-block h-2.5 w-2.5 rounded-full border border-[#2a1c12]/30 shadow-xs"
+                        style={{ backgroundColor: currentToneHex }}
+                      />
+                      Tone {config.tone.replace("tone_", "")}
                     </span>
                   </p>
                 </div>
@@ -268,30 +360,120 @@ export function PuppetLab() {
             </PaperButton>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Jantina (Gender) */}
+            <Picker
+              legend="Jantina"
+              options={GENDERS}
+              value={activeGender}
+              onChange={(gender) => update({ gender })}
+            />
+
+            {/* Warna kulit (Skin Tone Swatches) */}
+            <fieldset className="min-w-0">
+              <legend className="mb-1.5 font-tally text-[11px] tracking-[0.16em] text-[#6a4a32] uppercase">
+                Warna kulit
+              </legend>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {TONES.map((t) => {
+                  const isCurrent = active.tone === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      aria-label={`Warna kulit ${t.label}`}
+                      aria-pressed={isCurrent}
+                      onClick={() => update({ tone: t.id })}
+                      className={`relative h-8 w-8 rounded-full border border-black/20 transition-all ${
+                        isCurrent
+                          ? "scale-115 ring-2 ring-[#9a3b2f] ring-offset-2 shadow-md"
+                          : "opacity-85 hover:opacity-100 hover:scale-105"
+                      }`}
+                      style={{ backgroundColor: t.hex }}
+                    />
+                  );
+                })}
+              </div>
+            </fieldset>
+
+            {/* Kepala (Head Shape / Silhouette) */}
             <Picker
               legend="Kepala"
-              options={HEADS}
+              options={availableHeads}
               value={active.head}
               onChange={(head) => update({ head })}
             />
+
+            {/* Hiasan kepala */}
             <Picker
               legend="Hiasan kepala"
               options={HATS}
               value={active.headwear}
               onChange={(headwear) => update({ headwear })}
             />
+
+            {/* Baju */}
             <Picker
               legend="Baju"
               options={OUTFITS}
               value={active.outfit}
               onChange={(outfit) => update({ outfit })}
             />
+
+            {/* Kain */}
             <Picker
               legend="Kain"
               options={LOWERS}
               value={active.lower}
               onChange={(lower) => update({ lower })}
+            />
+
+            {/* Bentuk Muka (Modular control scaffold) */}
+            <Picker
+              legend="Bentuk Muka"
+              options={FACE_SHAPES}
+              value={faceShape}
+              onChange={setFaceShape}
+            />
+
+            {/* Mata (Modular control scaffold) */}
+            <Picker
+              legend="Mata"
+              options={EYES}
+              value={eyes}
+              onChange={setEyes}
+            />
+
+            {/* Kening (Modular control scaffold) */}
+            <Picker
+              legend="Kening"
+              options={BROWS}
+              value={brows}
+              onChange={setBrows}
+            />
+
+            {/* Hidung (Modular control scaffold) */}
+            <Picker
+              legend="Hidung"
+              options={NOSES}
+              value={nose}
+              onChange={setNose}
+            />
+
+            {/* Ekspresi (Modular control scaffold) */}
+            <Picker
+              legend="Ekspresi"
+              options={EXPRESSIONS}
+              value={expression}
+              onChange={setExpression}
+            />
+
+            {/* Rambut (Modular control scaffold) */}
+            <Picker
+              legend="Rambut"
+              options={hairOptions}
+              value={hair}
+              onChange={setHair}
             />
           </div>
         </section>

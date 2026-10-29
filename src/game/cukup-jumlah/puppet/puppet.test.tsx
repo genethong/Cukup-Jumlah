@@ -19,11 +19,11 @@ import {
 } from "./layout";
 import {
   puppetRig,
-  toneForHead,
   type HeadId,
   type HeadwearId,
   type LowerId,
   type OutfitId,
+  type ToneId,
 } from "./loadRig";
 import { beatPhase, createMotionState, sampleMotion, stepSpring } from "./motion";
 
@@ -39,23 +39,25 @@ describe("puppet rig", () => {
       songket_samping: -110,
       sarong: -60,
     });
-    expect(puppetRig.skin.head_tone).toEqual({
-      chinese_man: "light",
-      kadazan_man: "tan",
-      malay_woman: "golden",
-      malay_man: "medium_brown",
-      indian_woman: "dark",
-    });
+    expect(Object.keys(puppetRig.skin.tones)).toEqual([
+      "tone_1",
+      "tone_2",
+      "tone_3",
+      "tone_4",
+      "tone_5",
+      "tone_6",
+      "tone_7",
+      "tone_8",
+    ]);
     expect(puppetRig.placement.mirror.toLowerCase()).toContain("right");
     expect(puppetRig.sleeves.batik_shirt).toEqual(["upper"]);
     expect(puppetRig.sleeves.baju_melayu).toEqual(["upper", "forearm"]);
-    // The kit's recorded size lagged the resized sleeve file. The shipped rig matches the bitmap.
     expect(puppetRig.parts["sleeves/batik_shirt_upper"].size).toEqual([122, 150]);
   });
 
   it("places songkok, samping, and sarong from the rig offsets", () => {
-    expect(headwearOrigin(puppetRig, "malay_man", "songkok", 0, 0)).toEqual([74, -484]);
-    expect(headwearOrigin(puppetRig, "chinese_man", "baseball_cap", 0, 0)[1]).toBe(-548);
+    expect(headwearOrigin(puppetRig, "m_head_1", "songkok", 0, 0)).toEqual([74, -484]);
+    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-548);
     expect(lowerOrigin(puppetRig, "songket_samping", 0, 0)).toEqual([29, 394]);
     expect(lowerOrigin(puppetRig, "sarong", 0, 0)).toEqual([-9, 444]);
   });
@@ -117,7 +119,7 @@ describe("puppet rig", () => {
     expect(files.every((file) => file.endsWith(".webp"))).toBe(true);
     expect(fs.existsSync(path.join(root, "base"))).toBe(false);
     const bytes = files.reduce((sum, file) => sum + fs.statSync(file).size, 0);
-    expect(bytes).toBeLessThan(1_200_000);
+    expect(bytes).toBeLessThan(1_500_000);
 
     for (const [id, part] of Object.entries(puppetRig.parts)) {
       if (id.startsWith("base/")) continue;
@@ -157,11 +159,12 @@ describe("puppet motion", () => {
 });
 
 describe("PuppetAvatar", () => {
-  it("paints the head's tone, outfit sleeves, and no untinted base sheet", () => {
+  it("paints the configured tone, outfit sleeves, and no untinted base sheet", () => {
     const { container } = render(
       <PuppetAvatar
         config={{
-          head: "malay_man",
+          head: "m_head_1",
+          tone: "tone_6",
           headwear: "songkok",
           outfit: "baju_melayu",
           lower: "songket_samping",
@@ -170,22 +173,22 @@ describe("PuppetAvatar", () => {
       />,
     );
     const srcs = imageSrcs(container);
-    expect(srcs.some((src) => src.includes("/puppet/heads/malay_man.webp"))).toBe(true);
-    expect(srcs.some((src) => src.includes("/puppet/base_tones/medium_brown/torso.webp"))).toBe(
+    expect(srcs.some((src) => src.includes("/puppet/heads/m_head_1.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("/puppet/base_tones/tone_6/torso.webp"))).toBe(
       true,
     );
-    expect(toneForHead(puppetRig, "malay_man")).toBe("medium_brown");
     expect(srcs.some((src) => src.includes("/puppet/sleeves/baju_melayu_upper.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("/puppet/sleeves/baju_melayu_forearm.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("/puppet/trousers/baju_melayu.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("/puppet/base/"))).toBe(false);
   });
 
-  it("follows a dark head and skips a forearm sleeve the outfit does not have", () => {
+  it("follows an independent tone and skips a forearm sleeve the outfit does not have", () => {
     const { container } = render(
       <PuppetAvatar
         config={{
-          head: "indian_woman",
+          head: "f_head_2",
+          tone: "tone_7",
           headwear: null,
           outfit: "batik_shirt",
           lower: "sarong",
@@ -194,7 +197,7 @@ describe("PuppetAvatar", () => {
       />,
     );
     const srcs = imageSrcs(container);
-    expect(srcs.some((src) => src.includes("/puppet/base_tones/dark/leg.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("/puppet/base_tones/tone_7/leg.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("batik_shirt_upper.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("/puppet/trousers/batik_shirt.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("batik_shirt_forearm"))).toBe(false);
@@ -205,7 +208,8 @@ describe("PuppetAvatar", () => {
     const { container } = render(
       <PuppetAvatar
         config={{
-          head: "malay_woman",
+          head: "f_head_1",
+          tone: "tone_4",
           headwear: "tudung",
           outfit: "baju_kurung",
           lower: "sarong",
@@ -231,7 +235,8 @@ function walk(dir: string): string[] {
 }
 
 const _types = {
-  head: "malay_man" satisfies HeadId,
+  head: "m_head_1" satisfies HeadId,
+  tone: "tone_1" satisfies ToneId,
   hat: "tudung" satisfies HeadwearId,
   outfit: "baju_kurung" satisfies OutfitId,
   lower: "sarong" satisfies LowerId,

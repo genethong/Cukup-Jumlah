@@ -3,7 +3,7 @@ import { PuppetAvatar } from "./PuppetAvatar";
 import type { HeadId, LowerId, OutfitId, PuppetConfig } from "./loadRig";
 import type { PuppetPose } from "./motion";
 
-const HEADS: HeadId[] = ["malay_man", "malay_woman", "chinese_man", "indian_woman", "kadazan_man"];
+const HEADS: HeadId[] = ["m_head_1", "m_head_2", "m_head_3", "f_head_1", "f_head_2"];
 const OUTFITS: OutfitId[] = ["baju_melayu", "batik_shirt", "business_suit", "baju_kurung"];
 const LOWERS: (LowerId | null)[] = [null, "songket_samping", "sarong"];
 
@@ -39,7 +39,7 @@ function Grid({ pose }: { pose?: PuppetPose }) {
             LOWERS.map((lower) => (
               <Cell
                 key={`${head}-${outfit}-${lower ?? "none"}`}
-                config={{ head, headwear: null, outfit, lower }}
+                config={{ head, tone: "tone_4", headwear: null, outfit, lower }}
                 pose={pose}
               />
             )),

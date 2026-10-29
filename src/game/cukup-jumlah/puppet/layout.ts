@@ -310,7 +310,11 @@ export function measureFrame(rig: PuppetRig): PuppetFrame {
     addBox(0, 0, outfit.size[0], outfit.size[1]);
   }
 
-  for (const headId of Object.keys(rig.skin.head_tone)) {
+  const headIds = Object.keys(rig.parts)
+    .filter((k) => k.startsWith("heads/"))
+    .map((k) => k.replace(/^heads\//, ""));
+
+  for (const headId of headIds) {
     const head = rig.parts[`heads/${headId}`];
     const [hx, hy] = headOrigin(rig, headId, 0, 0);
     addBox(hx, hy, head.size[0], head.size[1]);

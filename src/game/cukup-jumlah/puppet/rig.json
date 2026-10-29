@@ -97,8 +97,8 @@
     ]
    }
   },
-  "heads/malay_man": {
-   "file": "parts/heads/malay_man.webp",
+  "heads/m_head_1": {
+   "file": "parts/heads/m_head_1.webp",
    "size": [
     404,
     512
@@ -127,8 +127,8 @@
     79
    ]
   },
-  "heads/chinese_man": {
-   "file": "parts/heads/chinese_man.webp",
+  "heads/m_head_2": {
+   "file": "parts/heads/m_head_2.webp",
    "size": [
     369,
     512
@@ -157,8 +157,8 @@
     94
    ]
   },
-  "heads/indian_woman": {
-   "file": "parts/heads/indian_woman.webp",
+  "heads/f_head_2": {
+   "file": "parts/heads/f_head_2.webp",
    "size": [
     367,
     512
@@ -187,8 +187,8 @@
     46
    ]
   },
-  "heads/malay_woman": {
-   "file": "parts/heads/malay_woman.webp",
+  "heads/f_head_1": {
+   "file": "parts/heads/f_head_1.webp",
    "size": [
     398,
     512
@@ -217,8 +217,8 @@
     89
    ]
   },
-  "heads/kadazan_man": {
-   "file": "parts/heads/kadazan_man.webp",
+  "heads/m_head_3": {
+   "file": "parts/heads/m_head_3.webp",
    "size": [
     395,
     512
@@ -573,38 +573,46 @@
  "skin": {
   "method": "HSV mask recolour: pixels with hue 12-45deg, sat 0.22-0.78, value>0.30, excluding a circle of radius pin_radius around every pin (brass), get RGB multiplied by target/source_mean_skin. Pre-baked results in parts/base_tones/<tone>/. Outfits and sleeves are NOT tinted (their gold/orange batik falls in the same hue range); their small skin neck tab is hidden under the head.",
   "tones": {
-   "light": [
+   "tone_1": [
+    246,
+    218,
+    186
+   ],
+   "tone_2": [
     236,
     196,
     154
    ],
-   "tan": [
+   "tone_3": [
     214,
     164,
     114
    ],
-   "golden": [
+   "tone_4": [
     196,
     136,
     84
    ],
-   "medium_brown": [
+   "tone_5": [
+    178,
+    118,
+    71
+   ],
+   "tone_6": [
     160,
     100,
     58
    ],
-   "dark": [
+   "tone_7": [
     118,
     70,
     40
+   ],
+   "tone_8": [
+    86,
+    52,
+    32
    ]
-  },
-  "head_tone": {
-   "chinese_man": "light",
-   "kadazan_man": "tan",
-   "malay_woman": "golden",
-   "malay_man": "medium_brown",
-   "indian_woman": "dark"
   },
   "base_tones_dir": "parts/base_tones/<tone>/<part>.webp"
  },
