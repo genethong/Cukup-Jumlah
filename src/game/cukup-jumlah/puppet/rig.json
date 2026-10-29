@@ -606,12 +606,12 @@
     "sleeves/tshirt_upper": {
       "file": "parts/sleeves/tshirt_upper.webp",
       "size": [
-        106,
+        98,
         140
       ],
       "pins": {
         "shoulder": [
-          53,
+          49,
           41
         ]
       }
@@ -620,7 +620,7 @@
       "file": "parts/sleeves/hoodie_upper.webp",
       "size": [
         106,
-        205
+        225
       ],
       "pins": {
         "shoulder": [
@@ -638,7 +638,7 @@
       "pins": {
         "elbow": [
           57,
-          17
+          25
         ]
       }
     },
