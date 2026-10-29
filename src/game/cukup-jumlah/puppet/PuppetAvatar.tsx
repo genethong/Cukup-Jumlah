@@ -9,8 +9,10 @@ import {
 } from "./loadRig";
 import {
   figureBottomY,
+  footSoleY,
   headOrigin,
   headwearOrigin,
+  lowerHemY,
   lowerOrigin,
   measureFrame,
   visualHipDeg,
@@ -159,7 +161,10 @@ function Leg({
           left: leg.pins.ankle[0] - leg.pins.hip[0],
           top: leg.pins.ankle[1] - leg.pins.hip[1],
           transformOrigin: "0 0",
-          transform: `rotate(var(--foot-${side.toLowerCase()}))`,
+          // Flip about the ankle so the toes point outward. The right leg is
+          // already mirrored about the hip, and this second flip cancels that
+          // for the foot only — right toes stay to the right.
+          transform: `rotate(var(--foot-${side.toLowerCase()})) scaleX(-1)`,
           willChange: "transform",
         }}
       >
@@ -262,15 +267,16 @@ const restVars = {
   "--shoulder-r": `${visualShoulderDeg("R", 0)}deg`,
   "--elbow-l": "0deg",
   "--elbow-r": "0deg",
-  "--hip-l": "0deg",
-  "--hip-r": "0deg",
+  "--hip-l": `${visualHipDeg("L", 0)}deg`,
+  "--hip-r": `${visualHipDeg("R", 0)}deg`,
   "--foot-l": "0deg",
   "--foot-r": "0deg",
 } as CSSProperties;
 
 /**
  * Jointed paper puppet. Parts rotate about the brass pins in rig.json.
- * Right-side limbs, sleeves, and the right foot are mirrored, matching `placement.mirror`.
+ * Right arm and right leg mirror about their shoulder and hip pins.
+ * Each foot also flips about its ankle so the toes point outward.
  * Draw order follows rig.draw_order: legs, sarong, torso, outfit, samping, head, headwear, arms.
  */
 export function PuppetAvatar({
@@ -300,7 +306,7 @@ export function PuppetAvatar({
     : null;
   const lower = config.lower ? rig.parts[`lower/${config.lower}`] : null;
   const lowerAt = config.lower ? lowerOrigin(rig, config.lower, torsoX, torsoY) : null;
-  const figureBottom = figureBottomY(rig, config.lower, torsoX, torsoY);
+  const figureBottom = figureBottomY(rig, torsoY);
   const rodTop = figureBottom - 6;
   const rodHeight = Math.max(28, Math.min(78, frame.height - rodTop - 10));
 
@@ -328,7 +334,7 @@ export function PuppetAvatar({
             style={{
               position: "absolute",
               left: hipX,
-              top: hipY + 348,
+              top: footSoleY(rig, torsoY) - 10,
               width: 300,
               height: 42,
               transform: "translate(-50%, 0) scaleX(var(--shadow))",
@@ -369,13 +375,12 @@ export function PuppetAvatar({
             <Leg side="L" tone={tone} torsoX={torsoX} torsoY={torsoY} />
             <Leg side="R" tone={tone} torsoX={torsoX} torsoY={torsoY} />
             {config.lower === "sarong" && lower && lowerAt && (
-              <img
-                src={rigFileUrl(lower.file)}
-                alt=""
-                draggable={false}
-                width={lower.size[0]}
-                height={lower.size[1]}
-                style={sheetStyle(lowerAt[0], lowerAt[1], lower.size, 4)}
+              <ClippedLower
+                file={lower.file}
+                origin={lowerAt}
+                size={lower.size}
+                hemY={lowerHemY(rig, "sarong", torsoY)}
+                z={4}
               />
             )}
             <img
@@ -395,13 +400,12 @@ export function PuppetAvatar({
               style={sheetStyle(torsoX, torsoY, outfit.size, 6)}
             />
             {config.lower === "songket_samping" && lower && lowerAt && (
-              <img
-                src={rigFileUrl(lower.file)}
-                alt=""
-                draggable={false}
-                width={lower.size[0]}
-                height={lower.size[1]}
-                style={sheetStyle(lowerAt[0], lowerAt[1], lower.size, 7)}
+              <ClippedLower
+                file={lower.file}
+                origin={lowerAt}
+                size={lower.size}
+                hemY={lowerHemY(rig, "songket_samping", torsoY)}
+                z={7}
               />
             )}
             <div
@@ -439,6 +443,53 @@ export function PuppetAvatar({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ClippedLower({
+  file,
+  origin,
+  size,
+  hemY,
+  z,
+}: {
+  file: string;
+  origin: [number, number];
+  size: [number, number];
+  hemY: number;
+  z: number;
+}) {
+  const height = Math.min(size[1], Math.max(0, hemY - origin[1]));
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: origin[0],
+        top: origin[1],
+        width: size[0],
+        height,
+        overflow: "hidden",
+        zIndex: z,
+        pointerEvents: "none",
+      }}
+    >
+      <img
+        src={rigFileUrl(file)}
+        alt=""
+        draggable={false}
+        width={size[0]}
+        height={size[1]}
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: size[0],
+          height: size[1],
+          maxWidth: "none",
+          userSelect: "none",
+        }}
+      />
     </div>
   );
 }

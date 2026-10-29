@@ -5,10 +5,15 @@ import { describe, expect, it } from "vitest";
 import { PuppetAvatar } from "./PuppetAvatar";
 import {
   REST_ARM_OUT_DEG,
+  REST_HIP_OUT_DEG,
   elbowWorld,
+  footPointWorld,
   headwearOrigin,
+  legJointY,
+  lowerHemY,
   lowerOrigin,
   rotateClockwise,
+  visualHipDeg,
 } from "./layout";
 import {
   puppetRig,
@@ -51,6 +56,39 @@ describe("puppet rig", () => {
     expect(headwearOrigin(puppetRig, "chinese_man", "baseball_cap", 0, 0)[1]).toBe(-548);
     expect(lowerOrigin(puppetRig, "songket_samping", 0, 0)).toEqual([29, 394]);
     expect(lowerOrigin(puppetRig, "sarong", 0, 0)).toEqual([-9, 444]);
+  });
+
+  it("stands with outward toes and hems cut at the ankle and knee", () => {
+    const toe: [number, number] = [120, 12];
+    const leftAnkle = footPointWorld(puppetRig, "L", 0, 0, 0, [0, 0]);
+    const leftToe = footPointWorld(puppetRig, "L", 0, 0, 0, toe);
+    const rightAnkle = footPointWorld(puppetRig, "R", 0, 0, 0, [0, 0]);
+    const rightToe = footPointWorld(puppetRig, "R", 0, 0, 0, toe);
+    const hipL = puppetRig.parts["base/torso"].pins.hip_L[0];
+    const hipR = puppetRig.parts["base/torso"].pins.hip_R[0];
+
+    expect(leftToe[0]).toBeLessThan(leftAnkle[0]);
+    expect(rightToe[0]).toBeGreaterThan(rightAnkle[0]);
+    expect(leftAnkle[0]).toBeLessThan(hipL);
+    expect(rightAnkle[0]).toBeGreaterThan(hipR);
+    expect(rightAnkle[0] - leftAnkle[0]).toBeGreaterThan(hipR - hipL);
+
+    const swayed = footPointWorld(puppetRig, "L", 0, 0, -1.2, [0, 0]);
+    expect(swayed[0]).toBeLessThan(hipL);
+    expect(visualHipDeg("L", -1.2)).toBeGreaterThan(0);
+    expect(visualHipDeg("R", -1.2)).toBeLessThan(0);
+    expect(REST_HIP_OUT_DEG).toBeGreaterThan(0);
+
+    const ankle = legJointY(puppetRig, "ankle", 0);
+    const knee = legJointY(puppetRig, "knee", 0);
+    const hipY = puppetRig.parts["base/torso"].pins.hip_L[1];
+    const sarongHem = lowerHemY(puppetRig, "sarong", 0);
+    const sampingHem = lowerHemY(puppetRig, "songket_samping", 0);
+    expect(sarongHem).toBeLessThan(ankle);
+    expect(sarongHem).toBeGreaterThan(knee);
+    expect(sampingHem).toBeGreaterThan(hipY);
+    expect(sampingHem).toBeLessThan(knee);
+    expect(sampingHem).toBeLessThan(ankle);
   });
 
   it("angles both arms outward from the rest pose", () => {
@@ -105,6 +143,12 @@ describe("puppet motion", () => {
     const idle = sampleMotion(state, 1.2, 1 / 60, "idle", undefined, 125, false);
     expect(Math.abs(idle.sway)).toBeGreaterThan(0);
     expect(Math.abs(idle.sway)).toBeLessThan(20);
+
+    const motion = createMotionState();
+    for (let t = 0; t < 6; t += 1 / 30) {
+      const sample = sampleMotion(motion, t, 1 / 30, "idle", undefined, 125, false);
+      expect(REST_HIP_OUT_DEG + sample.hip).toBeGreaterThan(0);
+    }
   });
 });
 

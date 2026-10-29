@@ -236,9 +236,14 @@ export function PuppetLab() {
                 Watak rekaan, bukan orang sebenar
               </p>
             </div>
-            <p className="flex items-center gap-2 text-xs font-bold tracking-wide text-[#5c4030] uppercase">
-              <BeatLamp />
-              {PUPPET_BPM} BPM
+            <p className="flex items-center gap-3 text-xs font-bold tracking-wide text-[#5c4030] uppercase">
+              <Link to="/dev" search={{ lab: "puppet", sheet: 1 }} className="underline">
+                Semua kombinasi
+              </Link>
+              <span className="inline-flex items-center gap-2">
+                <BeatLamp />
+                {PUPPET_BPM} BPM
+              </span>
             </p>
           </div>
 
