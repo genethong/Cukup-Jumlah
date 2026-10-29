@@ -336,27 +336,29 @@ Rig changes: replace `sleeves{}` with `tops{<id>:{sleeves:[...], trousers_defaul
 **Provenance:** the exact prompts used for the existing parts **could not be recovered**. They are not in `build_v2.py`, `preview_v2.py`, `build.py`, the logs on the box, or the repo; the scripts only list the source image hashes. The templates below are **canonical reconstructions** written to reproduce the look.
 
 ### Validated working prompt for Songkok (Task 1 Calibration)
-- **Tool constraint:** The generation pipeline accepts at most 3 reference image paths (`ImagePaths`). When generating parts, attach the 3 most essential references (e.g. `parts/songkok.png`, `02_kit_sheet.jpg`, and `parts/torso.png` for pin references).
-- **Final calibrated prompt (matches flat cardstock, brass rivets, cut-out filigree & drop shadow):**
+- **Tool constraint:** The generation pipeline accepts at most 3 reference image paths (`ImagePaths`). When generating parts, attach the 3 most essential references (e.g. `parts/songkok.png`, `02_kit_sheet.jpg`, and the calibrated test shape).
+- **Final validated prompt (strictly matched silhouette, near-black #0A0805 to #141010, awan larat curly vine filigree, half-size brass pins, and drop shadow):**
 ```
-STYLE: handcrafted layered paper-and-felt cut-out puppet piece, inspired by Malaysian wayang kulit craft, cute chibi proportions. Flat matte cardstock paper craft, strictly 2D flat silhouette, visible fine paper/felt fibre grain, slightly rounded die-cut edges with a thin darker cut edge bevel showing card thickness. Flat graphic paper cut-out layers with delicate soft drop shadows cast between stacked layers. Decorative details are layered paper filigree and metallic gold foil cut-outs: songket diamond openwork lattice, paper lace. Warm earthy palette (dark black-brown cardstock #0A0805 #201A12, songket gold #C18D48, brass #9D7A2F). Round brass split-pin rivets #9D7A2F with tiny specular highlights at joints and fasteners. Soft top-left studio lighting. Strictly FRONT VIEW, perfectly flat 2D, symmetric, centred, single isolated puppet piece.
+STYLE: handcrafted layered paper-and-felt cut-out puppet piece, inspired by Malaysian wayang kulit craft, cute chibi proportions. Flat matte cardstock paper craft, strictly 2D flat silhouette, visible fine paper fibre grain, slightly rounded die-cut edges with a thin darker cut edge bevel showing card thickness. Flat graphic paper cut-out layers with delicate soft drop shadows cast between stacked layers. Decorative details are layered paper filigree and metallic gold foil cut-outs: delicate curly vine and floral scroll filigree (Malay awan larat openwork lace), paper lace. Warm earthy palette (near-black matte cardstock #0A0805 to #141010, songket gold #C18D48, brass #9D7A2F). Small, neat round brass split-pin rivets #9D7A2F with tiny specular highlights. Soft top-left studio lighting. Strictly FRONT VIEW, perfectly flat 2D, symmetric, centred, single isolated puppet piece.
 BACKGROUND: perfectly flat pure chroma green #00FF00, no gradient, no floor, no cast shadow on background.
-NOT photoreal, NOT 3D render, NOT plastic, NOT clay, NOT cloth, NOT velvet, no realistic fabric shading, no fabric wrinkles, no perspective, no embossing, no embroidery, no text, no watermark, no green colors on the piece itself.
+NOT photoreal, NOT 3D render, NOT plastic, NOT clay, NOT cloth, NOT velvet, no realistic fabric shading, no fabric wrinkles, no perspective, no brown tones on cap body, no embossing, no embroidery, no geometric diamond lattice, no text, no watermark, no green colors on the piece itself.
 Match the exact style, materials, and construction of the attached reference image parts/songkok.png.
 
-SUBJECT: One flat songkok puppet hat piece. Made of two stacked cut-paper cardstock layers:
-1. Base layer: A flat, solid matte dark black-brown cardstock shape (#0A0805 #201A12) with a clean die-cut edge bevel and completely flat matte shading (zero fabric texture, zero velvet sheen, zero 3D curves).
-2. Filigree band layer: A separate horizontal cut-out paper filigree band of metallic gold songket diamond lace (#C18D48 #98733B) layered across the lower portion. This band is a delicate cut-paper filigree openwork lattice (cut-out paper holes showing the dark base beneath), NOT embossed, NOT embroidered. It casts a soft gentle drop shadow onto the dark base cardstock beneath it.
-3. Fasteners: Exactly TWO round metallic brass split-pin rivets (#9D7A2F with a tiny specular dot highlight #FEF8CB), one pin at the far-left end of the gold band and one pin at the far-right end of the gold band, visibly securing the paper band to the cardstock cap.
+The silhouette must follow the reference part's outline exactly.
+
+SUBJECT: One flat songkok puppet hat piece matching the reference silhouette:
+1. Silhouette & Base layer: The hat silhouette must strictly follow the reference part's outline with its gentle curved top rim and slightly upward-tapering sides. Made of flat solid matte near-black cardstock (#0A0805 to #141010, strictly near-black, NOT brown) with a clean die-cut cut edge bevel and flat matte 2D shading (zero fabric texture, zero velvet sheen, zero 3D curves).
+2. Filigree band layer: A separate horizontal cut-out paper filigree band of metallic gold foil (#C18D48 #98733B) layered across the lower portion. The filigree pattern is delicate curly vine and floral spiral openwork lace (Malay awan larat motif with curling organic vines and flower scrolls, NOT geometric diamond lattice). It is an openwork paper cut-out casting a subtle soft drop shadow onto the near-black cardstock base beneath it.
+3. Fasteners: Exactly TWO small round metallic brass split-pin rivets (#9D7A2F with tiny specular dot highlights #FEF8CB), sized small (half the size of normal joints, small neat dots about 3% of hat width), one neat rivet at the far-left end of the gold vine band and one neat rivet at the far-right end of the gold vine band, securing the filigree band to the cardstock cap.
 ```
 - **Key prompt calibration takeaways for all subsequent parts:**
-  1. Explicitly designate **layers** (e.g., base layer vs overlay filigree layer) and stipulate **soft drop shadows between stacked layers**.
-  2. For decorative trims and bands, mandate **"cut-out paper filigree openwork lattice, NOT embossed, NOT embroidered"**.
-  3. Specify **"round metallic brass split-pin rivets #9D7A2F with specular dot highlight #FEF8CB"** with explicit coordinate/anchor points (e.g., at both ends of a band or at limb joint pivots).
-  4. Specify **"completely flat matte cardstock paper, die-cut bevel edge, zero fabric texture, zero velvet sheen, zero 3D curvature"** to prevent realistic textile rendering.
+  1. **Mandatory outline rule:** `"The silhouette must follow the reference part's outline exactly."`
+  2. **Layering & Shadows:** Explicitly designate layered cut-out cardstock and mandate delicate soft drop shadows cast onto the underlying base layer.
+  3. **Cut-Out vs Embossing:** Mandate `"cut-out paper filigree openwork lace/lattice, NOT embossed, NOT embroidered"`.
+  4. **Fasteners & Rivets:** Specify `"round metallic brass split-pin rivets #9D7A2F with tiny specular dot highlight #FEF8CB"` with exact positions and proportions.
+  5. **Cardstock Matte Strictness:** Stipulate `"completely flat solid matte cardstock, die-cut cut edge bevel, zero fabric texture, zero velvet sheen, zero 3D curves"` with exact target hex ranges to eliminate photoreal cloth or 3D shading.
 - **Calibration artifacts:**
-  - `docs/art/puppet/00_calibration_songkok_comparison_v2.png`: Side-by-side comparison between original and calibrated test 2.
-  - `docs/art/puppet/00_calibration_songkok_triptych.png`: 3-way progression showing original reference vs test 1 (flawed) vs test 2 (matched).
+  - `docs/art/puppet/00_calibration_songkok_comparison_v3.png`: Side-by-side comparison between original reference and calibrated test 3.
 
 ### Master style block (paste into every prompt, unchanged)
 ```
