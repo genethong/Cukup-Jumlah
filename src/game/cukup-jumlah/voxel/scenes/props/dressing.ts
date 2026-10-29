@@ -1,7 +1,7 @@
 import type { VoxelGrid } from "../../core/grid";
 import { Slot } from "../../core/palette";
 import { recipe } from "../../core/recipe";
-import { stampText } from "../text";
+import { stampText, stampTiny } from "../text";
 
 export function buildLampPost(): VoxelGrid {
   return recipe([8, 28, 8], (v) => {
@@ -43,34 +43,15 @@ export function buildGrassTuft(flower = false): VoxelGrid {
   });
 }
 
+/** Generic red-and-cream striped pennant, facing the camera. Not a national flag. */
 export function buildFlag(): VoxelGrid {
-  return recipe([2, 32, 24], (v) => {
-    v.box([0, 0, 11], [2, 30, 13], Slot.POLE);
-    v.sphere([1, 30.2, 12], 1.2, Slot.POLE);
-    for (let y = 0; y < 14; y++) {
-      const stripeRed = (13 - y) % 2 === 0;
-      for (let z = 0; z < 22; z++) {
-        const canton = z < 11 && y >= 7;
-        const slot = canton ? Slot.FLAG_BLUE : stripeRed ? Slot.FLAG_RED : Slot.FLAG_WHITE;
-        v.set(0, 16 + y, z, slot);
-      }
-    }
-    for (let y = 8; y <= 12; y++) {
-      for (let z = 2; z <= 8; z++) {
-        const dx = z - 5.2;
-        const dy = y - 10;
-        const d = dx * dx + dy * dy;
-        if (d <= 9.5 && d >= 3.2) v.set(0, 16 + y, z, Slot.FLAG_YELLOW);
-      }
-    }
-    for (const [z, y] of [
-      [8, 10],
-      [9, 10],
-      [7, 10],
-      [8, 11],
-      [8, 9],
-    ] as const) {
-      v.set(0, 16 + y, z, Slot.FLAG_YELLOW);
+  return recipe([16, 28, 2], (v) => {
+    v.box([12, 0, 0], [14, 22, 2], Slot.POLE);
+    v.sphere([13, 22.4, 1], 1.1, Slot.POLE);
+    for (let y = 0; y < 8; y++) {
+      const span = 11 - y;
+      const slot = y % 2 === 0 ? Slot.BUNTING_A : Slot.BUNTING_B;
+      for (let x = 0; x < span; x++) v.set(12 - span + x, 15 + y, 0, slot);
     }
   });
 }
@@ -110,21 +91,21 @@ export function buildBin(): VoxelGrid {
 }
 
 export function buildPhotographer(): VoxelGrid {
-  return recipe([22, 24, 14], (v) => {
-    v.box([7, 0, 4], [10, 3, 8], Slot.SHOE);
-    v.box([12, 0, 4], [15, 3, 8], Slot.SHOE);
-    v.box([7, 3, 4], [10, 9, 8], Slot.JEANS);
-    v.box([12, 3, 4], [15, 9, 8], Slot.JEANS);
-    v.box([6, 8, 3], [16, 16, 9], Slot.VEST);
-    v.box([1, 9, 9], [21, 15, 11], Slot.BADGE);
-    stampText(v, "MEDIA", 1, 10, 11, Slot.BADGE_TEXT);
-    v.box([3, 9, 4], [6, 14, 7], Slot.VEST);
-    v.box([16, 9, 4], [19, 15, 8], Slot.VEST);
-    v.ellipsoid([11, 18.2, 6], [3.3, 3.1, 3.1], Slot.SKIN_1);
-    v.cone("y", [11, 21.2, 6], 3.6, 3.2, 2.2, Slot.CAM);
-    v.box([7, 12, 9], [15, 16, 12], Slot.CAM);
-    v.cylinder("z", [11, 14, 11], 1.5, 1.4, Slot.CAM);
-    v.box([9, 13, 11], [13, 16, 13], Slot.CAM_FLASH);
+  return recipe([22, 22, 12], (v) => {
+    v.box([7, 0, 3], [10, 3, 7], Slot.SHOE);
+    v.box([12, 0, 3], [15, 3, 7], Slot.SHOE);
+    v.box([7, 3, 3], [10, 8, 7], Slot.JEANS);
+    v.box([12, 3, 3], [15, 8, 7], Slot.JEANS);
+    v.box([5, 7, 2], [17, 14, 8], Slot.VEST);
+    v.box([2, 9, 3], [5, 13, 6], Slot.VEST);
+    v.box([17, 9, 3], [20, 13, 6], Slot.VEST);
+    v.box([3, 8, 8], [19, 12, 9], Slot.BADGE);
+    stampTiny(v, "MEDIA", 2, 9, 9, Slot.BADGE_TEXT);
+    v.ellipsoid([11, 16, 5], [2.7, 2.5, 2.5], Slot.SKIN_1);
+    v.cone("y", [11, 18.8, 5], 3.0, 2.7, 1.6, Slot.CAM);
+    v.box([8, 13, 7], [14, 16, 10], Slot.CAM);
+    v.cylinder("z", [11, 14.4, 9.4], 1.25, 1.1, Slot.METAL_DARK);
+    v.box([9, 14, 10], [13, 16, 11], Slot.CAM_FLASH);
   });
 }
 

@@ -1,4 +1,4 @@
-import { BufferGeometry, Mesh } from "three";
+import { BufferGeometry, Group, Mesh } from "three";
 import type { CandidateProfile } from "../../types";
 import type { VoxelModelInstance } from "../voxelBuilder";
 import { createAnimator } from "./anim";
@@ -118,14 +118,13 @@ function applyGeo(mesh: Mesh, geo: BufferGeometry) {
 export function buildVoxelYB(profile: CandidateProfile = heroFallback()): VoxelYb {
   const skel = createSkeleton();
   const animator = createAnimator(skel);
-  const noodles = createNoodleSpray(skel.handR);
 
   const torsoAnchor: Vec3 = [0, HIP_Y, 0];
-  const shoulderR = voxelShared(torsoAnchor, TORSO_ANCHOR, [8, 23, 15]);
-  const shoulderL = voxelShared(torsoAnchor, TORSO_ANCHOR, [26, 23, 15]);
-  const neckAt = voxelShared(torsoAnchor, TORSO_ANCHOR, [17, 25, 14]);
-  const hipL = voxelShared(torsoAnchor, TORSO_ANCHOR, [17 + 8, 7, 14]);
-  const hipR = voxelShared(torsoAnchor, TORSO_ANCHOR, [17 - 8, 7, 14]);
+  const shoulderR = voxelShared(torsoAnchor, TORSO_ANCHOR, [12, 21, 17]);
+  const shoulderL = voxelShared(torsoAnchor, TORSO_ANCHOR, [28, 21, 17]);
+  const neckAt = voxelShared(torsoAnchor, TORSO_ANCHOR, [20, 24, 16]);
+  const hipL = voxelShared(torsoAnchor, TORSO_ANCHOR, [28, 10, 16]);
+  const hipR = voxelShared(torsoAnchor, TORSO_ANCHOR, [12, 10, 16]);
 
   skel.hips.position.set(0, HIP_Y * VS, 0);
   skel.torso.position.set(0, 0, 0);
@@ -137,14 +136,20 @@ export function buildVoxelYB(profile: CandidateProfile = heroFallback()): VoxelY
   skel.handR.position.set((1.4 - ARM_R_ANCHOR[0]) * VS, (31.2 - ARM_R_ANCHOR[1]) * VS, (10.2 - ARM_R_ANCHOR[2]) * VS);
   skel.handL.position.set((9.2 - ARM_L_ANCHOR[0]) * VS, (6.4 - ARM_L_ANCHOR[1]) * VS, (13 - ARM_L_ANCHOR[2]) * VS);
 
-  const hatRest = { songkok: 14, cap: 13, tudung: 10, none: 14 } as const;
+  const hatRest = { songkok: 16, cap: 15, tudung: 9, none: 16 } as const;
   skel.hat.position.set(0, hatRest.songkok * VS, 0);
 
-  const spatula = ensureMesh(skel.handR, "spatula");
-  spatula.position.set(0.02, -0.04, 0.04);
-  spatula.rotation.set(-0.15, 0.2, 0.55);
+  const spatulaPivot = new Group();
+  spatulaPivot.position.set(0.02, -0.02, 0.02);
+  spatulaPivot.rotation.set(-0.2, 0.15, 0.7);
+  skel.handR.add(spatulaPivot);
+  const spatula = ensureMesh(spatulaPivot, "spatula");
   const spat = makeGeometry(buildSpatula(), SPATULA_ANCHOR, paletteFor(HERO_LOOK), () => false);
   applyGeo(spatula, spat.geo);
+  const bladeTip = new Group();
+  bladeTip.position.set(0.02, 0.66, 0.02);
+  spatula.add(bladeTip);
+  const noodles = createNoodleSpray(bladeTip);
 
   let look = lookFromProfile(profile);
   const stats = { voxels: 0, triangles: spat.triangles };
@@ -227,7 +232,7 @@ export function buildVoxelYB(profile: CandidateProfile = heroFallback()): VoxelY
     const showHair = look.headwear === "none";
     skel.hair.visible = showHair;
     skel.hat.visible = look.headwear !== "none";
-    const lift = look.headwear === "tudung" ? 10 : look.headwear === "cap" ? 13 : 14;
+    const lift = look.headwear === "tudung" ? 9 : look.headwear === "cap" ? 15 : 16;
     skel.hat.position.set(0, lift * VS, look.headwear === "tudung" ? -1 * VS : 0);
 
     skel.face.visible = false;
@@ -250,7 +255,7 @@ export function buildVoxelYB(profile: CandidateProfile = heroFallback()): VoxelY
         (showHair ? parts.hair.triangles : 0) +
         (look.headwear !== "none" ? parts.hat.triangles : 0) +
         spat.triangles +
-        noodles.count * 12;
+        noodles.triangles;
   };
 
   rebuild(look, true);

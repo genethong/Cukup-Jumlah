@@ -126,6 +126,8 @@ export function VoxelPocPreview() {
     flare.position.set(diorama.flash[0], diorama.flash[1], diorama.flash[2]);
     scene.add(flare);
 
+    yb.group.rotation.y = 0.42;
+
     const blob = blobShadow();
     blob.position.set(diorama.feet[0], diorama.feet[1] + 0.012, diorama.feet[2]);
     blob.visible = tier === "low";
@@ -135,7 +137,7 @@ export function VoxelPocPreview() {
     box.expandByObject(yb.group);
     if (tier === "high") fitShadow(lights.sun, box);
 
-    const look = new Vector3(diorama.feet[0] + 0.95, diorama.feet[1] + 0.72, diorama.feet[2] - 0.05);
+    const look = new Vector3(diorama.feet[0] + 0.62, diorama.feet[1] + 1.02, diorama.feet[2]);
 
     const renderer = new WebGLRenderer({
       antialias: true,
@@ -146,8 +148,8 @@ export function VoxelPocPreview() {
     configureRenderer(renderer, tier);
     host.replaceChildren(renderer.domElement);
 
-    const cam = createIsoCamera(1, 3.6);
-    placeIsoCamera(cam, look, 11.5, -16, 26);
+    const cam = createIsoCamera(1, 3.2);
+    placeIsoCamera(cam, look, 9, -24, 22);
 
     const fit = () => {
       const w = host.clientWidth || window.innerWidth;
@@ -256,7 +258,7 @@ export function VoxelYbPortrait({
     host.replaceChildren(renderer.domElement);
 
     const cam = createIsoCamera(1, 2.35);
-    placeIsoCamera(cam, new Vector3(0, 0.95, 0), 8, -48, 28);
+    placeIsoCamera(cam, new Vector3(0, 0.9, 0), 7.2, -24, 16);
     const onPointer = () => model.triggerHop();
     renderer.domElement.addEventListener("pointerdown", onPointer);
 

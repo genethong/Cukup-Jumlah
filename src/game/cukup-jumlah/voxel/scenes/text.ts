@@ -31,7 +31,32 @@ export function textWidth(text: string): number {
   return Math.max(0, w - 1);
 }
 
-/** Stamp text on a +Z-facing layer. Returns the width in voxels. */
+/** Stamp a 3-row label. Fits a vest badge. */
+export function stampTiny(v: Sculpt, text: string, x: number, y: number, z: number, slot: number): number {
+  const tiny: Record<string, string[]> = {
+    M: ["1001", "1111", "1001"],
+    E: ["111", "110", "111"],
+    D: ["110", "101", "110"],
+    I: ["1", "1", "1"],
+    A: ["111", "101", "111"],
+  };
+  let cursor = x;
+  for (const ch of text) {
+    const rows = tiny[ch];
+    if (!rows) {
+      cursor += 2;
+      continue;
+    }
+    for (let r = 0; r < rows.length; r++) {
+      const row = rows[r];
+      for (let c = 0; c < row.length; c++) {
+        if (row[c] === "1") v.set(cursor + c, y + (rows.length - 1 - r), z, slot);
+      }
+    }
+    cursor += rows[0].length + 1;
+  }
+  return cursor - x;
+}
 export function stampText(v: Sculpt, text: string, x: number, y: number, z: number, slot: number): number {
   let cursor = x;
   for (const ch of text) {

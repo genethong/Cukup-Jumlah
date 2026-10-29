@@ -129,7 +129,7 @@ export function buildMamakCorner(): MamakCorner {
   add(buildStool(), [106, TILE_TOP, 46]);
   add(buildBin(), [112, TILE_TOP, 36]);
   add(buildMenuBoard(), [100, TILE_TOP + 8, 40]);
-  const photoAt: Vec3 = [84, TILE_TOP, 72];
+  const photoAt: Vec3 = [74, TILE_TOP, 76];
   add(buildPhotographer(), photoAt);
 
   const group = new Group();
@@ -163,6 +163,6 @@ export function buildMamakCorner(): MamakCorner {
     feet: w([32, TILE_TOP, 64]),
     lamp: w([10, TILE_TOP + 23, 50]),
     stallLight: w([stallAt[0] + 32, TILE_TOP + 18, stallAt[2] + 22]),
-    flash: w([photoAt[0] + 11, TILE_TOP + 17, photoAt[2] + 13]),
+    flash: w([photoAt[0] + 11, TILE_TOP + 15, photoAt[2] + 10]),
   };
 }

@@ -2,12 +2,12 @@ import type { Vec3, VoxelGrid } from "../../core/grid";
 import { Slot } from "../../core/palette";
 import { recipe } from "../../core/recipe";
 
-export const SONGKOK_ANCHOR: Vec3 = [12, 0, 11];
+export const SONGKOK_ANCHOR: Vec3 = [11, 0, 9];
 
 export function buildSongkok(): VoxelGrid {
-  return recipe([24, 12, 22], (v) => {
-    v.cone("y", [12, 5.6, 11], 10.5, 9.4, 5.3, Slot.SONGKOK);
-    v.paintSurface("+y", { min: [7, 7, 12], max: [18, 12, 20] }, Slot.SONGKOK_HI);
+  return recipe([22, 8, 18], (v) => {
+    v.cone("y", [11, 3.5, 9], 8.6, 7.8, 3.2, Slot.SONGKOK);
+    v.paintSurface("+y", { min: [7, 4, 8], max: [15, 8, 14] }, Slot.SONGKOK_HI);
   });
 }
 
