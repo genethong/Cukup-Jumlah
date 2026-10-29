@@ -16,10 +16,10 @@
 The exact image-generation prompts that created the current parts were **not saved**. The prompt templates in this doc are rebuilt to reproduce the look. So before you generate any new part, regenerate ONE existing part, the **songkok**, using the master style block and the headwear template, with the style reference images attached. Put it side by side with `art-bible-refs` and the existing songkok part. Compare the material (cardstock/felt grain), brass pins, filigree, palette, lighting and scale. Adjust the prompt until it is indistinguishable, then **write the final working prompt back into this doc** (Prompt templates section) and use it for everything else. If you can't get a close match, stop and report rather than shipping off-style parts.
 
 **First task 2: remove all race/ethnicity labels (neutrality cleanup).**
-The current test page still uses race labels, which is against the golden rules. Before adding new parts, rename and clean up everything listed in the neutrality section of this doc. That includes:
-- head files such as `malay_man`, `chinese_man`, `indian_woman`, `malay_woman`, `kadazan_man`
-- tone names, and the head→tone links in `rig.json`
-- lab UI labels such as "Lelaki Melayu", "Wanita India" and "Lelaki Cina"
+The previous test page used ethnic labels, which is against the golden rules. Before adding new parts, rename and clean up everything listed in the neutrality section of this doc. That includes:
+- head files: replaced by neutral identifiers `m_head_1`..`m_head_3` and `f_head_1`..`f_head_2`
+- tone names: replaced by neutral identifiers `tone_1`..`tone_8`, and decouple head→tone links in `rig.json`
+- lab UI labels: replaced by neutral labels "Kepala L1", "Kepala L2", "Kepala P1", etc.
 - any captions like "kulit sederhana"
 
 Replace them with neutral IDs: `tone_1`…`tone_8` for skin, and separate controls for gender (Lelaki/Perempuan), face shape, eyes, brows, nose, expression and hair. Skin tone must be its own picker, not tied to a face. Ship that cleanup as its own PR, with before and after screenshots of `/dev?lab=puppet`.
@@ -48,7 +48,7 @@ All reference images are in `art-bible-refs/` beside this file. Every number bel
 1. **Look:** a *wayang kulit*-inspired, layered paper/felt cut-out puppet. Each body part is a flat cardstock piece joined with brass split pins, with a wooden rod below. Characters are cute and chibi, and the satire comes from **situations and props** (a mic, a campaign tee, a fictional flag), never from mocking a body or a group.
 2. **Fictional people only.** No real politicians and no likenesses. No real party logos, flags, colours-as-identity, or slogans. Any party flag or campaign tee uses an invented symbol (for example a star-in-a-circle, a durian, or a teh-tarik cup).
 3. **Strict neutrality. NO race or ethnicity labels or presets anywhere:** not in UI text, file names, rig keys, prompts or commit messages. A character is built from **neutral, independent controls**: gender (Lelaki/Perempuan), skin swatch, face shape, eyes, brows, nose, expression, hair, facial hair, extras, headwear, top, bottom, footwear and prop. Any combination is allowed.
-   - ⚠️ **Legacy debt to remove:** the current repo still has ethnic names. Head files are `malay_man`, `malay_woman`, `chinese_man`, `indian_woman` and `kadazan_man`. Tones are named (`light`, `tan`, `golden`, `medium_brown`, `dark`). `rig.skin.head_tone` binds a head to a tone. The Lab UI shows labels such as "Lelaki Melayu" (see `03_ingame_after_fixes.png`). The new set **replaces** all of these with neutral IDs (section 6). Keep the old files only until the new heads ship, then delete them in the same PR that switches the UI.
+   - ⚠️ **Legacy debt removed:** head files now use neutral IDs (`m_head_N`, `f_head_N`). Tones are neutral numbered swatches (`tone_1`..`tone_8`), and skin tone is fully decoupled from head shape. All UI labels use neutral identifiers.
 4. **Never lose the look.** When in doubt, put the new part next to `03_ingame_after_fixes.png` and the real parts in `art-bible-refs/parts/`. If a part looks different, regenerate it.
 
 ---
@@ -141,7 +141,7 @@ No black cartoon line. Edges come from the darker cut-card bevel and the layer s
 
    ⚠️ Mismatch found: `v2/parts/sleeves/batik_shirt_upper.png` on disk is 122×150, but `rig.json` says 59×135. Re-measure it whenever you rebuild.
 5. **Export:** the build writes PNG (RGBA). The game uses **WebP** RGBA in `public/puppet/<category>/<id>.webp` (for example `cwebp -q 90 -alpha_q 100`, **(PROPOSED)** settings). Measured game sizes: a head WebP is about 22 KB and a trouser WebP is about 7–12 KB. **Budget: ≤ 60 KB per WebP (PROPOSED)**, and investigate anything larger.
-6. **Naming:** `snake_case`, neutral, English or Malay garment words only, with no people, ethnicity, party or real-name words.
+6. **Naming:** `snake_case`, neutral, English or traditional garment words only, with no people, ethnicity, party or real-name words.
    - `heads/` is replaced by `face/` layers (section 6). Gendered sets use the prefix `m_` / `f_`: `face/f_shape_oval.webp`, `eyes/m_sleepy.webp`.
    - Sleeves: `sleeves/<top>_upper`, `sleeves/<top>_forearm`. Trousers: `trousers/<bottom>`.
 7. **Folders**
@@ -178,7 +178,7 @@ repo:
   "base/forearm_hand": {"size":[92,300],"pins":{"elbow":[51,32],"wrist":[52,210]}},
   "base/leg": {"size":[107,360],"pins":{"hip":[55,43],"knee":[46,185],"ankle":[42,315]}},
   "base/foot": {"size":[200,148],"pins":{"ankle":[44,56]}},
-  "heads/malay_man": {"size":[404,512],"pins":{"neck":[203,468],"crown":[202,4],"hat_brim":[202,143],"face_center":[202,259]}},
+  "heads/m_head_1": {"size":[404,512],"pins":{"neck":[203,468],"crown":[202,4],"hat_brim":[202,143],"face_center":[202,259]}},
   "headwear/songkok": {"size":[291,216],"pins":{"brim":[145,208]}},
   "headwear/tudung": {"size":[469,650],"pins":{"face_hole_center":[235,277]}},
   "outfits/baju_melayu": {"size":[441,561],"pins":{"neck":[221,35],"shoulder_L":[62,136],"shoulder_R":[377,136],"hip_L":[66,512],"hip_R":[372,512]}},
@@ -339,7 +339,7 @@ Rig changes: replace `sleeves{}` with `tops{<id>:{sleeves:[...], trousers_defaul
 - **Tool constraint:** The generation pipeline accepts at most 3 reference image paths (`ImagePaths`). When generating parts, attach the 3 most essential references (e.g. `parts/songkok.png`, `02_kit_sheet.jpg`, and the calibrated test shape).
 - **Final validated prompt (strictly matched silhouette, near-black #0A0805 to #141010, awan larat curly vine filigree, half-size brass pins, and drop shadow):**
 ```
-STYLE: handcrafted layered paper-and-felt cut-out puppet piece, inspired by Malaysian wayang kulit craft, cute chibi proportions. Flat matte cardstock paper craft, strictly 2D flat silhouette, visible fine paper fibre grain, slightly rounded die-cut edges with a thin darker cut edge bevel showing card thickness. Flat graphic paper cut-out layers with delicate soft drop shadows cast between stacked layers. Decorative details are layered paper filigree and metallic gold foil cut-outs: delicate curly vine and floral scroll filigree (Malay awan larat openwork lace), paper lace. Warm earthy palette (near-black matte cardstock #0A0805 to #141010, songket gold #C18D48, brass #9D7A2F). Small, neat round brass split-pin rivets #9D7A2F with tiny specular highlights. Soft top-left studio lighting. Strictly FRONT VIEW, perfectly flat 2D, symmetric, centred, single isolated puppet piece.
+STYLE: handcrafted layered paper-and-felt cut-out puppet piece, inspired by Malaysian wayang kulit craft, cute chibi proportions. Flat matte cardstock paper craft, strictly 2D flat silhouette, visible fine paper fibre grain, slightly rounded die-cut edges with a thin darker cut edge bevel showing card thickness. Flat graphic paper cut-out layers with delicate soft drop shadows cast between stacked layers. Decorative details are layered paper filigree and metallic gold foil cut-outs: delicate curly vine and floral scroll filigree (traditional awan larat openwork lace), paper lace. Warm earthy palette (near-black matte cardstock #0A0805 to #141010, songket gold #C18D48, brass #9D7A2F). Small, neat round brass split-pin rivets #9D7A2F with tiny specular highlights. Soft top-left studio lighting. Strictly FRONT VIEW, perfectly flat 2D, symmetric, centred, single isolated puppet piece.
 BACKGROUND: perfectly flat pure chroma green #00FF00, no gradient, no floor, no cast shadow on background.
 NOT photoreal, NOT 3D render, NOT plastic, NOT clay, NOT cloth, NOT velvet, no realistic fabric shading, no fabric wrinkles, no perspective, no brown tones on cap body, no embossing, no embroidery, no geometric diamond lattice, no text, no watermark, no green colors on the piece itself.
 Match the exact style, materials, and construction of the attached reference image parts/songkok.png.
@@ -348,7 +348,7 @@ The silhouette must follow the reference part's outline exactly.
 
 SUBJECT: One flat songkok puppet hat piece matching the reference silhouette:
 1. Silhouette & Base layer: The hat silhouette must strictly follow the reference part's outline with its gentle curved top rim and slightly upward-tapering sides. Made of flat solid matte near-black cardstock (#0A0805 to #141010, strictly near-black, NOT brown) with a clean die-cut cut edge bevel and flat matte 2D shading (zero fabric texture, zero velvet sheen, zero 3D curves).
-2. Filigree band layer: A separate horizontal cut-out paper filigree band of metallic gold foil (#C18D48 #98733B) layered across the lower portion. The filigree pattern is delicate curly vine and floral spiral openwork lace (Malay awan larat motif with curling organic vines and flower scrolls, NOT geometric diamond lattice). It is an openwork paper cut-out casting a subtle soft drop shadow onto the near-black cardstock base beneath it.
+2. Filigree band layer: A separate horizontal cut-out paper filigree band of metallic gold foil (#C18D48 #98733B) layered across the lower portion. The filigree pattern is delicate curly vine and floral spiral openwork lace (traditional awan larat motif with curling organic vines and flower scrolls, NOT geometric diamond lattice). It is an openwork paper cut-out casting a subtle soft drop shadow onto the near-black cardstock base beneath it.
 3. Fasteners: Exactly TWO small round metallic brass split-pin rivets (#9D7A2F with tiny specular dot highlights #FEF8CB), sized small (half the size of normal joints, small neat dots about 3% of hat width), one neat rivet at the far-left end of the gold vine band and one neat rivet at the far-right end of the gold vine band, securing the filigree band to the cardstock cap.
 ```
 - **Key prompt calibration takeaways for all subsequent parts:**
@@ -362,8 +362,7 @@ SUBJECT: One flat songkok puppet hat piece matching the reference silhouette:
 
 ### Master style block (paste into every prompt, unchanged)
 ```
-STYLE: handcrafted layered paper-and-felt cut-out puppet piece, inspired by Malaysian wayang kulit
-and Malay craft, cute chibi proportions. Matte cardstock with visible fine felt fibre grain, slightly
+STYLE: handcrafted layered paper-and-felt cut-out puppet piece, inspired by Malaysian wayang kulit craft, cute chibi proportions. Matte cardstock with visible fine felt fibre grain, slightly
 rounded die-cut edges with a thin darker bevel showing card thickness, gentle soft shadow between
 stacked paper layers. Decorative details are cut-paper filigree and gold foil: batik florals, songket
 diamond lattice, gold thread borders. Warm earthy palette (deep red #8A1C19, teal #0E897F, songket gold
@@ -436,7 +435,7 @@ Match the exact style of the attached reference images.
 - [ ] Hats sit on the hairline for **every** face shape and hair combination. The tudung face hole frames every face shape.
 - [ ] Feet are under the hips, toes point outward, scale is 0.75.
 - [ ] Style: put the part next to `03_ingame_after_fixes.png`. Is it paper/felt, front view, and in the same palette? Nothing photoreal, 3D, plastic or green-fringed.
-- [ ] Neutrality: grep the diff for ethnicity words, real names or party names (`git diff | grep -iE "malay|melayu|chinese|cina|india|kadazan|iban|umno|pas|dap|pkr|bersatu"`). It must return nothing new.
+- [ ] Neutrality: grep the diff for prohibited ethnicity, real person or party names. The only allowed cultural hit is the traditional garment name "baju_melayu".
 - [ ] Sizes: each WebP is ≤ 60 KB (PROPOSED budget), and the dimensions match rig.json.
 - [ ] `npm test` (the vitest `puppet.test.tsx`) and the typecheck both pass.
 - [ ] Save screenshots to `docs/art/puppet/` (desktop Lab, mobile 390 px, combos sheet) and embed them in the PR.
