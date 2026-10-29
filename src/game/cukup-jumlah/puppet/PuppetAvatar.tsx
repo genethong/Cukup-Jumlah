@@ -1,0 +1,458 @@
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
+import {
+  puppetRig,
+  rigFileUrl,
+  toneForHead,
+  tonePartUrl,
+  type BasePartName,
+  type PuppetConfig,
+} from "./loadRig";
+import {
+  figureBottomY,
+  headOrigin,
+  headwearOrigin,
+  lowerOrigin,
+  measureFrame,
+  visualHipDeg,
+  visualShoulderDeg,
+  type PuppetFrame,
+  type Side,
+} from "./layout";
+import {
+  createMotionState,
+  PUPPET_BPM,
+  sampleMotion,
+  type PuppetAnim,
+  type PuppetPose,
+} from "./motion";
+
+const rig = puppetRig;
+const frame: PuppetFrame = measureFrame(rig);
+
+export type PuppetAvatarProps = {
+  config: PuppetConfig;
+  /** Added on top of the idle springs. Outward-positive degrees for the limbs. */
+  pose?: PuppetPose;
+  /** `idle` sways, dangles, and bobs at 125 BPM. `hop` cheers. `rod-wiggle` flicks the stick. */
+  anim?: PuppetAnim;
+  bpm?: number;
+  className?: string;
+  label?: string;
+};
+
+function PinnedImage({ partKey, pin, src }: { partKey: string; pin: string; src: string }) {
+  const part = rig.parts[partKey];
+  const pivot = part?.pins[pin];
+  if (!part || !pivot) return null;
+  return (
+    <img
+      src={src}
+      alt=""
+      draggable={false}
+      width={part.size[0]}
+      height={part.size[1]}
+      style={{
+        position: "absolute",
+        left: -pivot[0],
+        top: -pivot[1],
+        width: part.size[0],
+        height: part.size[1],
+        maxWidth: "none",
+        pointerEvents: "none",
+        userSelect: "none",
+      }}
+    />
+  );
+}
+
+function Arm({
+  side,
+  outfit,
+  tone,
+  torsoX,
+  torsoY,
+}: {
+  side: Side;
+  outfit: PuppetConfig["outfit"];
+  tone: string;
+  torsoX: number;
+  torsoY: number;
+}) {
+  const upper = rig.parts["base/upper_arm"];
+  const shoulder = rig.parts["base/torso"].pins[side === "L" ? "shoulder_L" : "shoulder_R"];
+  const sleeves = rig.sleeves[outfit] ?? [];
+  const mirror = side === "R";
+  const limb = (name: BasePartName) => tonePartUrl(tone, name);
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: torsoX + shoulder[0],
+        top: torsoY + shoulder[1],
+        transformOrigin: "0 0",
+        transform: `rotate(var(--shoulder-${side.toLowerCase()}))${mirror ? " scaleX(-1)" : ""}`,
+        zIndex: side === "L" ? 9 : 10,
+        willChange: "transform",
+      }}
+    >
+      <PinnedImage partKey="base/upper_arm" pin="shoulder" src={limb("upper_arm")} />
+      {sleeves.includes("upper") && (
+        <PinnedImage
+          partKey={`sleeves/${outfit}_upper`}
+          pin="shoulder"
+          src={rigFileUrl(rig.parts[`sleeves/${outfit}_upper`].file)}
+        />
+      )}
+      <div
+        style={{
+          position: "absolute",
+          left: upper.pins.elbow[0] - upper.pins.shoulder[0],
+          top: upper.pins.elbow[1] - upper.pins.shoulder[1],
+          transformOrigin: "0 0",
+          transform: `rotate(var(--elbow-${side.toLowerCase()}))`,
+          willChange: "transform",
+        }}
+      >
+        <PinnedImage partKey="base/forearm_hand" pin="elbow" src={limb("forearm_hand")} />
+        {sleeves.includes("forearm") && (
+          <PinnedImage
+            partKey={`sleeves/${outfit}_forearm`}
+            pin="elbow"
+            src={rigFileUrl(rig.parts[`sleeves/${outfit}_forearm`].file)}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Leg({
+  side,
+  tone,
+  torsoX,
+  torsoY,
+}: {
+  side: Side;
+  tone: string;
+  torsoX: number;
+  torsoY: number;
+}) {
+  const leg = rig.parts["base/leg"];
+  const hip = rig.parts["base/torso"].pins[side === "L" ? "hip_L" : "hip_R"];
+  const mirror = side === "R";
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: torsoX + hip[0],
+        top: torsoY + hip[1],
+        transformOrigin: "0 0",
+        transform: `rotate(var(--hip-${side.toLowerCase()}))${mirror ? " scaleX(-1)" : ""}`,
+        zIndex: side === "L" ? 2 : 3,
+        willChange: "transform",
+      }}
+    >
+      <PinnedImage partKey="base/leg" pin="hip" src={tonePartUrl(tone, "leg")} />
+      <div
+        style={{
+          position: "absolute",
+          left: leg.pins.ankle[0] - leg.pins.hip[0],
+          top: leg.pins.ankle[1] - leg.pins.hip[1],
+          transformOrigin: "0 0",
+          transform: `rotate(var(--foot-${side.toLowerCase()}))`,
+          willChange: "transform",
+        }}
+      >
+        <PinnedImage partKey="base/foot" pin="ankle" src={tonePartUrl(tone, "foot")} />
+      </div>
+    </div>
+  );
+}
+
+function useScale(frameWidth: number, frameHeight: number) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.2);
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const measure = () => {
+      const rect = el.getBoundingClientRect();
+      const next = Math.min(rect.width / frameWidth, rect.height / frameHeight);
+      if (next > 0) setScale(next);
+    };
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [frameWidth, frameHeight]);
+  return { boxRef, scale };
+}
+
+function usePuppetMotion(
+  ref: RefObject<HTMLDivElement | null>,
+  anim: PuppetAnim,
+  pose: PuppetPose | undefined,
+  bpm: number,
+) {
+  const live = useRef({ anim, pose, bpm });
+  live.current = { anim, pose, bpm };
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const reduced =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (typeof requestAnimationFrame !== "function") return;
+    const state = createMotionState();
+    let raf = 0;
+    let last = performance.now();
+
+    const paint = (now: number) => {
+      const dt = Math.min(0.034, (now - last) / 1000);
+      last = now;
+      const current = live.current;
+      const sample = sampleMotion(
+        state,
+        now / 1000,
+        dt,
+        current.anim,
+        current.pose,
+        current.bpm,
+        reduced,
+      );
+      el.style.setProperty("--bob", `${sample.bob.toFixed(2)}px`);
+      el.style.setProperty("--sway", `${sample.sway.toFixed(3)}deg`);
+      el.style.setProperty("--head", `${sample.head.toFixed(3)}deg`);
+      el.style.setProperty("--rod", `${sample.rod.toFixed(3)}deg`);
+      el.style.setProperty("--sx", sample.squashX.toFixed(4));
+      el.style.setProperty("--sy", sample.squashY.toFixed(4));
+      el.style.setProperty("--shadow", sample.shadow.toFixed(3));
+      el.style.setProperty(
+        "--shoulder-l",
+        `${visualShoulderDeg("L", sample.shoulder).toFixed(3)}deg`,
+      );
+      el.style.setProperty(
+        "--shoulder-r",
+        `${visualShoulderDeg("R", sample.shoulder).toFixed(3)}deg`,
+      );
+      el.style.setProperty("--elbow-l", `${sample.elbow.toFixed(3)}deg`);
+      el.style.setProperty("--elbow-r", `${sample.elbow.toFixed(3)}deg`);
+      el.style.setProperty("--hip-l", `${visualHipDeg("L", sample.hip).toFixed(3)}deg`);
+      el.style.setProperty("--hip-r", `${visualHipDeg("R", sample.hip).toFixed(3)}deg`);
+      el.style.setProperty("--foot-l", `${sample.foot.toFixed(3)}deg`);
+      el.style.setProperty("--foot-r", `${sample.foot.toFixed(3)}deg`);
+      raf = requestAnimationFrame(paint);
+    };
+    raf = requestAnimationFrame(paint);
+    return () => cancelAnimationFrame(raf);
+  }, [ref]);
+}
+
+const restVars = {
+  "--bob": "0px",
+  "--sway": "0deg",
+  "--head": "0deg",
+  "--rod": "0deg",
+  "--sx": "1",
+  "--sy": "1",
+  "--shadow": "1",
+  "--shoulder-l": `${visualShoulderDeg("L", 0)}deg`,
+  "--shoulder-r": `${visualShoulderDeg("R", 0)}deg`,
+  "--elbow-l": "0deg",
+  "--elbow-r": "0deg",
+  "--hip-l": "0deg",
+  "--hip-r": "0deg",
+  "--foot-l": "0deg",
+  "--foot-r": "0deg",
+} as CSSProperties;
+
+/**
+ * Jointed paper puppet. Parts rotate about the brass pins in rig.json.
+ * Right-side limbs, sleeves, and the right foot are mirrored, matching `placement.mirror`.
+ * Draw order follows rig.draw_order: legs, sarong, torso, outfit, samping, head, headwear, arms.
+ */
+export function PuppetAvatar({
+  config,
+  pose,
+  anim = "idle",
+  bpm = PUPPET_BPM,
+  className,
+  label,
+}: PuppetAvatarProps) {
+  const { boxRef, scale } = useScale(frame.width, frame.height);
+  const motionRef = useRef<HTMLDivElement>(null);
+  usePuppetMotion(motionRef, anim, pose, bpm);
+
+  const tone = toneForHead(rig, config.head);
+  const { torsoX, torsoY, hipX, hipY } = frame;
+  const neck = rig.parts["base/torso"].pins.neck;
+  const neckX = torsoX + neck[0];
+  const neckY = torsoY + neck[1];
+  const [headX, headY] = headOrigin(rig, config.head, torsoX, torsoY);
+  const head = rig.parts[`heads/${config.head}`];
+  const outfit = rig.parts[`outfits/${config.outfit}`];
+  const torso = rig.parts["base/torso"];
+  const hat = config.headwear ? rig.parts[`headwear/${config.headwear}`] : null;
+  const hatOrigin = config.headwear
+    ? headwearOrigin(rig, config.head, config.headwear, torsoX, torsoY)
+    : null;
+  const lower = config.lower ? rig.parts[`lower/${config.lower}`] : null;
+  const lowerAt = config.lower ? lowerOrigin(rig, config.lower, torsoX, torsoY) : null;
+  const figureBottom = figureBottomY(rig, config.lower, torsoX, torsoY);
+  const rodTop = figureBottom - 6;
+  const rodHeight = Math.max(28, Math.min(78, frame.height - rodTop - 10));
+
+  return (
+    <div
+      ref={boxRef}
+      className={className ? `relative h-full w-full ${className}` : "relative h-full w-full"}
+      role={label ? "img" : undefined}
+      aria-label={label}
+      aria-hidden={label ? undefined : true}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          width: frame.width,
+          height: frame.height,
+          transform: `translate(-50%, -50%) scale(${scale})`,
+        }}
+      >
+        <div ref={motionRef} className="absolute inset-0" style={restVars}>
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              left: hipX,
+              top: hipY + 348,
+              width: 300,
+              height: 42,
+              transform: "translate(-50%, 0) scaleX(var(--shadow))",
+              borderRadius: "50%",
+              background:
+                "radial-gradient(ellipse, rgba(72, 40, 16, 0.38), rgba(72, 40, 16, 0) 70%)",
+              zIndex: 0,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              transformOrigin: `${hipX}px ${hipY}px`,
+              transform: "translateY(var(--bob)) rotate(var(--sway)) scale(var(--sx), var(--sy))",
+              filter: "drop-shadow(0 18px 12px rgba(62, 34, 14, 0.32))",
+              willChange: "transform",
+            }}
+          >
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                left: hipX - 9,
+                top: rodTop,
+                width: 18,
+                height: rodHeight,
+                transformOrigin: `9px 8px`,
+                transform: "rotate(var(--rod))",
+                zIndex: 1,
+                borderRadius: 999,
+                background:
+                  "linear-gradient(90deg, #4a301c 0%, #a56b3c 38%, #e6c79a 50%, #8a5a32 62%, #3d2618 100%)",
+                boxShadow:
+                  "inset 0 0 0 1px rgba(40, 22, 10, 0.28), 0 10px 0 0 #6b4424",
+              }}
+            />
+            <Leg side="L" tone={tone} torsoX={torsoX} torsoY={torsoY} />
+            <Leg side="R" tone={tone} torsoX={torsoX} torsoY={torsoY} />
+            {config.lower === "sarong" && lower && lowerAt && (
+              <img
+                src={rigFileUrl(lower.file)}
+                alt=""
+                draggable={false}
+                width={lower.size[0]}
+                height={lower.size[1]}
+                style={sheetStyle(lowerAt[0], lowerAt[1], lower.size, 4)}
+              />
+            )}
+            <img
+              src={tonePartUrl(tone, "torso")}
+              alt=""
+              draggable={false}
+              width={torso.size[0]}
+              height={torso.size[1]}
+              style={sheetStyle(torsoX, torsoY, torso.size, 5)}
+            />
+            <img
+              src={rigFileUrl(outfit.file)}
+              alt=""
+              draggable={false}
+              width={outfit.size[0]}
+              height={outfit.size[1]}
+              style={sheetStyle(torsoX, torsoY, outfit.size, 6)}
+            />
+            {config.lower === "songket_samping" && lower && lowerAt && (
+              <img
+                src={rigFileUrl(lower.file)}
+                alt=""
+                draggable={false}
+                width={lower.size[0]}
+                height={lower.size[1]}
+                style={sheetStyle(lowerAt[0], lowerAt[1], lower.size, 7)}
+              />
+            )}
+            <div
+              style={{
+                position: "absolute",
+                left: neckX,
+                top: neckY,
+                transformOrigin: "0 0",
+                transform: "rotate(var(--head))",
+                zIndex: 8,
+                willChange: "transform",
+              }}
+            >
+              <img
+                src={rigFileUrl(head.file)}
+                alt=""
+                draggable={false}
+                width={head.size[0]}
+                height={head.size[1]}
+                style={sheetStyle(headX - neckX, headY - neckY, head.size, 1)}
+              />
+              {hat && hatOrigin && config.headwear && (
+                <img
+                  src={rigFileUrl(hat.file)}
+                  alt=""
+                  draggable={false}
+                  width={hat.size[0]}
+                  height={hat.size[1]}
+                  style={sheetStyle(hatOrigin[0] - neckX, hatOrigin[1] - neckY, hat.size, 2)}
+                />
+              )}
+            </div>
+            <Arm side="L" outfit={config.outfit} tone={tone} torsoX={torsoX} torsoY={torsoY} />
+            <Arm side="R" outfit={config.outfit} tone={tone} torsoX={torsoX} torsoY={torsoY} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function sheetStyle(x: number, y: number, size: [number, number], z: number): CSSProperties {
+  return {
+    position: "absolute",
+    left: x,
+    top: y,
+    width: size[0],
+    height: size[1],
+    maxWidth: "none",
+    pointerEvents: "none",
+    userSelect: "none",
+    zIndex: z,
+  };
+}

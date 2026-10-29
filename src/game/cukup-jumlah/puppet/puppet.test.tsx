@@ -1,0 +1,172 @@
+import fs from "node:fs";
+import path from "node:path";
+import { render } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { PuppetAvatar } from "./PuppetAvatar";
+import {
+  REST_ARM_OUT_DEG,
+  elbowWorld,
+  headwearOrigin,
+  lowerOrigin,
+  rotateClockwise,
+} from "./layout";
+import {
+  puppetRig,
+  toneForHead,
+  type HeadId,
+  type HeadwearId,
+  type LowerId,
+  type OutfitId,
+} from "./loadRig";
+import { beatPhase, createMotionState, sampleMotion, stepSpring } from "./motion";
+
+describe("puppet rig", () => {
+  it("keeps v2 offsets, tones, and the right-side mirror as the source of truth", () => {
+    expect(puppetRig.placement.headwear_brim_dy).toEqual({
+      songkok: 15,
+      ketayap: 15,
+      turban: 55,
+      baseball_cap: 70,
+    });
+    expect(puppetRig.placement.lower_waist_dy_from_hips).toEqual({
+      songket_samping: -110,
+      sarong: -60,
+    });
+    expect(puppetRig.skin.head_tone).toEqual({
+      chinese_man: "light",
+      kadazan_man: "tan",
+      malay_woman: "golden",
+      malay_man: "medium_brown",
+      indian_woman: "dark",
+    });
+    expect(puppetRig.placement.mirror.toLowerCase()).toContain("right");
+    expect(puppetRig.sleeves.batik_shirt).toEqual(["upper"]);
+    expect(puppetRig.sleeves.baju_melayu).toEqual(["upper", "forearm"]);
+    // The kit's recorded size lagged the resized sleeve file. The shipped rig matches the bitmap.
+    expect(puppetRig.parts["sleeves/batik_shirt_upper"].size).toEqual([122, 150]);
+  });
+
+  it("places songkok, samping, and sarong from the rig offsets", () => {
+    expect(headwearOrigin(puppetRig, "malay_man", "songkok", 0, 0)).toEqual([74, -484]);
+    expect(headwearOrigin(puppetRig, "chinese_man", "baseball_cap", 0, 0)[1]).toBe(-548);
+    expect(lowerOrigin(puppetRig, "songket_samping", 0, 0)).toEqual([29, 394]);
+    expect(lowerOrigin(puppetRig, "sarong", 0, 0)).toEqual([-9, 444]);
+  });
+
+  it("angles both arms outward from the rest pose", () => {
+    expect(REST_ARM_OUT_DEG).toBeGreaterThanOrEqual(8);
+    expect(REST_ARM_OUT_DEG).toBeLessThanOrEqual(12);
+    const [lx] = rotateClockwise(0, 100, 90);
+    expect(lx).toBeCloseTo(-100, 5);
+
+    const left = elbowWorld(puppetRig, "L", 0, 0, 0);
+    const right = elbowWorld(puppetRig, "R", 0, 0, 0);
+    expect(left[0]).toBeLessThan(puppetRig.parts["base/torso"].pins.shoulder_L[0]);
+    expect(right[0]).toBeGreaterThan(puppetRig.parts["base/torso"].pins.shoulder_R[0]);
+    expect(left[0]).toBeCloseTo(35.08, 1);
+    expect(right[0]).toBeCloseTo(403.92, 1);
+
+    const wider = elbowWorld(puppetRig, "L", 0, 0, 8);
+    expect(wider[0]).toBeLessThan(left[0]);
+  });
+
+  it("ships only the tinted parts that the rig uses, as WebP", () => {
+    const root = path.resolve("public/puppet");
+    const files = walk(root);
+    expect(files.length).toBeGreaterThan(0);
+    expect(files.every((file) => file.endsWith(".webp"))).toBe(true);
+    expect(fs.existsSync(path.join(root, "base"))).toBe(false);
+    const bytes = files.reduce((sum, file) => sum + fs.statSync(file).size, 0);
+    expect(bytes).toBeLessThan(1_200_000);
+
+    for (const [id, part] of Object.entries(puppetRig.parts)) {
+      if (id.startsWith("base/")) continue;
+      const rel = part.file.replace(/^parts\//, "");
+      expect(fs.existsSync(path.join(root, rel)), rel).toBe(true);
+    }
+    for (const tone of Object.keys(puppetRig.skin.tones)) {
+      for (const name of ["torso", "upper_arm", "forearm_hand", "leg", "foot"]) {
+        expect(fs.existsSync(path.join(root, "base_tones", tone, `${name}.webp`))).toBe(true);
+      }
+    }
+  });
+});
+
+describe("puppet motion", () => {
+  it("shares a 125 BPM phase and lets a spring settle", () => {
+    expect(beatPhase(0, 125)).toEqual({ phase: 0, index: 0 });
+    expect(beatPhase(60 / 125, 125).index).toBe(1);
+
+    const spring = { v: 12, vel: 0 };
+    for (let i = 0; i < 240; i += 1) stepSpring(spring, 0, 1 / 60, 80, 10);
+    expect(Math.abs(spring.v)).toBeLessThan(0.5);
+
+    const state = createMotionState();
+    const idle = sampleMotion(state, 1.2, 1 / 60, "idle", undefined, 125, false);
+    expect(Math.abs(idle.sway)).toBeGreaterThan(0);
+    expect(Math.abs(idle.sway)).toBeLessThan(20);
+  });
+});
+
+describe("PuppetAvatar", () => {
+  it("paints the head's tone, outfit sleeves, and no untinted base sheet", () => {
+    const { container } = render(
+      <PuppetAvatar
+        config={{
+          head: "malay_man",
+          headwear: "songkok",
+          outfit: "baju_melayu",
+          lower: "songket_samping",
+        }}
+        anim="still"
+      />,
+    );
+    const srcs = imageSrcs(container);
+    expect(srcs.some((src) => src.includes("/puppet/heads/malay_man.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("/puppet/base_tones/medium_brown/torso.webp"))).toBe(
+      true,
+    );
+    expect(toneForHead(puppetRig, "malay_man")).toBe("medium_brown");
+    expect(srcs.some((src) => src.includes("/puppet/sleeves/baju_melayu_upper.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("/puppet/sleeves/baju_melayu_forearm.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("/puppet/base/"))).toBe(false);
+  });
+
+  it("follows a dark head and skips a forearm sleeve the outfit does not have", () => {
+    const { container } = render(
+      <PuppetAvatar
+        config={{
+          head: "indian_woman",
+          headwear: null,
+          outfit: "batik_shirt",
+          lower: "sarong",
+        }}
+        anim="still"
+      />,
+    );
+    const srcs = imageSrcs(container);
+    expect(srcs.some((src) => src.includes("/puppet/base_tones/dark/leg.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("batik_shirt_upper.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("batik_shirt_forearm"))).toBe(false);
+    expect(srcs.some((src) => src.includes("headwear/"))).toBe(false);
+  });
+});
+
+function imageSrcs(container: HTMLElement) {
+  return [...container.querySelectorAll("img")].map((img) => img.getAttribute("src") ?? "");
+}
+
+function walk(dir: string): string[] {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    return entry.isDirectory() ? walk(full) : [full];
+  });
+}
+
+const _types = {
+  head: "malay_man" satisfies HeadId,
+  hat: "tudung" satisfies HeadwearId,
+  outfit: "baju_kurung" satisfies OutfitId,
+  lower: "sarong" satisfies LowerId,
+};
+void _types;
