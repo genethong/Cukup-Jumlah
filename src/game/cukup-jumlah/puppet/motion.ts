@@ -134,9 +134,8 @@ export function sampleMotion(
   const bobTarget = (cheering ? -36 : -8.5 * pulse) + poseBob;
   const shoulderTarget = (cheering ? 26 : Math.sin(tSeconds * 1.05 - 0.45) * 3.4) + poseShoulder;
   const elbowTarget = (cheering ? 16 : Math.sin(tSeconds * 1.05 - 0.85) * 6) + poseElbow;
-  // Extra beyond the outward rest stance. Amplitude stays inside that stance
-  // so the shins never swing back through centre.
-  const hipTarget = (cheering ? 6 : Math.sin(tSeconds * 1.05 - 0.3) * 1.2) + poseHip;
+  // Tiny extra lean. The rest stance is already only about 1° outward.
+  const hipTarget = (cheering ? 1.2 : Math.sin(tSeconds * 1.05 - 0.3) * 0.35) + poseHip;
   const footTarget = (cheering ? 6 : 0) + poseFoot;
   const headTarget = (cheering ? -8 : -idle * 1.3) + poseHead;
 

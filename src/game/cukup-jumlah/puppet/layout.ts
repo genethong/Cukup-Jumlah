@@ -8,16 +8,21 @@ import type { PuppetRig } from "./loadRig";
 export const REST_ARM_OUT_DEG = 10;
 
 /**
- * Rest stance opens the legs a few degrees so the feet sit apart under the hips.
- * Idle sway is added on top and stays outward — it does not cross back through centre.
+ * Net outward lean of the shin after cancelling the leg art's built-in slant.
+ * About 1° keeps the feet under the hips instead of bowed.
  */
-export const REST_HIP_OUT_DEG = 4;
+export const NET_HIP_OUT_DEG = 1;
 
-/** Sarong hem sits this many pixels above the ankle / foot pin. */
-export const SARONG_HEM_ABOVE_ANKLE = 14;
+/** Feet read large on the chibi body; draw them at three quarters around the ankle pin. */
+export const FOOT_SCALE = 0.75;
 
-/** Samping hem, 0 at the hip pin and 1 at the knee pin. Near the knee, still on the thigh. */
-export const SAMPING_HEM_ALONG_THIGH = 0.82;
+/** How many degrees the unmirrored leg art already slants outward (ankle left of the hip). */
+export function artShinOutDeg(rig: PuppetRig): number {
+  const leg = rig.parts["base/leg"];
+  const ax = leg.pins.ankle[0] - leg.pins.hip[0];
+  const ay = leg.pins.ankle[1] - leg.pins.hip[1];
+  return (Math.atan2(-ax, ay) * 180) / Math.PI;
+}
 
 /**
  * The stage hugs the resting puppet. A hop is allowed to spill between
@@ -25,7 +30,7 @@ export const SAMPING_HEM_ALONG_THIGH = 0.82;
  */
 const FRAME_ARM_OUT_DEG = REST_ARM_OUT_DEG;
 const FRAME_ELBOW_OUT_DEG = 8;
-const FRAME_HIP_OUT_DEG = 4;
+const FRAME_HIP_OUT_DEG = 0.6;
 
 export type PuppetFrame = {
   width: number;
@@ -59,13 +64,13 @@ export function visualShoulderDeg(side: Side, outwardFromRest: number): number {
 
 /**
  * Hip angle for CSS `rotate()`, applied after `scaleX(-1)` on the right leg.
- * `outwardFromRest` is extra degrees beyond {@link REST_HIP_OUT_DEG}.
- * Positive CSS degrees swing the shin toward screen-left, so the mirrored
- * right leg uses the negated angle and a negative sway still stays outward.
+ * The leg art already slants outward, so the rest angle pulls most of that
+ * back and leaves {@link NET_HIP_OUT_DEG}. Positive CSS degrees swing the
+ * shin toward screen-left; the right leg uses the opposite sign.
  */
-export function visualHipDeg(side: Side, outwardFromRest: number): number {
-  const outward = REST_HIP_OUT_DEG + outwardFromRest;
-  return side === "L" ? outward : -outward;
+export function visualHipDeg(side: Side, outwardFromRest: number, rig: PuppetRig): number {
+  const css = NET_HIP_OUT_DEG - artShinOutDeg(rig) + outwardFromRest;
+  return side === "L" ? css : -css;
 }
 
 /** World y of the leg's knee or ankle pin, leg hanging from the hip with no rotation. */
@@ -78,16 +83,40 @@ export function legJointY(rig: PuppetRig, joint: "knee" | "ankle", torsoY: numbe
 
 /**
  * Hem of a lower garment, derived from the leg pins.
- * Sarong stops just above the ankle so the foot hangs free.
- * Samping is a hip wrap that stops around the knee so the shin shows.
+ * Sarong stops at the top of the scaled foot so only the shoe shows.
+ * Samping stops at the knee pin.
  */
 export function lowerHemY(rig: PuppetRig, lowerId: string, torsoY: number): number {
-  const hipY = torsoY + rig.parts["base/torso"].pins.hip_L[1];
-  if (lowerId === "songket_samping") {
-    const knee = legJointY(rig, "knee", torsoY);
-    return hipY + (knee - hipY) * SAMPING_HEM_ALONG_THIGH;
-  }
-  return legJointY(rig, "ankle", torsoY) - SARONG_HEM_ABOVE_ANKLE;
+  if (lowerId === "songket_samping") return legJointY(rig, "knee", torsoY);
+  const ankle = legJointY(rig, "ankle", torsoY);
+  const foot = rig.parts["base/foot"];
+  return ankle - foot.pins.ankle[1] * FOOT_SCALE - 4;
+}
+
+export type LowerDraw = { x: number; y: number; w: number; h: number };
+
+/**
+ * Draw the garment at its authored width, scaled only on Y about the waist
+ * pin, so the artwork's own hem lands on {@link lowerHemY}.
+ */
+export function lowerDraw(
+  rig: PuppetRig,
+  lowerId: string,
+  torsoX: number,
+  torsoY: number,
+): LowerDraw {
+  const part = rig.parts[`lower/${lowerId}`];
+  const [left, top] = lowerOrigin(rig, lowerId, torsoX, torsoY);
+  const waistX = left + part.pins.waist[0];
+  const waistY = top + part.pins.waist[1];
+  const naturalDrop = Math.max(1, part.size[1] - part.pins.waist[1]);
+  const scaleY = Math.max(0.05, (lowerHemY(rig, lowerId, torsoY) - waistY) / naturalDrop);
+  return {
+    x: waistX - part.pins.waist[0],
+    y: waistY - part.pins.waist[1] * scaleY,
+    w: part.size[0],
+    h: part.size[1] * scaleY,
+  };
 }
 
 /**
@@ -110,7 +139,7 @@ export function footPointWorld(
   let x = ax - localFromAnkle[0];
   const y = ay + localFromAnkle[1];
   if (side === "R") x = -x;
-  const [rx, ry] = rotateClockwise(x, y, visualHipDeg(side, outwardFromRest));
+  const [rx, ry] = rotateClockwise(x, y, visualHipDeg(side, outwardFromRest, rig));
   return [torsoX + hip[0] + rx, torsoY + hip[1] + ry];
 }
 
@@ -175,7 +204,7 @@ export function footSoleY(rig: PuppetRig, torsoY: number): number {
     torsoY +
     hip +
     (leg.pins.ankle[1] - leg.pins.hip[1]) +
-    (foot.size[1] - foot.pins.ankle[1])
+    (foot.size[1] - foot.pins.ankle[1]) * FOOT_SCALE
   );
 }
 
@@ -271,11 +300,8 @@ export function measureFrame(rig: PuppetRig): PuppetFrame {
   }
 
   for (const lowerId of Object.keys(rig.placement.lower_waist_dy_from_hips)) {
-    const part = rig.parts[`lower/${lowerId}`];
-    const [x, y] = lowerOrigin(rig, lowerId, 0, 0);
-    const hem = lowerHemY(rig, lowerId, 0);
-    const clipped = Math.min(part.size[1], Math.max(0, hem - y));
-    addBox(x, y, part.size[0], clipped);
+    const draw = lowerDraw(rig, lowerId, 0, 0);
+    addBox(draw.x, draw.y, draw.w, draw.h);
   }
 
   const upper = rig.parts["base/upper_arm"];
@@ -317,22 +343,32 @@ export function measureFrame(rig: PuppetRig): PuppetFrame {
   const addLeg = (side: Side, outwardFromRest: number) => {
     const mirror = side === "R";
     const hip = torso.pins[side === "L" ? "hip_L" : "hip_R"];
-    const deg = visualHipDeg(side, outwardFromRest);
+    const deg = visualHipDeg(side, outwardFromRest, rig);
     addPivotChain(add, hip, [0, 0], deg, 0, mirror, leg.size, leg.pins.hip);
     const ankleOffset: [number, number] = [
       leg.pins.ankle[0] - leg.pins.hip[0],
       leg.pins.ankle[1] - leg.pins.hip[1],
     ];
     // Local foot mirror points the toes out. On the right leg the hip mirror
-    // cancels it, so the right toes still point right.
-    addPivotChain(add, hip, ankleOffset, deg, 0, mirror, foot.size, foot.pins.ankle, true);
+    // cancels it, so the right toes still point right. Feet are drawn smaller.
+    addPivotChain(
+      add,
+      hip,
+      ankleOffset,
+      deg,
+      0,
+      mirror,
+      [foot.size[0] * FOOT_SCALE, foot.size[1] * FOOT_SCALE],
+      [foot.pins.ankle[0] * FOOT_SCALE, foot.pins.ankle[1] * FOOT_SCALE],
+      true,
+    );
   };
 
   for (const side of ["L", "R"] as const) {
     addArm(side, 0, 0);
     addArm(side, REST_ARM_OUT_DEG, 0);
     addArm(side, FRAME_ARM_OUT_DEG, FRAME_ELBOW_OUT_DEG);
-    addLeg(side, -REST_HIP_OUT_DEG);
+    addLeg(side, -0.4);
     addLeg(side, 0);
     addLeg(side, FRAME_HIP_OUT_DEG);
   }

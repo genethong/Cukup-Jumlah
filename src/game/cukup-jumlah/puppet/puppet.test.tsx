@@ -4,8 +4,10 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { PuppetAvatar } from "./PuppetAvatar";
 import {
+  FOOT_SCALE,
+  NET_HIP_OUT_DEG,
   REST_ARM_OUT_DEG,
-  REST_HIP_OUT_DEG,
+  artShinOutDeg,
   elbowWorld,
   footPointWorld,
   headwearOrigin,
@@ -73,22 +75,23 @@ describe("puppet rig", () => {
     expect(rightAnkle[0]).toBeGreaterThan(hipR);
     expect(rightAnkle[0] - leftAnkle[0]).toBeGreaterThan(hipR - hipL);
 
-    const swayed = footPointWorld(puppetRig, "L", 0, 0, -1.2, [0, 0]);
-    expect(swayed[0]).toBeLessThan(hipL);
-    expect(visualHipDeg("L", -1.2)).toBeGreaterThan(0);
-    expect(visualHipDeg("R", -1.2)).toBeLessThan(0);
-    expect(REST_HIP_OUT_DEG).toBeGreaterThan(0);
+    const gap = hipL - leftAnkle[0];
+    expect(gap).toBeGreaterThan(1);
+    expect(gap).toBeLessThan(14);
+    expect(artShinOutDeg(puppetRig) + visualHipDeg("L", -0.35, puppetRig)).toBeGreaterThan(0.3);
+    expect(artShinOutDeg(puppetRig) + visualHipDeg("L", 0.35, puppetRig)).toBeLessThan(2);
+    expect(NET_HIP_OUT_DEG).toBeLessThan(2);
+    expect(FOOT_SCALE).toBeCloseTo(0.75);
 
     const ankle = legJointY(puppetRig, "ankle", 0);
     const knee = legJointY(puppetRig, "knee", 0);
-    const hipY = puppetRig.parts["base/torso"].pins.hip_L[1];
+    const footTop = ankle - puppetRig.parts["base/foot"].pins.ankle[1] * FOOT_SCALE;
     const sarongHem = lowerHemY(puppetRig, "sarong", 0);
     const sampingHem = lowerHemY(puppetRig, "songket_samping", 0);
     expect(sarongHem).toBeLessThan(ankle);
     expect(sarongHem).toBeGreaterThan(knee);
-    expect(sampingHem).toBeGreaterThan(hipY);
-    expect(sampingHem).toBeLessThan(knee);
-    expect(sampingHem).toBeLessThan(ankle);
+    expect(Math.abs(sarongHem - footTop)).toBeLessThan(8);
+    expect(sampingHem).toBeCloseTo(knee, 0);
   });
 
   it("angles both arms outward from the rest pose", () => {
@@ -147,7 +150,9 @@ describe("puppet motion", () => {
     const motion = createMotionState();
     for (let t = 0; t < 6; t += 1 / 30) {
       const sample = sampleMotion(motion, t, 1 / 30, "idle", undefined, 125, false);
-      expect(REST_HIP_OUT_DEG + sample.hip).toBeGreaterThan(0);
+      const net = artShinOutDeg(puppetRig) + visualHipDeg("L", sample.hip, puppetRig);
+      expect(net).toBeGreaterThan(0.2);
+      expect(net).toBeLessThan(2.2);
     }
   });
 });
@@ -173,6 +178,7 @@ describe("PuppetAvatar", () => {
     expect(toneForHead(puppetRig, "malay_man")).toBe("medium_brown");
     expect(srcs.some((src) => src.includes("/puppet/sleeves/baju_melayu_upper.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("/puppet/sleeves/baju_melayu_forearm.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("/puppet/trousers/baju_melayu.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("/puppet/base/"))).toBe(false);
   });
 
@@ -191,8 +197,26 @@ describe("PuppetAvatar", () => {
     const srcs = imageSrcs(container);
     expect(srcs.some((src) => src.includes("/puppet/base_tones/dark/leg.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("batik_shirt_upper.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("/puppet/trousers/batik_shirt.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("batik_shirt_forearm"))).toBe(false);
     expect(srcs.some((src) => src.includes("headwear/"))).toBe(false);
+  });
+
+  it("leaves kurung with a sarong bare-legged", () => {
+    const { container } = render(
+      <PuppetAvatar
+        config={{
+          head: "malay_woman",
+          headwear: "tudung",
+          outfit: "baju_kurung",
+          lower: "sarong",
+        }}
+        anim="still"
+      />,
+    );
+    const srcs = imageSrcs(container);
+    expect(srcs.some((src) => src.includes("/puppet/trousers/"))).toBe(false);
+    expect(srcs.some((src) => src.includes("/puppet/lower/sarong.webp"))).toBe(true);
   });
 });
 

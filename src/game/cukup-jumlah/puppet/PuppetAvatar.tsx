@@ -5,15 +5,17 @@ import {
   toneForHead,
   tonePartUrl,
   type BasePartName,
+  type LowerId,
+  type OutfitId,
   type PuppetConfig,
 } from "./loadRig";
 import {
+  FOOT_SCALE,
   figureBottomY,
   footSoleY,
   headOrigin,
   headwearOrigin,
-  lowerHemY,
-  lowerOrigin,
+  lowerDraw,
   measureFrame,
   visualHipDeg,
   visualShoulderDeg,
@@ -128,20 +130,32 @@ function Arm({
   );
 }
 
+/** Cloth legs for every outfit except kurung worn with a sarong. */
+function trouserUrl(outfit: OutfitId, lower: LowerId | null): string | null {
+  if (outfit === "baju_kurung" && lower === "sarong") return null;
+  return `/puppet/trousers/${outfit}.webp`;
+}
+
 function Leg({
   side,
   tone,
+  outfit,
+  lower,
   torsoX,
   torsoY,
 }: {
   side: Side;
   tone: string;
+  outfit: OutfitId;
+  lower: LowerId | null;
   torsoX: number;
   torsoY: number;
 }) {
   const leg = rig.parts["base/leg"];
+  const foot = rig.parts["base/foot"];
   const hip = rig.parts["base/torso"].pins[side === "L" ? "hip_L" : "hip_R"];
   const mirror = side === "R";
+  const trousers = trouserUrl(outfit, lower);
   return (
     <div
       style={{
@@ -155,20 +169,55 @@ function Leg({
       }}
     >
       <PinnedImage partKey="base/leg" pin="hip" src={tonePartUrl(tone, "leg")} />
+      {trousers && (
+        <img
+          src={trousers}
+          alt=""
+          draggable={false}
+          width={leg.size[0]}
+          height={leg.size[1]}
+          style={{
+            position: "absolute",
+            left: -leg.pins.hip[0],
+            top: -leg.pins.hip[1],
+            width: leg.size[0],
+            height: leg.size[1],
+            maxWidth: "none",
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        />
+      )}
       <div
         style={{
           position: "absolute",
           left: leg.pins.ankle[0] - leg.pins.hip[0],
           top: leg.pins.ankle[1] - leg.pins.hip[1],
           transformOrigin: "0 0",
-          // Flip about the ankle so the toes point outward. The right leg is
-          // already mirrored about the hip, and this second flip cancels that
-          // for the foot only — right toes stay to the right.
-          transform: `rotate(var(--foot-${side.toLowerCase()})) scaleX(-1)`,
+          // Flip about the ankle so the toes point outward, then shrink.
+          // The right leg is already mirrored about the hip; this second flip
+          // cancels that for the foot only, so right toes stay to the right.
+          transform: `rotate(var(--foot-${side.toLowerCase()})) scaleX(-1) scale(${FOOT_SCALE})`,
           willChange: "transform",
         }}
       >
-        <PinnedImage partKey="base/foot" pin="ankle" src={tonePartUrl(tone, "foot")} />
+        <img
+          src={tonePartUrl(tone, "foot")}
+          alt=""
+          draggable={false}
+          width={foot.size[0]}
+          height={foot.size[1]}
+          style={{
+            position: "absolute",
+            left: -foot.pins.ankle[0],
+            top: -foot.pins.ankle[1],
+            width: foot.size[0],
+            height: foot.size[1],
+            maxWidth: "none",
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        />
       </div>
     </div>
   );
@@ -244,8 +293,8 @@ function usePuppetMotion(
       );
       el.style.setProperty("--elbow-l", `${sample.elbow.toFixed(3)}deg`);
       el.style.setProperty("--elbow-r", `${sample.elbow.toFixed(3)}deg`);
-      el.style.setProperty("--hip-l", `${visualHipDeg("L", sample.hip).toFixed(3)}deg`);
-      el.style.setProperty("--hip-r", `${visualHipDeg("R", sample.hip).toFixed(3)}deg`);
+      el.style.setProperty("--hip-l", `${visualHipDeg("L", sample.hip, rig).toFixed(3)}deg`);
+      el.style.setProperty("--hip-r", `${visualHipDeg("R", sample.hip, rig).toFixed(3)}deg`);
       el.style.setProperty("--foot-l", `${sample.foot.toFixed(3)}deg`);
       el.style.setProperty("--foot-r", `${sample.foot.toFixed(3)}deg`);
       raf = requestAnimationFrame(paint);
@@ -267,8 +316,8 @@ const restVars = {
   "--shoulder-r": `${visualShoulderDeg("R", 0)}deg`,
   "--elbow-l": "0deg",
   "--elbow-r": "0deg",
-  "--hip-l": `${visualHipDeg("L", 0)}deg`,
-  "--hip-r": `${visualHipDeg("R", 0)}deg`,
+  "--hip-l": `${visualHipDeg("L", 0, rig)}deg`,
+  "--hip-r": `${visualHipDeg("R", 0, rig)}deg`,
   "--foot-l": "0deg",
   "--foot-r": "0deg",
 } as CSSProperties;
@@ -305,7 +354,6 @@ export function PuppetAvatar({
     ? headwearOrigin(rig, config.head, config.headwear, torsoX, torsoY)
     : null;
   const lower = config.lower ? rig.parts[`lower/${config.lower}`] : null;
-  const lowerAt = config.lower ? lowerOrigin(rig, config.lower, torsoX, torsoY) : null;
   const figureBottom = figureBottomY(rig, torsoY);
   const rodTop = figureBottom - 6;
   const rodHeight = Math.max(28, Math.min(78, frame.height - rodTop - 10));
@@ -372,16 +420,24 @@ export function PuppetAvatar({
                   "inset 0 0 0 1px rgba(40, 22, 10, 0.28), 0 10px 0 0 #6b4424",
               }}
             />
-            <Leg side="L" tone={tone} torsoX={torsoX} torsoY={torsoY} />
-            <Leg side="R" tone={tone} torsoX={torsoX} torsoY={torsoY} />
-            {config.lower === "sarong" && lower && lowerAt && (
-              <ClippedLower
-                file={lower.file}
-                origin={lowerAt}
-                size={lower.size}
-                hemY={lowerHemY(rig, "sarong", torsoY)}
-                z={4}
-              />
+            <Leg
+              side="L"
+              tone={tone}
+              outfit={config.outfit}
+              lower={config.lower}
+              torsoX={torsoX}
+              torsoY={torsoY}
+            />
+            <Leg
+              side="R"
+              tone={tone}
+              outfit={config.outfit}
+              lower={config.lower}
+              torsoX={torsoX}
+              torsoY={torsoY}
+            />
+            {config.lower === "sarong" && lower && (
+              <ScaledLower lowerId="sarong" torsoX={torsoX} torsoY={torsoY} z={4} />
             )}
             <img
               src={tonePartUrl(tone, "torso")}
@@ -399,14 +455,8 @@ export function PuppetAvatar({
               height={outfit.size[1]}
               style={sheetStyle(torsoX, torsoY, outfit.size, 6)}
             />
-            {config.lower === "songket_samping" && lower && lowerAt && (
-              <ClippedLower
-                file={lower.file}
-                origin={lowerAt}
-                size={lower.size}
-                hemY={lowerHemY(rig, "songket_samping", torsoY)}
-                z={7}
-              />
+            {config.lower === "songket_samping" && lower && (
+              <ScaledLower lowerId="songket_samping" torsoX={torsoX} torsoY={torsoY} z={7} />
             )}
             <div
               style={{
@@ -447,50 +497,38 @@ export function PuppetAvatar({
   );
 }
 
-function ClippedLower({
-  file,
-  origin,
-  size,
-  hemY,
+function ScaledLower({
+  lowerId,
+  torsoX,
+  torsoY,
   z,
 }: {
-  file: string;
-  origin: [number, number];
-  size: [number, number];
-  hemY: number;
+  lowerId: "sarong" | "songket_samping";
+  torsoX: number;
+  torsoY: number;
   z: number;
 }) {
-  const height = Math.min(size[1], Math.max(0, hemY - origin[1]));
+  const part = rig.parts[`lower/${lowerId}`];
+  const draw = lowerDraw(rig, lowerId, torsoX, torsoY);
   return (
-    <div
+    <img
+      src={rigFileUrl(part.file)}
+      alt=""
+      draggable={false}
+      width={part.size[0]}
+      height={part.size[1]}
       style={{
         position: "absolute",
-        left: origin[0],
-        top: origin[1],
-        width: size[0],
-        height,
-        overflow: "hidden",
-        zIndex: z,
+        left: draw.x,
+        top: draw.y,
+        width: draw.w,
+        height: draw.h,
+        maxWidth: "none",
         pointerEvents: "none",
+        userSelect: "none",
+        zIndex: z,
       }}
-    >
-      <img
-        src={rigFileUrl(file)}
-        alt=""
-        draggable={false}
-        width={size[0]}
-        height={size[1]}
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: size[0],
-          height: size[1],
-          maxWidth: "none",
-          userSelect: "none",
-        }}
-      />
-    </div>
+    />
   );
 }
 
