@@ -49,7 +49,7 @@ export type OutfitId =
 
 export type LowerId = "songket_samping" | "sarong" | "jeans";
 
-export type FootwearId = "default" | "sneakers";
+export type FootwearId = "default" | "selipar" | "sneakers";
 
 export type ToneId =
   | "tone_1"

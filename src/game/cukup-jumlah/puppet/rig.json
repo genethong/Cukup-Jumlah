@@ -675,6 +675,61 @@
           56
         ]
       }
+    },
+    "footwear/selipar": {
+      "file": "parts/footwear/selipar.webp",
+      "size": [
+        200,
+        148
+      ],
+      "pins": {
+        "ankle": [
+          44,
+          56
+        ]
+      }
+    },
+    "trousers/tshirt": {
+      "file": "parts/trousers/tshirt.webp",
+      "size": [
+        107,
+        360
+      ],
+      "pins": {
+        "hip": [
+          55,
+          43
+        ],
+        "knee": [
+          46,
+          185
+        ],
+        "ankle": [
+          42,
+          315
+        ]
+      }
+    },
+    "trousers/hoodie": {
+      "file": "parts/trousers/hoodie.webp",
+      "size": [
+        107,
+        360
+      ],
+      "pins": {
+        "hip": [
+          55,
+          43
+        ],
+        "knee": [
+          46,
+          185
+        ],
+        "ankle": [
+          42,
+          315
+        ]
+      }
     }
   },
   "draw_order": [

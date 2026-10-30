@@ -139,9 +139,10 @@ function headUrl(headId: string, tone: string): string {
  * Cloth legs on the leg pins. Kurung with a sarong still wears the teal
  * overlay so a gap beside the kain cannot show bare skin.
  */
-function trouserUrl(outfit: OutfitId, lower: LowerId | null): string | null {
+function trouserUrl(outfit: OutfitId, lower: LowerId | null): string {
   if (lower === "jeans") return "/puppet/trousers/jeans.webp";
-  if (outfit === "tshirt" || outfit === "hoodie") return null;
+  if (outfit === "tshirt") return "/puppet/trousers/tshirt.webp";
+  if (outfit === "hoodie") return "/puppet/trousers/hoodie.webp";
   return `/puppet/trousers/${outfit}.webp`;
 }
 
@@ -166,10 +167,14 @@ function Leg({
   const foot =
     footwear === "sneakers" && rig.parts["footwear/sneakers"]
       ? rig.parts["footwear/sneakers"]
+      : footwear === "selipar" && rig.parts["footwear/selipar"]
+      ? rig.parts["footwear/selipar"]
       : rig.parts["base/foot"];
   const footSrc =
     footwear === "sneakers"
       ? "/puppet/footwear/sneakers.webp"
+      : footwear === "selipar"
+      ? "/puppet/footwear/selipar.webp"
       : tonePartUrl(tone, "foot");
   const hip = rig.parts["base/torso"].pins[side === "L" ? "hip_L" : "hip_R"];
   const mirror = side === "R";

@@ -65,6 +65,7 @@ const LOWERS: { id: LowerId | null; label: string }[] = [
 
 const FOOTWEAR: { id: FootwearId; label: string }[] = [
   { id: "default", label: "Kaki Ayam" },
+  { id: "selipar", label: "Selipar" },
   { id: "sneakers", label: "Sneakers" },
 ];
 
