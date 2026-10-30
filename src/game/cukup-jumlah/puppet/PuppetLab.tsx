@@ -309,10 +309,10 @@ export function PuppetLab() {
             return (
               <div
                 key={idx}
-                className="relative flex h-[340px] flex-col items-center justify-end"
+                className="relative flex h-[340px] min-h-0 w-full flex-col items-center"
               >
                 <div
-                  className={`relative h-full w-full cursor-pointer transition-transform ${
+                  className={`relative min-h-0 w-full flex-1 cursor-pointer transition-transform ${
                     isSelected ? "scale-102" : "opacity-85 hover:opacity-100"
                   }`}
                   onClick={() => setSelected(idx)}
@@ -326,7 +326,7 @@ export function PuppetLab() {
                 <button
                   type="button"
                   onClick={() => setSelected(idx)}
-                  className={`mt-2 rounded-full px-3 py-1 font-tally text-xs tracking-wider uppercase transition-colors ${
+                  className={`mt-2 shrink-0 rounded-full px-3 py-1 font-tally text-xs tracking-wider uppercase transition-colors ${
                     isSelected
                       ? "bg-[#2a1c12] text-[#f6ead8]"
                       : "bg-[#2a1c12]/10 text-[#2a1c12] hover:bg-[#2a1c12]/20"

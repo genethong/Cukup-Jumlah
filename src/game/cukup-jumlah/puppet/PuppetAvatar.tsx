@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import {
   puppetRig,
   resolveFaceConfig,
@@ -15,7 +15,8 @@ import {
   FOOT_SCALE,
   figureBottomY,
   footSoleY,
-  headwearOrigin,
+  headOrigin,
+  headwearDraw,
   lowerDraw,
   measureFrame,
   visualHipDeg,
@@ -30,6 +31,7 @@ import {
   type PuppetAnim,
   type PuppetPose,
 } from "./motion";
+import { faceDrawKey, renderFace, type HatClip } from "./faceDraw";
 
 const rig = puppetRig;
 const frame: PuppetFrame = measureFrame(rig);
@@ -187,23 +189,6 @@ function Leg({
       }}
     >
       <PinnedImage partKey="base/leg" pin="hip" src={tonePartUrl(tone, "leg")} />
-      <img
-        src={trouserUrl(outfit, lower)}
-        alt=""
-        draggable={false}
-        width={leg.size[0]}
-        height={leg.size[1]}
-        style={{
-          position: "absolute",
-          left: -leg.pins.hip[0],
-          top: -leg.pins.hip[1],
-          width: leg.size[0],
-          height: leg.size[1],
-          maxWidth: "none",
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
-      />
       <div
         style={{
           position: "absolute",
@@ -270,59 +255,97 @@ function Leg({
           />
         )}
       </div>
+      {/* Cloth paints over the ankle so the hem sits on the shoe instead of ending in a hard cut under the foot. */}
+      <img
+        src={trouserUrl(outfit, lower)}
+        alt=""
+        draggable={false}
+        width={leg.size[0]}
+        height={leg.size[1]}
+        style={{
+          position: "absolute",
+          left: -leg.pins.hip[0],
+          top: -leg.pins.hip[1],
+          width: leg.size[0],
+          height: leg.size[1],
+          maxWidth: "none",
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+      />
     </div>
   );
 }
 
-/** Layered Face: 512x512 canvas, neck pin at (256, 456) */
-export function PuppetFace({ face }: { face: ResolvedFaceConfig }) {
-  const {
-    shapeKey,
-    skinHex,
-    actualEyesFile,
-    actualBrowsFile,
-    actualNoseFile,
-    actualMouthFile,
-    hairBackFile,
-    hairFrontFile,
-    facialHairFile,
-    actualExtraFile,
-    sweatDropFile,
-    extra,
-    hairTransform,
-    slotTransforms,
-  } = face;
-
-  const hairStyle = {
-    position: "absolute" as const,
-    left: 0,
-    top: 0,
-    width: 512,
-    height: 512,
-    transform: `translate(${hairTransform.dx}px, ${hairTransform.dy}px) scale(${hairTransform.sx}, ${hairTransform.sy})`,
-    transformOrigin: `256px ${hairTransform.originY}px`,
-    pointerEvents: "none" as const,
-    userSelect: "none" as const,
+function hatClipFor(
+  headwear: PuppetConfig["headwear"],
+  shapeKey: string,
+  torsoX: number,
+  torsoY: number,
+): HatClip | null {
+  if (!headwear) return null;
+  const hat = rig.parts[`headwear/${headwear}`];
+  if (!hat) return null;
+  const draw = headwearDraw(rig, shapeKey, headwear, torsoX, torsoY);
+  const [hx, hy] = headOrigin(rig, shapeKey, torsoX, torsoY);
+  const x = draw.x - hx;
+  const y = draw.y - hy;
+  const brimPinY = hat.pins.brim ? y + hat.pins.brim[1] * draw.scale : y + draw.h;
+  const coversAll = headwear === "turban" || headwear === "tudung";
+  // Caps keep hair below the band. Ketayap clears the bun around the dome.
+  // Songkok only loses hair that sticks out above the crown.
+  let coverBottom = y + 8;
+  if (headwear === "ketayap") coverBottom = y + draw.h;
+  else if (headwear.startsWith("baseball_cap")) coverBottom = brimPinY - 48;
+  return {
+    src: rigFileUrl(hat.file),
+    x,
+    y,
+    w: draw.w,
+    h: draw.h,
+    mode: coversAll ? "all" : "crown",
+    coverBottom,
   };
+}
 
-  const slotStyle = (slot: string, z: number): CSSProperties => {
-    const t = slotTransforms[slot] ?? { dx: 0, dy: 0, scale: 1, origin: [256, 256] };
-    return {
-      position: "absolute",
-      left: 0,
-      top: 0,
-      width: 512,
-      height: 512,
-      transform: `translate(${t.dx}px, ${t.dy}px) scale(${t.scale})`,
-      transformOrigin: `${t.origin[0]}px ${t.origin[1]}px`,
-      pointerEvents: "none",
-      userSelect: "none",
-      zIndex: z,
+/** Layered face: 512 canvas, neck pin at (256, 456). Composited to match the approved shade math. */
+export function PuppetFace({ face, hat }: { face: ResolvedFaceConfig; hat: HatClip | null }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const requestRef = useRef({ face, hat });
+  requestRef.current = { face, hat };
+  const key = faceDrawKey({ face, hat });
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let cancel = false;
+    const request = requestRef.current;
+    renderFace(request)
+      .then((painted) => {
+        if (cancel) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.clearRect(0, 0, 512, 512);
+        ctx.drawImage(painted, 0, 0);
+      })
+      .catch(() => {
+        // Missing a layer should not blank the rest of the lab.
+      });
+    return () => {
+      cancel = true;
     };
-  };
+  }, [key]);
 
   return (
-    <div
+    <canvas
+      ref={canvasRef}
+      width={512}
+      height={512}
+      data-skin={face.skinHex}
+      data-shape={face.shapeKey}
+      data-shade={`/puppet/layers/skin_shade/${face.shapeKey}.webp`}
+      data-nose={face.actualNoseFile}
+      aria-hidden
       style={{
         position: "absolute",
         left: -256,
@@ -332,179 +355,10 @@ export function PuppetFace({ face }: { face: ResolvedFaceConfig }) {
         pointerEvents: "none",
         userSelect: "none",
       }}
-    >
-      {/* 1. Hair back */}
-      {hairBackFile && (
-        <img
-          src={hairBackFile}
-          alt=""
-          draggable={false}
-          width={512}
-          height={512}
-          style={{ ...hairStyle, zIndex: 1 }}
-        />
-      )}
-
-      {/* 2. Skin base (tinted) + Skin shade (multiply) */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: 512,
-          height: 512,
-          isolation: "isolate",
-          zIndex: 2,
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundColor: skinHex,
-            WebkitMaskImage: `url(/puppet/layers/skin_base/${shapeKey}.webp)`,
-            maskImage: `url(/puppet/layers/skin_base/${shapeKey}.webp)`,
-            WebkitMaskSize: "512px 512px",
-            maskSize: "512px 512px",
-            WebkitMaskRepeat: "no-repeat",
-            maskRepeat: "no-repeat",
-            pointerEvents: "none",
-          }}
-        />
-        <img
-          src={`/puppet/layers/skin_shade/${shapeKey}.webp`}
-          alt=""
-          draggable={false}
-          width={512}
-          height={512}
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: 512,
-            height: 512,
-            mixBlendMode: "multiply",
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-        />
-      </div>
-
-      {/* 3. Nose */}
-      <img
-        src={actualNoseFile}
-        alt=""
-        draggable={false}
-        width={512}
-        height={512}
-        style={slotStyle("nose", 3)}
-      />
-
-      {/* 4. Blush */}
-      {extra === "blush" && actualExtraFile && (
-        <img
-          src={actualExtraFile}
-          alt=""
-          draggable={false}
-          width={512}
-          height={512}
-          style={slotStyle("blush", 4)}
-        />
-      )}
-
-      {/* 5. Eyes */}
-      <img
-        src={actualEyesFile}
-        alt=""
-        draggable={false}
-        width={512}
-        height={512}
-        style={slotStyle("eyes", 5)}
-      />
-
-      {/* 6. Brows */}
-      {actualBrowsFile && (
-        <img
-          src={actualBrowsFile}
-          alt=""
-          draggable={false}
-          width={512}
-          height={512}
-          style={slotStyle("brows", 6)}
-        />
-      )}
-
-      {/* 7. Beard / Stubble */}
-      {facialHairFile && (
-        <img
-          src={facialHairFile}
-          alt=""
-          draggable={false}
-          width={512}
-          height={512}
-          style={slotStyle("beard", 7)}
-        />
-      )}
-
-      {/* 8. Mouth */}
-      <img
-        src={actualMouthFile}
-        alt=""
-        draggable={false}
-        width={512}
-        height={512}
-        style={slotStyle("mouth", 8)}
-      />
-
-      {/* 9. Mole */}
-      {extra === "mole" && actualExtraFile && (
-        <img
-          src={actualExtraFile}
-          alt=""
-          draggable={false}
-          width={512}
-          height={512}
-          style={slotStyle("mole", 9)}
-        />
-      )}
-
-      {/* 10. Hair front */}
-      {hairFrontFile && (
-        <img
-          src={hairFrontFile}
-          alt=""
-          draggable={false}
-          width={512}
-          height={512}
-          style={{ ...hairStyle, zIndex: 10 }}
-        />
-      )}
-
-      {/* 11. Glasses / Sunglasses */}
-      {(extra === "glasses" || extra === "sunglasses") && actualExtraFile && (
-        <img
-          src={actualExtraFile}
-          alt=""
-          draggable={false}
-          width={512}
-          height={512}
-          style={slotStyle("glasses", 11)}
-        />
-      )}
-
-      {/* 12. Sweat drop */}
-      {sweatDropFile && (
-        <img
-          src={sweatDropFile}
-          alt=""
-          draggable={false}
-          width={512}
-          height={512}
-          style={slotStyle("sweat", 12)}
-        />
-      )}
-    </div>
+    />
   );
 }
+
 
 export function PuppetAvatar({
   config,
@@ -514,9 +368,11 @@ export function PuppetAvatar({
   className = "",
   label,
 }: PuppetAvatarProps) {
+  const fitRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const motionRef = useRef(createMotionState());
   const [, setFrameTick] = useState(0);
+  const [fitScale, setFitScale] = useState<number | null>(null);
 
   const resolvedFace = resolveFaceConfig(config);
   const tone = resolvedFace.tone;
@@ -526,8 +382,9 @@ export function PuppetAvatar({
 
   const resolvedHead = resolvedFace.shapeKey;
   const hat = config.headwear ? rig.parts[`headwear/${config.headwear}`] : null;
-  const hatOrigin =
-    config.headwear && hat ? headwearOrigin(rig, resolvedHead, config.headwear, frame.torsoX, frame.torsoY) : null;
+  const hatDraw =
+    config.headwear && hat ? headwearDraw(rig, resolvedHead, config.headwear, frame.torsoX, frame.torsoY) : null;
+  const hatClip = hatClipFor(config.headwear, resolvedHead, frame.torsoX, frame.torsoY);
 
   const neck = torso.pins.neck;
   const torsoX = frame.torsoX;
@@ -547,11 +404,31 @@ export function PuppetAvatar({
 
   useMotionLoop(rootRef, motionRef, anim, pose, bpm, rig, setFrameTick);
 
+  useLayoutEffect(() => {
+    const el = fitRef.current;
+    if (!el) return;
+    if (typeof ResizeObserver === "undefined") {
+      setFitScale(1);
+      return;
+    }
+    const measure = () => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width < 2 || rect.height < 2) return;
+      const next = Math.min(rect.width / frame.width, rect.height / frame.height);
+      setFitScale(next > 0 ? next : 1);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
+      ref={fitRef}
       role="img"
       aria-label={label ?? `Wayang kulit boneka: ${config.outfit}`}
-      className={`relative select-none ${className}`}
+      className={`relative select-none overflow-hidden ${className}`}
       style={{
         width: "100%",
         height: "100%",
@@ -565,9 +442,10 @@ export function PuppetAvatar({
           position: "absolute",
           left: "50%",
           top: "50%",
-          transform: "translate(-50%, -50%)",
+          transform: `translate(-50%, -50%) scale(${fitScale ?? 1})`,
           transformOrigin: "center center",
           pointerEvents: "none",
+          visibility: fitScale == null ? "hidden" : "visible",
         }}
       >
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -663,15 +541,20 @@ export function PuppetAvatar({
                 willChange: "transform",
               }}
             >
-              <PuppetFace face={resolvedFace} />
-              {hat && hatOrigin && config.headwear && (
+              <PuppetFace face={resolvedFace} hat={hatClip} />
+              {hat && hatDraw && config.headwear && (
                 <img
                   src={rigFileUrl(hat.file)}
                   alt=""
                   draggable={false}
                   width={hat.size[0]}
                   height={hat.size[1]}
-                  style={sheetStyle(hatOrigin[0] - neckX, hatOrigin[1] - neckY, hat.size, 25)}
+                  style={sheetStyle(
+                    hatDraw.x - neckX,
+                    hatDraw.y - neckY,
+                    [hatDraw.w, hatDraw.h],
+                    25,
+                  )}
                 />
               )}
             </div>

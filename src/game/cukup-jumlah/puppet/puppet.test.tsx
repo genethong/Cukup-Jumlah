@@ -10,6 +10,8 @@ import {
   artShinOutDeg,
   elbowWorld,
   footPointWorld,
+  headOrigin,
+  headwearDraw,
   headwearOrigin,
   legJointY,
   lowerHemY,
@@ -17,14 +19,8 @@ import {
   rotateClockwise,
   visualHipDeg,
 } from "./layout";
-import {
-  puppetRig,
-  type HeadId,
-  type HeadwearId,
-  type LowerId,
-  type OutfitId,
-  type ToneId,
-} from "./loadRig";
+import { multiplyFactor, tintChannels } from "./faceDraw";
+import { faceRig, puppetRig, type HeadId, type HeadwearId, type LowerId, type OutfitId, type ToneId } from "./loadRig";
 import { beatPhase, createMotionState, sampleMotion, stepSpring } from "./motion";
 
 describe("puppet rig", () => {
@@ -59,7 +55,8 @@ describe("puppet rig", () => {
 
   it("places songkok, samping, and sarong from the rig offsets", () => {
     expect(headwearOrigin(puppetRig, "m_head_1", "songkok", 0, 0)).toEqual([75, -416]);
-    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-455);
+    // Cap visor art hangs ~66px below the brim pin; the draw is lifted so it clears the eyes.
+    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-525);
     expect(lowerOrigin(puppetRig, "songket_samping", 0, 0)).toEqual([-22, 392]);
     expect(lowerOrigin(puppetRig, "sarong", 0, 0)).toEqual([-9, 444]);
   });
@@ -136,6 +133,30 @@ describe("puppet rig", () => {
   });
 });
 
+describe("face shade", () => {
+  it("treats shade 128 as the tone and lets lighter grey lift it", () => {
+    expect(tintChannels(128, [246, 218, 186]).map((n) => Math.round(n))).toEqual([246, 218, 186]);
+    const darker = tintChannels(64, [246, 218, 186]);
+    expect(darker[0]).toBeCloseTo(123, 0);
+    const lighter = tintChannels(160, [86, 52, 32]);
+    expect(lighter[0]).toBeGreaterThan(86);
+    expect(multiplyFactor(128, 255)).toBeCloseTo(1, 5);
+    expect(multiplyFactor(64, 255)).toBeCloseTo(0.5, 5);
+  });
+
+  it("keeps every baseball cap visor above the eyes", () => {
+    const heads = ["m_oval", "m_round", "m_square", "m_long", "f_oval", "f_round", "f_heart", "f_long"] as const;
+    for (const head of heads) {
+      const origin = headOrigin(puppetRig, head, 0, 0);
+      const draw = headwearDraw(puppetRig, head, "baseball_cap", 0, 0);
+      const visorBottom = draw.y - origin[1] + 326;
+      const eyes = (faceRig.anchors as unknown as Record<string, { slots: { eyes: { anchor: number[] } } }>)[head]
+        .slots.eyes.anchor[1];
+      expect(visorBottom, head).toBeLessThan(eyes - 8);
+    }
+  });
+});
+
 describe("puppet motion", () => {
   it("shares a 125 BPM phase and lets a spring settle", () => {
     expect(beatPhase(0, 125)).toEqual({ phase: 0, index: 0 });
@@ -175,7 +196,10 @@ describe("PuppetAvatar", () => {
       />,
     );
     const srcs = imageSrcs(container);
-    expect(srcs.some((src) => src.includes("/puppet/layers/skin_shade/m_oval.webp"))).toBe(true);
+    const face = container.querySelector("canvas");
+    expect(face?.getAttribute("data-shade")).toContain("/puppet/layers/skin_shade/m_oval.webp");
+    expect(face?.getAttribute("data-skin")).toBe("#A0643A");
+    expect(face?.getAttribute("data-nose")).toContain("/puppet/layers/nose/");
     expect(srcs.some((src) => src.includes("/puppet/base_tones/tone_6/torso.webp"))).toBe(
       true,
     );

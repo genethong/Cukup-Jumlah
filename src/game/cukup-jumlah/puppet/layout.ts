@@ -179,7 +179,63 @@ export function headOrigin(
   return [torsoX + neck[0] - head.pins.neck[0], torsoY + neck[1] - head.pins.neck[1]];
 }
 
-/** Top-left of a headwear image. Brim hats use `placement.headwear_brim_dy`. Tudung uses the face hole. */
+export type HeadwearDraw = { x: number; y: number; w: number; h: number; scale: number };
+
+/**
+ * Extra shift and scale on top of `placement.headwear_brim_dy`.
+ * The brim pin on a baseball cap sits inside the visor, ~66px above the
+ * visor's lowest pixel, so the authored pin lands the brim over the eyes.
+ * Ketayap's +15 dy drops the dome below a bun. A serban needs to be wider
+ * than a round head or side hair escapes the wrap.
+ */
+export function headwearAdjust(
+  headwearId: string,
+  headId: string,
+): { dy: number; scale: number } {
+  const round = headId.endsWith("round") || headId.endsWith("head_2");
+  if (headwearId.startsWith("baseball_cap")) return { dy: -70, scale: 1 };
+  if (headwearId === "ketayap") return { dy: -30, scale: 1 };
+  if (headwearId === "turban") return { dy: 0, scale: round ? 1.28 : 1.14 };
+  return { dy: 0, scale: 1 };
+}
+
+/** Placed headwear rectangle. Brim hats use `placement.headwear_brim_dy` plus {@link headwearAdjust}. Tudung uses the face hole. */
+export function headwearDraw(
+  rig: PuppetRig,
+  headId: string,
+  headwearId: string,
+  torsoX: number,
+  torsoY: number,
+): HeadwearDraw {
+  const [hx, hy] = headOrigin(rig, headId, torsoX, torsoY);
+  const head = rig.parts[`heads/${headId}`];
+  const hat = rig.parts[`headwear/${headwearId}`];
+  const adjust = headwearAdjust(headwearId, headId);
+  const scale = adjust.scale;
+  if (headwearId === "tudung") {
+    const ax = hx + head.pins.face_center[0];
+    const ay = hy + head.pins.face_center[1];
+    return {
+      x: ax - hat.pins.face_hole_center[0] * scale,
+      y: ay - hat.pins.face_hole_center[1] * scale,
+      w: hat.size[0] * scale,
+      h: hat.size[1] * scale,
+      scale,
+    };
+  }
+  const dy = (rig.placement.headwear_brim_dy[headwearId] ?? 0) + adjust.dy;
+  const ax = hx + head.pins.hat_brim[0];
+  const ay = hy + head.pins.hat_brim[1] + dy;
+  return {
+    x: ax - hat.pins.brim[0] * scale,
+    y: ay - hat.pins.brim[1] * scale,
+    w: hat.size[0] * scale,
+    h: hat.size[1] * scale,
+    scale,
+  };
+}
+
+/** Top-left of a headwear image. */
 export function headwearOrigin(
   rig: PuppetRig,
   headId: string,
@@ -187,18 +243,8 @@ export function headwearOrigin(
   torsoX: number,
   torsoY: number,
 ): [number, number] {
-  const [hx, hy] = headOrigin(rig, headId, torsoX, torsoY);
-  const head = rig.parts[`heads/${headId}`];
-  const hat = rig.parts[`headwear/${headwearId}`];
-  if (headwearId === "tudung") {
-    const ax = hx + head.pins.face_center[0];
-    const ay = hy + head.pins.face_center[1];
-    return [ax - hat.pins.face_hole_center[0], ay - hat.pins.face_hole_center[1]];
-  }
-  const dy = rig.placement.headwear_brim_dy[headwearId] ?? 0;
-  const ax = hx + head.pins.hat_brim[0];
-  const ay = hy + head.pins.hat_brim[1] + dy;
-  return [ax - hat.pins.brim[0], ay - hat.pins.brim[1]];
+  const draw = headwearDraw(rig, headId, headwearId, torsoX, torsoY);
+  return [draw.x, draw.y];
 }
 
 /**
@@ -319,13 +365,11 @@ export function measureFrame(rig: PuppetRig): PuppetFrame {
     const [hx, hy] = headOrigin(rig, headId, 0, 0);
     addBox(hx, hy, head.size[0], head.size[1]);
     for (const hw of Object.keys(rig.placement.headwear_brim_dy)) {
-      const hat = rig.parts[`headwear/${hw}`];
-      const [x, y] = headwearOrigin(rig, headId, hw, 0, 0);
-      addBox(x, y, hat.size[0], hat.size[1]);
+      const draw = headwearDraw(rig, headId, hw, 0, 0);
+      addBox(draw.x, draw.y, draw.w, draw.h);
     }
-    const tudung = rig.parts["headwear/tudung"];
-    const [tx, ty] = headwearOrigin(rig, headId, "tudung", 0, 0);
-    addBox(tx, ty, tudung.size[0], tudung.size[1]);
+    const tudung = headwearDraw(rig, headId, "tudung", 0, 0);
+    addBox(tudung.x, tudung.y, tudung.w, tudung.h);
   }
 
   for (const lowerId of Object.keys(rig.placement.lower_waist_dy_from_hips)) {

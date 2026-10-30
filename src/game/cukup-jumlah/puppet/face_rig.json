@@ -1574,10 +1574,8 @@
    "f_bun": "layers/hair_back/f_bun.webp",
    "f_curly": "layers/hair_back/f_curly.webp",
    "f_long": "layers/hair_back/f_long.webp",
-   "f_none": "layers/hair_back/f_none.webp",
    "f_pixie": "layers/hair_back/f_pixie.webp",
    "f_ponytail": "layers/hair_back/f_ponytail.webp",
-   "m_bald": "layers/hair_back/m_bald.webp",
    "m_crew": "layers/hair_back/m_crew.webp",
    "m_curly": "layers/hair_back/m_curly.webp",
    "m_horseshoe": "layers/hair_back/m_horseshoe.webp",
@@ -1591,10 +1589,8 @@
    "f_bun": "layers/hair_front/f_bun.webp",
    "f_curly": "layers/hair_front/f_curly.webp",
    "f_long": "layers/hair_front/f_long.webp",
-   "f_none": "layers/hair_front/f_none.webp",
    "f_pixie": "layers/hair_front/f_pixie.webp",
    "f_ponytail": "layers/hair_front/f_ponytail.webp",
-   "m_bald": "layers/hair_front/m_bald.webp",
    "m_crew": "layers/hair_front/m_crew.webp",
    "m_curly": "layers/hair_front/m_curly.webp",
    "m_horseshoe": "layers/hair_front/m_horseshoe.webp",
@@ -1701,7 +1697,6 @@
   "eyes": [
    "normal",
    "sleepy",
-   "narrow",
    "round"
   ]
  },
