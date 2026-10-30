@@ -33,7 +33,7 @@ describe("puppet rig", () => {
       songkok: 15,
       ketayap: 15,
       turban: 15,
-      baseball_cap: 10,
+      baseball_cap: 0,
     });
     expect(puppetRig.placement.lower_waist_dy_from_hips).toEqual({
       songket_samping: -110,
@@ -57,8 +57,8 @@ describe("puppet rig", () => {
 
   it("places songkok, samping, and sarong from the rig offsets", () => {
     expect(headwearOrigin(puppetRig, "m_head_1", "songkok", 0, 0)).toEqual([74, -484]);
-    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-378);
-    expect(lowerOrigin(puppetRig, "songket_samping", 0, 0)).toEqual([29, 394]);
+    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-458);
+    expect(lowerOrigin(puppetRig, "songket_samping", 0, 0)).toEqual([-22, 392]);
     expect(lowerOrigin(puppetRig, "sarong", 0, 0)).toEqual([-9, 444]);
   });
 
