@@ -88,164 +88,139 @@
       "file": "parts/base/foot.webp",
       "size": [
         200,
-        148
+        170
       ],
       "pins": {
         "ankle": [
-          44,
-          56
+          60,
+          20
         ]
       }
     },
     "heads/m_head_1": {
-      "file": "parts/heads/m_head_1.webp",
+      "file": "parts/layers/skin_base/m_oval.webp",
       "size": [
-        404,
+        512,
         512
       ],
       "pins": {
         "neck": [
-          203,
-          468
+          256,
+          456
         ],
         "crown": [
-          202,
-          4
+          256,
+          77
         ],
         "hat_brim": [
-          202,
-          143
+          256,
+          199
         ],
         "face_center": [
-          202,
-          259
+          256,
+          261
         ]
-      },
-      "skin_source_mean": [
-        208,
-        150,
-        79
-      ]
+      }
     },
     "heads/m_head_2": {
-      "file": "parts/heads/m_head_2.webp",
+      "file": "parts/layers/skin_base/m_round.webp",
       "size": [
-        369,
+        512,
         512
       ],
       "pins": {
         "neck": [
-          186,
-          426
+          256,
+          456
         ],
         "crown": [
-          184,
-          4
+          256,
+          105
         ],
         "hat_brim": [
-          184,
-          130
+          256,
+          227
         ],
         "face_center": [
-          184,
-          236
+          256,
+          289
         ]
-      },
-      "skin_source_mean": [
-        222,
-        166,
-        94
-      ]
+      }
     },
     "heads/f_head_2": {
-      "file": "parts/heads/f_head_2.webp",
+      "file": "parts/layers/skin_base/f_round.webp",
       "size": [
-        367,
+        512,
         512
       ],
       "pins": {
         "neck": [
-          186,
-          470
+          256,
+          456
         ],
         "crown": [
-          183,
-          4
+          256,
+          120
         ],
         "hat_brim": [
-          183,
-          172
+          256,
+          237
         ],
         "face_center": [
-          183,
-          260
+          256,
+          297
         ]
-      },
-      "skin_source_mean": [
-        157,
-        99,
-        46
-      ]
+      }
     },
     "heads/f_head_1": {
-      "file": "parts/heads/f_head_1.webp",
+      "file": "parts/layers/skin_base/f_oval.webp",
       "size": [
-        398,
+        512,
         512
       ],
       "pins": {
         "neck": [
-          199,
-          474
+          256,
+          456
         ],
         "crown": [
-          199,
-          5
+          256,
+          105
         ],
         "hat_brim": [
-          199,
-          145
+          256,
+          222
         ],
         "face_center": [
-          199,
-          262
+          256,
+          282
         ]
-      },
-      "skin_source_mean": [
-        216,
-        160,
-        89
-      ]
+      }
     },
     "heads/m_head_3": {
-      "file": "parts/heads/m_head_3.webp",
+      "file": "parts/layers/skin_base/m_square.webp",
       "size": [
-        395,
+        512,
         512
       ],
       "pins": {
         "neck": [
-          201,
-          470
+          256,
+          456
         ],
         "crown": [
-          197,
-          4
+          256,
+          71
         ],
         "hat_brim": [
-          197,
-          143
+          256,
+          193
         ],
         "face_center": [
-          197,
-          260
+          256,
+          255
         ]
-      },
-      "skin_source_mean": [
-        207,
-        150,
-        81
-      ]
+      }
     },
     "headwear/songkok": {
       "file": "parts/headwear/songkok.webp",
@@ -302,13 +277,13 @@
     "headwear/baseball_cap": {
       "file": "parts/headwear/baseball_cap.webp",
       "size": [
-        404,
-        240
+        420,
+        331
       ],
       "pins": {
         "brim": [
-          202,
-          196
+          210,
+          260
         ]
       }
     },
@@ -667,12 +642,12 @@
       "file": "parts/footwear/sneakers.webp",
       "size": [
         200,
-        148
+        170
       ],
       "pins": {
         "ankle": [
-          44,
-          56
+          60,
+          20
         ]
       }
     },
@@ -680,12 +655,12 @@
       "file": "parts/footwear/selipar.webp",
       "size": [
         200,
-        148
+        170
       ],
       "pins": {
         "ankle": [
-          44,
-          56
+          60,
+          20
         ]
       }
     },
@@ -728,6 +703,232 @@
         "ankle": [
           42,
           315
+        ]
+      }
+    },
+    "headwear/baseball_cap_red": {
+      "file": "parts/headwear/baseball_cap_red.webp",
+      "size": [
+        420,
+        332
+      ],
+      "pins": {
+        "brim": [
+          210,
+          261
+        ]
+      }
+    },
+    "headwear/baseball_cap_mustard": {
+      "file": "parts/headwear/baseball_cap_mustard.webp",
+      "size": [
+        420,
+        332
+      ],
+      "pins": {
+        "brim": [
+          210,
+          261
+        ]
+      }
+    },
+    "heads/m_oval": {
+      "file": "parts/layers/skin_base/m_oval.webp",
+      "size": [
+        512,
+        512
+      ],
+      "pins": {
+        "neck": [
+          256,
+          456
+        ],
+        "crown": [
+          256,
+          77
+        ],
+        "hat_brim": [
+          256,
+          199
+        ],
+        "face_center": [
+          256,
+          261
+        ]
+      }
+    },
+    "heads/m_round": {
+      "file": "parts/layers/skin_base/m_round.webp",
+      "size": [
+        512,
+        512
+      ],
+      "pins": {
+        "neck": [
+          256,
+          456
+        ],
+        "crown": [
+          256,
+          105
+        ],
+        "hat_brim": [
+          256,
+          227
+        ],
+        "face_center": [
+          256,
+          289
+        ]
+      }
+    },
+    "heads/m_square": {
+      "file": "parts/layers/skin_base/m_square.webp",
+      "size": [
+        512,
+        512
+      ],
+      "pins": {
+        "neck": [
+          256,
+          456
+        ],
+        "crown": [
+          256,
+          71
+        ],
+        "hat_brim": [
+          256,
+          193
+        ],
+        "face_center": [
+          256,
+          255
+        ]
+      }
+    },
+    "heads/m_long": {
+      "file": "parts/layers/skin_base/m_long.webp",
+      "size": [
+        512,
+        512
+      ],
+      "pins": {
+        "neck": [
+          256,
+          456
+        ],
+        "crown": [
+          256,
+          49
+        ],
+        "hat_brim": [
+          256,
+          167
+        ],
+        "face_center": [
+          256,
+          229
+        ]
+      }
+    },
+    "heads/f_oval": {
+      "file": "parts/layers/skin_base/f_oval.webp",
+      "size": [
+        512,
+        512
+      ],
+      "pins": {
+        "neck": [
+          256,
+          456
+        ],
+        "crown": [
+          256,
+          105
+        ],
+        "hat_brim": [
+          256,
+          222
+        ],
+        "face_center": [
+          256,
+          282
+        ]
+      }
+    },
+    "heads/f_round": {
+      "file": "parts/layers/skin_base/f_round.webp",
+      "size": [
+        512,
+        512
+      ],
+      "pins": {
+        "neck": [
+          256,
+          456
+        ],
+        "crown": [
+          256,
+          120
+        ],
+        "hat_brim": [
+          256,
+          237
+        ],
+        "face_center": [
+          256,
+          297
+        ]
+      }
+    },
+    "heads/f_long": {
+      "file": "parts/layers/skin_base/f_long.webp",
+      "size": [
+        512,
+        512
+      ],
+      "pins": {
+        "neck": [
+          256,
+          456
+        ],
+        "crown": [
+          256,
+          94
+        ],
+        "hat_brim": [
+          256,
+          208
+        ],
+        "face_center": [
+          256,
+          269
+        ]
+      }
+    },
+    "heads/f_heart": {
+      "file": "parts/layers/skin_base/f_heart.webp",
+      "size": [
+        512,
+        512
+      ],
+      "pins": {
+        "neck": [
+          256,
+          456
+        ],
+        "crown": [
+          256,
+          115
+        ],
+        "hat_brim": [
+          256,
+          230
+        ],
+        "face_center": [
+          256,
+          290
         ]
       }
     }
@@ -807,7 +1008,9 @@
       "songkok": 15,
       "ketayap": 15,
       "turban": 15,
-      "baseball_cap": 0
+      "baseball_cap": 0,
+      "baseball_cap_red": 0,
+      "baseball_cap_mustard": 0
     },
     "headwear_note": "place headwear.brim at head.hat_brim + (0, dy)",
     "tudung": "place tudung.face_hole_center at head.face_center",

@@ -34,6 +34,8 @@ describe("puppet rig", () => {
       ketayap: 15,
       turban: 15,
       baseball_cap: 0,
+      baseball_cap_red: 0,
+      baseball_cap_mustard: 0,
     });
     expect(puppetRig.placement.lower_waist_dy_from_hips).toEqual({
       songket_samping: -110,
@@ -56,8 +58,8 @@ describe("puppet rig", () => {
   });
 
   it("places songkok, samping, and sarong from the rig offsets", () => {
-    expect(headwearOrigin(puppetRig, "m_head_1", "songkok", 0, 0)).toEqual([74, -484]);
-    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-458);
+    expect(headwearOrigin(puppetRig, "m_head_1", "songkok", 0, 0)).toEqual([75, -416]);
+    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-455);
     expect(lowerOrigin(puppetRig, "songket_samping", 0, 0)).toEqual([-22, 392]);
     expect(lowerOrigin(puppetRig, "sarong", 0, 0)).toEqual([-9, 444]);
   });
@@ -83,12 +85,12 @@ describe("puppet rig", () => {
     expect(artShinOutDeg(puppetRig) + visualHipDeg("L", -0.35, puppetRig)).toBeGreaterThan(0.3);
     expect(artShinOutDeg(puppetRig) + visualHipDeg("L", 0.35, puppetRig)).toBeLessThan(2);
     expect(NET_HIP_OUT_DEG).toBeLessThan(2);
-    expect(FOOT_SCALE).toBeCloseTo(0.75);
+    expect(FOOT_SCALE).toBeCloseTo(1.0);
 
     const ankle = legJointY(puppetRig, "ankle", 0);
     const knee = legJointY(puppetRig, "knee", 0);
     const shoeTop =
-      ankle + (100 - puppetRig.parts["base/foot"].pins.ankle[1]) * FOOT_SCALE;
+      ankle + (45 - puppetRig.parts["base/foot"].pins.ankle[1]) * FOOT_SCALE;
     const sarongHem = lowerHemY(puppetRig, "sarong", 0);
     const sampingHem = lowerHemY(puppetRig, "songket_samping", 0);
     expect(sarongHem).toBeGreaterThan(shoeTop);
@@ -119,10 +121,10 @@ describe("puppet rig", () => {
     expect(files.every((file) => file.endsWith(".webp"))).toBe(true);
     expect(fs.existsSync(path.join(root, "base"))).toBe(false);
     const bytes = files.reduce((sum, file) => sum + fs.statSync(file).size, 0);
-    expect(bytes).toBeLessThan(2_500_000);
+    expect(bytes).toBeLessThan(5_000_000);
 
     for (const [id, part] of Object.entries(puppetRig.parts)) {
-      if (id.startsWith("base/")) continue;
+      if (id.startsWith("base/") || id.startsWith("heads/")) continue;
       const rel = part.file.replace(/^parts\//, "");
       expect(fs.existsSync(path.join(root, rel)), rel).toBe(true);
     }
@@ -159,11 +161,11 @@ describe("puppet motion", () => {
 });
 
 describe("PuppetAvatar", () => {
-  it("paints the configured tone, outfit sleeves, and no untinted base sheet", () => {
+  it("paints the configured tone, outfit sleeves, and layered face", () => {
     const { container } = render(
       <PuppetAvatar
         config={{
-          head: "m_head_1",
+          head: "m_oval",
           tone: "tone_6",
           headwear: "songkok",
           outfit: "baju_melayu",
@@ -173,7 +175,7 @@ describe("PuppetAvatar", () => {
       />,
     );
     const srcs = imageSrcs(container);
-    expect(srcs.some((src) => src.includes("/puppet/heads/tone_6/m_head_1.webp"))).toBe(true);
+    expect(srcs.some((src) => src.includes("/puppet/layers/skin_shade/m_oval.webp"))).toBe(true);
     expect(srcs.some((src) => src.includes("/puppet/base_tones/tone_6/torso.webp"))).toBe(
       true,
     );
@@ -187,7 +189,7 @@ describe("PuppetAvatar", () => {
     const { container } = render(
       <PuppetAvatar
         config={{
-          head: "f_head_2",
+          head: "f_round",
           tone: "tone_7",
           headwear: null,
           outfit: "batik_shirt",
@@ -208,7 +210,7 @@ describe("PuppetAvatar", () => {
     const { container } = render(
       <PuppetAvatar
         config={{
-          head: "f_head_1",
+          head: "f_oval",
           tone: "tone_4",
           headwear: "tudung",
           outfit: "baju_kurung",

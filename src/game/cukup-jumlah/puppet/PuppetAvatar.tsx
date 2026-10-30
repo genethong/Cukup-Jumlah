@@ -1,20 +1,20 @@
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import {
   puppetRig,
+  resolveFaceConfig,
   rigFileUrl,
-  toneForHead,
   tonePartUrl,
   type BasePartName,
   type FootwearId,
   type LowerId,
   type OutfitId,
   type PuppetConfig,
+  type ResolvedFaceConfig,
 } from "./loadRig";
 import {
   FOOT_SCALE,
   figureBottomY,
   footSoleY,
-  headOrigin,
   headwearOrigin,
   lowerDraw,
   measureFrame,
@@ -131,10 +131,6 @@ function Arm({
   );
 }
 
-function headUrl(headId: string, tone: string): string {
-  return `/puppet/heads/${tone}/${headId}.webp`;
-}
-
 /**
  * Cloth legs on the leg pins. Kurung with a sarong still wears the teal
  * overlay so a gap beside the kain cannot show bare skin.
@@ -178,7 +174,6 @@ function Leg({
       : tonePartUrl(tone, "foot");
   const hip = rig.parts["base/torso"].pins[side === "L" ? "hip_L" : "hip_R"];
   const mirror = side === "R";
-  const trousers = trouserUrl(outfit, lower);
   return (
     <div
       style={{
@@ -187,231 +182,403 @@ function Leg({
         top: torsoY + hip[1],
         transformOrigin: "0 0",
         transform: `rotate(var(--hip-${side.toLowerCase()}))${mirror ? " scaleX(-1)" : ""}`,
-        zIndex: side === "L" ? 2 : 3,
+        zIndex: 2,
         willChange: "transform",
       }}
     >
       <PinnedImage partKey="base/leg" pin="hip" src={tonePartUrl(tone, "leg")} />
-      {trousers && (
-        <img
-          src={trousers}
-          alt=""
-          draggable={false}
-          width={leg.size[0]}
-          height={leg.size[1]}
-          style={{
-            position: "absolute",
-            left: -leg.pins.hip[0],
-            top: -leg.pins.hip[1],
-            width: leg.size[0],
-            height: leg.size[1],
-            maxWidth: "none",
-            pointerEvents: "none",
-            userSelect: "none",
-            zIndex: 2,
-          }}
-        />
-      )}
+      <img
+        src={trouserUrl(outfit, lower)}
+        alt=""
+        draggable={false}
+        width={leg.size[0]}
+        height={leg.size[1]}
+        style={{
+          position: "absolute",
+          left: -leg.pins.hip[0],
+          top: -leg.pins.hip[1],
+          width: leg.size[0],
+          height: leg.size[1],
+          maxWidth: "none",
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+      />
       <div
         style={{
           position: "absolute",
           left: leg.pins.ankle[0] - leg.pins.hip[0],
           top: leg.pins.ankle[1] - leg.pins.hip[1],
           transformOrigin: "0 0",
-          // Flip about the ankle so the toes point outward, then shrink.
-          // The right leg is already mirrored about the hip; this second flip
-          // cancels that for the foot only, so right toes stay to the right.
           transform: `rotate(var(--foot-${side.toLowerCase()})) scaleX(-1) scale(${FOOT_SCALE})`,
-          zIndex: 1,
-          willChange: "transform",
         }}
       >
-        <img
-          src={footSrc}
-          alt=""
-          draggable={false}
-          width={foot.size[0]}
-          height={foot.size[1]}
-          style={{
-            position: "absolute",
-            left: -foot.pins.ankle[0],
-            top: -foot.pins.ankle[1],
-            width: foot.size[0],
-            height: foot.size[1],
-            maxWidth: "none",
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-        />
+        {footwear === "selipar" ? (
+          <>
+            <img
+              src={tonePartUrl(tone, "foot")}
+              alt=""
+              draggable={false}
+              width={foot.size[0]}
+              height={foot.size[1]}
+              style={{
+                position: "absolute",
+                left: -foot.pins.ankle[0],
+                top: -foot.pins.ankle[1],
+                width: foot.size[0],
+                height: foot.size[1],
+                maxWidth: "none",
+                pointerEvents: "none",
+                userSelect: "none",
+              }}
+            />
+            <img
+              src="/puppet/footwear/selipar.webp"
+              alt=""
+              draggable={false}
+              width={foot.size[0]}
+              height={foot.size[1]}
+              style={{
+                position: "absolute",
+                left: -foot.pins.ankle[0],
+                top: -foot.pins.ankle[1],
+                width: foot.size[0],
+                height: foot.size[1],
+                maxWidth: "none",
+                pointerEvents: "none",
+                userSelect: "none",
+              }}
+            />
+          </>
+        ) : (
+          <img
+            src={footSrc}
+            alt=""
+            draggable={false}
+            width={foot.size[0]}
+            height={foot.size[1]}
+            style={{
+              position: "absolute",
+              left: -foot.pins.ankle[0],
+              top: -foot.pins.ankle[1],
+              width: foot.size[0],
+              height: foot.size[1],
+              maxWidth: "none",
+              pointerEvents: "none",
+              userSelect: "none",
+            }}
+          />
+        )}
       </div>
     </div>
   );
 }
 
-function useScale(frameWidth: number, frameHeight: number) {
-  const boxRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.2);
-  useEffect(() => {
-    const el = boxRef.current;
-    if (!el) return;
-    const measure = () => {
-      const rect = el.getBoundingClientRect();
-      const next = Math.min(rect.width / frameWidth, rect.height / frameHeight);
-      if (next > 0) setScale(next);
+/** Layered Face: 512x512 canvas, neck pin at (256, 456) */
+export function PuppetFace({ face }: { face: ResolvedFaceConfig }) {
+  const {
+    shapeKey,
+    skinHex,
+    actualEyesFile,
+    actualBrowsFile,
+    actualNoseFile,
+    actualMouthFile,
+    hairBackFile,
+    hairFrontFile,
+    facialHairFile,
+    actualExtraFile,
+    sweatDropFile,
+    extra,
+    hairTransform,
+    slotTransforms,
+  } = face;
+
+  const hairStyle = {
+    position: "absolute" as const,
+    left: 0,
+    top: 0,
+    width: 512,
+    height: 512,
+    transform: `translate(${hairTransform.dx}px, ${hairTransform.dy}px) scale(${hairTransform.sx}, ${hairTransform.sy})`,
+    transformOrigin: `256px ${hairTransform.originY}px`,
+    pointerEvents: "none" as const,
+    userSelect: "none" as const,
+  };
+
+  const slotStyle = (slot: string, z: number): CSSProperties => {
+    const t = slotTransforms[slot] ?? { dx: 0, dy: 0, scale: 1, origin: [256, 256] };
+    return {
+      position: "absolute",
+      left: 0,
+      top: 0,
+      width: 512,
+      height: 512,
+      transform: `translate(${t.dx}px, ${t.dy}px) scale(${t.scale})`,
+      transformOrigin: `${t.origin[0]}px ${t.origin[1]}px`,
+      pointerEvents: "none",
+      userSelect: "none",
+      zIndex: z,
     };
-    measure();
-    if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [frameWidth, frameHeight]);
-  return { boxRef, scale };
+  };
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: -256,
+        top: -456,
+        width: 512,
+        height: 512,
+        pointerEvents: "none",
+        userSelect: "none",
+      }}
+    >
+      {/* 1. Hair back */}
+      {hairBackFile && (
+        <img
+          src={hairBackFile}
+          alt=""
+          draggable={false}
+          width={512}
+          height={512}
+          style={{ ...hairStyle, zIndex: 1 }}
+        />
+      )}
+
+      {/* 2. Skin base (tinted) + Skin shade (multiply) */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: 512,
+          height: 512,
+          isolation: "isolate",
+          zIndex: 2,
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: skinHex,
+            WebkitMaskImage: `url(/puppet/layers/skin_base/${shapeKey}.webp)`,
+            maskImage: `url(/puppet/layers/skin_base/${shapeKey}.webp)`,
+            WebkitMaskSize: "512px 512px",
+            maskSize: "512px 512px",
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            pointerEvents: "none",
+          }}
+        />
+        <img
+          src={`/puppet/layers/skin_shade/${shapeKey}.webp`}
+          alt=""
+          draggable={false}
+          width={512}
+          height={512}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: 512,
+            height: 512,
+            mixBlendMode: "multiply",
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        />
+      </div>
+
+      {/* 3. Nose */}
+      <img
+        src={actualNoseFile}
+        alt=""
+        draggable={false}
+        width={512}
+        height={512}
+        style={slotStyle("nose", 3)}
+      />
+
+      {/* 4. Blush */}
+      {extra === "blush" && actualExtraFile && (
+        <img
+          src={actualExtraFile}
+          alt=""
+          draggable={false}
+          width={512}
+          height={512}
+          style={slotStyle("blush", 4)}
+        />
+      )}
+
+      {/* 5. Eyes */}
+      <img
+        src={actualEyesFile}
+        alt=""
+        draggable={false}
+        width={512}
+        height={512}
+        style={slotStyle("eyes", 5)}
+      />
+
+      {/* 6. Brows */}
+      {actualBrowsFile && (
+        <img
+          src={actualBrowsFile}
+          alt=""
+          draggable={false}
+          width={512}
+          height={512}
+          style={slotStyle("brows", 6)}
+        />
+      )}
+
+      {/* 7. Beard / Stubble */}
+      {facialHairFile && (
+        <img
+          src={facialHairFile}
+          alt=""
+          draggable={false}
+          width={512}
+          height={512}
+          style={slotStyle("beard", 7)}
+        />
+      )}
+
+      {/* 8. Mouth */}
+      <img
+        src={actualMouthFile}
+        alt=""
+        draggable={false}
+        width={512}
+        height={512}
+        style={slotStyle("mouth", 8)}
+      />
+
+      {/* 9. Mole */}
+      {extra === "mole" && actualExtraFile && (
+        <img
+          src={actualExtraFile}
+          alt=""
+          draggable={false}
+          width={512}
+          height={512}
+          style={slotStyle("mole", 9)}
+        />
+      )}
+
+      {/* 10. Hair front */}
+      {hairFrontFile && (
+        <img
+          src={hairFrontFile}
+          alt=""
+          draggable={false}
+          width={512}
+          height={512}
+          style={{ ...hairStyle, zIndex: 10 }}
+        />
+      )}
+
+      {/* 11. Glasses / Sunglasses */}
+      {(extra === "glasses" || extra === "sunglasses") && actualExtraFile && (
+        <img
+          src={actualExtraFile}
+          alt=""
+          draggable={false}
+          width={512}
+          height={512}
+          style={slotStyle("glasses", 11)}
+        />
+      )}
+
+      {/* 12. Sweat drop */}
+      {sweatDropFile && (
+        <img
+          src={sweatDropFile}
+          alt=""
+          draggable={false}
+          width={512}
+          height={512}
+          style={slotStyle("sweat", 12)}
+        />
+      )}
+    </div>
+  );
 }
 
-function usePuppetMotion(
-  ref: RefObject<HTMLDivElement | null>,
-  anim: PuppetAnim,
-  pose: PuppetPose | undefined,
-  bpm: number,
-) {
-  const live = useRef({ anim, pose, bpm });
-  live.current = { anim, pose, bpm };
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const reduced =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (typeof requestAnimationFrame !== "function") return;
-    const state = createMotionState();
-    let raf = 0;
-    let last = performance.now();
-
-    const paint = (now: number) => {
-      const dt = Math.min(0.034, (now - last) / 1000);
-      last = now;
-      const current = live.current;
-      const sample = sampleMotion(
-        state,
-        now / 1000,
-        dt,
-        current.anim,
-        current.pose,
-        current.bpm,
-        reduced,
-      );
-      el.style.setProperty("--bob", `${sample.bob.toFixed(2)}px`);
-      el.style.setProperty("--sway", `${sample.sway.toFixed(3)}deg`);
-      el.style.setProperty("--head", `${sample.head.toFixed(3)}deg`);
-      el.style.setProperty("--rod", `${sample.rod.toFixed(3)}deg`);
-      el.style.setProperty("--sx", sample.squashX.toFixed(4));
-      el.style.setProperty("--sy", sample.squashY.toFixed(4));
-      el.style.setProperty("--shadow", sample.shadow.toFixed(3));
-      el.style.setProperty(
-        "--shoulder-l",
-        `${visualShoulderDeg("L", sample.shoulder).toFixed(3)}deg`,
-      );
-      el.style.setProperty(
-        "--shoulder-r",
-        `${visualShoulderDeg("R", sample.shoulder).toFixed(3)}deg`,
-      );
-      el.style.setProperty("--elbow-l", `${sample.elbow.toFixed(3)}deg`);
-      el.style.setProperty("--elbow-r", `${sample.elbow.toFixed(3)}deg`);
-      el.style.setProperty("--hip-l", `${visualHipDeg("L", sample.hip, rig).toFixed(3)}deg`);
-      el.style.setProperty("--hip-r", `${visualHipDeg("R", sample.hip, rig).toFixed(3)}deg`);
-      el.style.setProperty("--foot-l", `${sample.foot.toFixed(3)}deg`);
-      el.style.setProperty("--foot-r", `${sample.foot.toFixed(3)}deg`);
-      raf = requestAnimationFrame(paint);
-    };
-    raf = requestAnimationFrame(paint);
-    return () => cancelAnimationFrame(raf);
-  }, [ref]);
-}
-
-const restVars = {
-  "--bob": "0px",
-  "--sway": "0deg",
-  "--head": "0deg",
-  "--rod": "0deg",
-  "--sx": "1",
-  "--sy": "1",
-  "--shadow": "1",
-  "--shoulder-l": `${visualShoulderDeg("L", 0)}deg`,
-  "--shoulder-r": `${visualShoulderDeg("R", 0)}deg`,
-  "--elbow-l": "0deg",
-  "--elbow-r": "0deg",
-  "--hip-l": `${visualHipDeg("L", 0, rig)}deg`,
-  "--hip-r": `${visualHipDeg("R", 0, rig)}deg`,
-  "--foot-l": "0deg",
-  "--foot-r": "0deg",
-} as CSSProperties;
-
-/**
- * Jointed paper puppet. Parts rotate about the brass pins in rig.json.
- * Right arm and right leg mirror about their shoulder and hip pins.
- * Each foot also flips about its ankle so the toes point outward.
- * Draw order follows rig.draw_order: legs, sarong, torso, outfit, samping, head, headwear, arms.
- */
 export function PuppetAvatar({
   config,
   pose,
   anim = "idle",
   bpm = PUPPET_BPM,
-  className,
+  className = "",
   label,
 }: PuppetAvatarProps) {
-  const { boxRef, scale } = useScale(frame.width, frame.height);
-  const motionRef = useRef<HTMLDivElement>(null);
-  usePuppetMotion(motionRef, anim, pose, bpm);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const motionRef = useRef(createMotionState());
+  const [, setFrameTick] = useState(0);
 
-  const tone = config.tone ?? toneForHead(rig, config.head);
-  const { torsoX, torsoY, hipX, hipY } = frame;
-  const neck = rig.parts["base/torso"].pins.neck;
+  const resolvedFace = resolveFaceConfig(config);
+  const tone = resolvedFace.tone;
+  const torso = rig.parts["base/torso"];
+  const outfit = rig.parts[`outfits/${config.outfit}`];
+  const lower = config.lower ? rig.parts[`lower/${config.lower}`] : null;
+
+  const resolvedHead = resolvedFace.shapeKey;
+  const hat = config.headwear ? rig.parts[`headwear/${config.headwear}`] : null;
+  const hatOrigin =
+    config.headwear && hat ? headwearOrigin(rig, resolvedHead, config.headwear, frame.torsoX, frame.torsoY) : null;
+
+  const neck = torso.pins.neck;
+  const torsoX = frame.torsoX;
+  const torsoY = frame.torsoY;
   const neckX = torsoX + neck[0];
   const neckY = torsoY + neck[1];
-  const [headX, headY] = headOrigin(rig, config.head, torsoX, torsoY);
-  const head = rig.parts[`heads/${config.head}`];
-  const outfit = rig.parts[`outfits/${config.outfit}`];
-  const torso = rig.parts["base/torso"];
-  const hat = config.headwear ? rig.parts[`headwear/${config.headwear}`] : null;
-  const hatOrigin = config.headwear
-    ? headwearOrigin(rig, config.head, config.headwear, torsoX, torsoY)
-    : null;
-  const lower = config.lower ? rig.parts[`lower/${config.lower}`] : null;
-  const figureBottom = figureBottomY(rig, torsoY);
-  const rodTop = figureBottom - 6;
-  const rodHeight = Math.max(28, Math.min(78, frame.height - rodTop - 10));
+  const hipX = frame.hipX;
+  const hipY = frame.hipY;
+
+  const soleY = footSoleY(rig, torsoY);
+  const bottomY = figureBottomY(rig, torsoY);
+  const shadowY = Math.max(soleY, bottomY) + 6;
+  const shadowSpread = config.lower === "sarong" ? 170 : 130;
+
+  const rodTop = hipY + 12;
+  const rodHeight = Math.max(80, frame.height - rodTop - 8);
+
+  useMotionLoop(rootRef, motionRef, anim, pose, bpm, rig, setFrameTick);
 
   return (
     <div
-      ref={boxRef}
-      className={className ? `relative h-full w-full ${className}` : "relative h-full w-full"}
-      role={label ? "img" : undefined}
-      aria-label={label}
-      aria-hidden={label ? undefined : true}
+      role="img"
+      aria-label={label ?? `Wayang kulit boneka: ${config.outfit}`}
+      className={`relative select-none ${className}`}
+      style={{
+        width: "100%",
+        height: "100%",
+      }}
     >
       <div
+        ref={rootRef}
         style={{
+          width: frame.width,
+          height: frame.height,
           position: "absolute",
           left: "50%",
           top: "50%",
-          width: frame.width,
-          height: frame.height,
-          transform: `translate(-50%, -50%) scale(${scale})`,
+          transform: "translate(-50%, -50%)",
+          transformOrigin: "center center",
+          pointerEvents: "none",
         }}
       >
-        <div ref={motionRef} className="absolute inset-0" style={restVars}>
+        <div style={{ position: "relative", width: "100%", height: "100%" }}>
           <div
             aria-hidden
             style={{
               position: "absolute",
-              left: hipX,
-              top: footSoleY(rig, torsoY) - 10,
-              width: 300,
-              height: 42,
-              transform: "translate(-50%, 0) scaleX(var(--shadow))",
-              borderRadius: "50%",
+              left: hipX - shadowSpread,
+              top: shadowY - 14,
+              width: shadowSpread * 2,
+              height: 28,
               background:
                 "radial-gradient(ellipse, rgba(72, 40, 16, 0.38), rgba(72, 40, 16, 0) 70%)",
               zIndex: 0,
@@ -496,14 +663,7 @@ export function PuppetAvatar({
                 willChange: "transform",
               }}
             >
-              <img
-                src={headUrl(config.head, tone)}
-                alt=""
-                draggable={false}
-                width={head.size[0]}
-                height={head.size[1]}
-                style={sheetStyle(headX - neckX, headY - neckY, head.size, 1)}
-              />
+              <PuppetFace face={resolvedFace} />
               {hat && hatOrigin && config.headwear && (
                 <img
                   src={rigFileUrl(hat.file)}
@@ -511,7 +671,7 @@ export function PuppetAvatar({
                   draggable={false}
                   width={hat.size[0]}
                   height={hat.size[1]}
-                  style={sheetStyle(hatOrigin[0] - neckX, hatOrigin[1] - neckY, hat.size, 2)}
+                  style={sheetStyle(hatOrigin[0] - neckX, hatOrigin[1] - neckY, hat.size, 25)}
                 />
               )}
             </div>
@@ -571,4 +731,56 @@ function sheetStyle(x: number, y: number, size: [number, number], z: number): CS
     userSelect: "none",
     zIndex: z,
   };
+}
+
+function useMotionLoop(
+  rootRef: RefObject<HTMLDivElement | null>,
+  motionRef: RefObject<ReturnType<typeof createMotionState>>,
+  anim: PuppetAnim,
+  pose: PuppetPose | undefined,
+  bpm: number,
+  rig: typeof puppetRig,
+  setFrameTick: (updater: (n: number) => number) => void,
+) {
+  useEffect(() => {
+    let handle: number;
+    let prev = performance.now();
+
+    const applyVars = (s: ReturnType<typeof sampleMotion>) => {
+      const el = rootRef.current;
+      if (!el) return;
+      el.style.setProperty("--bob", `${s.bob.toFixed(2)}px`);
+      el.style.setProperty("--sway", `${s.sway.toFixed(3)}deg`);
+      el.style.setProperty("--head", `${s.head.toFixed(3)}deg`);
+      el.style.setProperty("--rod", `${s.rod.toFixed(3)}deg`);
+      el.style.setProperty("--sx", (s.squashX ?? 1).toFixed(4));
+      el.style.setProperty("--sy", (s.squashY ?? 1).toFixed(4));
+      el.style.setProperty("--shoulder-l", `${visualShoulderDeg("L", s.shoulder).toFixed(3)}deg`);
+      el.style.setProperty("--shoulder-r", `${visualShoulderDeg("R", s.shoulder).toFixed(3)}deg`);
+      el.style.setProperty("--elbow-l", `${s.elbow.toFixed(3)}deg`);
+      el.style.setProperty("--elbow-r", `${s.elbow.toFixed(3)}deg`);
+      el.style.setProperty("--hip-l", `${visualHipDeg("L", s.hip, rig).toFixed(3)}deg`);
+      el.style.setProperty("--hip-r", `${visualHipDeg("R", s.hip, rig).toFixed(3)}deg`);
+      el.style.setProperty("--foot-l", `${s.foot.toFixed(3)}deg`);
+      el.style.setProperty("--foot-r", `${s.foot.toFixed(3)}deg`);
+    };
+
+    if (anim === "still") {
+      const s = sampleMotion(motionRef.current, 0, 0, "still", pose, bpm, true);
+      applyVars(s);
+      setFrameTick((n) => n + 1);
+      return;
+    }
+
+    const frame = (now: number) => {
+      const dt = Math.min((now - prev) / 1000, 0.05);
+      prev = now;
+      const s = sampleMotion(motionRef.current, now / 1000, dt, anim, pose, bpm, false);
+      applyVars(s);
+      handle = requestAnimationFrame(frame);
+    };
+
+    handle = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(handle);
+  }, [anim, pose, bpm, rig, rootRef, motionRef, setFrameTick]);
 }

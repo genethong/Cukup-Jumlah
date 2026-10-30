@@ -14,7 +14,7 @@ export const REST_ARM_OUT_DEG = 10;
 export const NET_HIP_OUT_DEG = 1;
 
 /** Feet read large on the chibi body; draw them at three quarters around the ankle pin. */
-export const FOOT_SCALE = 0.75;
+export const FOOT_SCALE = 1.0;
 
 /** How many degrees the unmirrored leg art already slants outward (ankle left of the hip). */
 export function artShinOutDeg(rig: PuppetRig): number {
@@ -96,9 +96,9 @@ export function lowerHemY(rig: PuppetRig, lowerId: string, torsoY: number): numb
   if (lowerId === "songket_samping") return legJointY(rig, "knee", torsoY) + 14;
   const ankle = legJointY(rig, "ankle", torsoY);
   const foot = rig.parts["base/foot"];
-  // The foot sprite is bare skin from the top down to about y=100; the brown
+  // The foot sprite is bare skin from the top down to about y=45; the
   // shoe starts there. The hem has to cover that instep, not stop at the pin.
-  const shoeLeatherY = 100;
+  const shoeLeatherY = 45;
   const shoeTop = ankle + (shoeLeatherY - foot.pins.ankle[1]) * FOOT_SCALE;
   const hipY = torsoY + rig.parts["base/torso"].pins.hip_L[1];
   const waistY = hipY + (rig.placement.lower_waist_dy_from_hips.sarong ?? 0);
