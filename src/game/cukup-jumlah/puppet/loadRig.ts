@@ -214,6 +214,8 @@ export function resolveFaceConfig(config: PuppetConfig): ResolvedFaceConfig {
   // Ensure shape is valid for gender
   if (gender === "m" && shape === "heart") shape = "oval";
   if (gender === "f" && shape === "square") shape = "oval";
+  // "Tiada" is not a female hair style — it was drawing a bald head.
+  if (gender === "f" && (hair === "none" || hair === "bald")) hair = "bun";
 
   const shapeKey = `${gender}_${shape}`;
   const refShape = gender === "m" ? "m_oval" : "f_oval";

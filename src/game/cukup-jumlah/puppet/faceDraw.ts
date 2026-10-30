@@ -27,11 +27,15 @@ export type HatClip = {
   h: number;
   /**
    * `all` — drop every hair pixel the hat does not cover (serban, tudung).
+   * `tuck` — hair under the hat stays; anything else must sit inside the head,
+   * so close caps don't leave a flat shelf or side wisps.
    * `crown` — drop hair above `coverBottom` that sits outside the hat
-   * (cap, ketayap) so side hair below the band can still show.
+   * (baseball cap) so side hair below the band can still show.
    */
-  mode: "all" | "crown";
+  mode: "all" | "tuck" | "crown";
   coverBottom: number;
+  /** Tudung: keep face pixels only inside the cloth opening. */
+  maskSkinToHole?: boolean;
 };
 
 export type FaceDrawRequest = {
@@ -299,25 +303,47 @@ function hideSkinAboveHairline(skin: ImageData, hairFront: ImageData, crew: bool
   }
 }
 
-function tintSkin(base: ImageData, shade: ImageData, hex: string): ImageData {
+function tintSkin(
+  base: ImageData,
+  shade: ImageData,
+  hex: string,
+  shapeKey: string,
+  toneId: string,
+  gender: "m" | "f",
+): ImageData {
   const tone: [number, number, number] = [
     Number.parseInt(hex.slice(1, 3), 16),
     Number.parseInt(hex.slice(3, 5), 16),
     Number.parseInt(hex.slice(5, 7), 16),
   ];
+  const chin = geos[shapeKey]?.chin ?? 420;
+  const lightMale = gender === "m" && (toneId === "tone_1" || toneId === "tone_2" || toneId === "tone_3");
+  const softenLong = shapeKey === "f_long";
   const out = new ImageData(SIZE, SIZE);
   const b = base.data;
   const s = shade.data;
   const d = out.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const alpha = b[i + 3];
-    if (alpha === 0) continue;
-    const shadeByte = s[i + 3] < 8 ? 128 : s[i];
-    const [r, g, bl] = tintChannels(shadeByte, tone);
-    d[i] = r;
-    d[i + 1] = g;
-    d[i + 2] = bl;
-    d[i + 3] = alpha;
+  for (let y = 0; y < SIZE; y += 1) {
+    for (let x = 0; x < SIZE; x += 1) {
+      const i = (y * SIZE + x) * 4;
+      const alpha = b[i + 3];
+      if (alpha === 0) continue;
+      let shadeByte = s[i + 3] < 8 ? 128 : s[i];
+      // The neck tab's shade sits around 108, which reads darker than the cheek on light skin.
+      if (lightMale && y > chin + 6) {
+        const t = Math.min(1, (y - (chin + 6)) / 16);
+        shadeByte += (128 - shadeByte) * 0.9 * t;
+      }
+      // f_long's cheek folds are much darker than the other female shapes.
+      if (softenLong && y > 248 && y < chin - 4 && shadeByte < 124) {
+        shadeByte = shadeByte * 0.22 + 124 * 0.78;
+      }
+      const [r, g, bl] = tintChannels(shadeByte, tone);
+      d[i] = r;
+      d[i + 1] = g;
+      d[i + 2] = bl;
+      d[i + 3] = alpha;
+    }
   }
   return out;
 }
@@ -386,15 +412,125 @@ function overMole(dst: Uint8ClampedArray, src: Uint8ClampedArray): void {
   }
 }
 
+function dilateMask(src: Uint8ClampedArray, radius: number, threshold: number): Uint8Array {
+  const out = new Uint8Array(SIZE * SIZE);
+  for (let y = 0; y < SIZE; y += 1) {
+    for (let x = 0; x < SIZE; x += 1) {
+      let on = 0;
+      for (let dy = -radius; dy <= radius && !on; dy += 1) {
+        const yy = y + dy;
+        if (yy < 0 || yy >= SIZE) continue;
+        for (let dx = -radius; dx <= radius; dx += 1) {
+          const xx = x + dx;
+          if (xx < 0 || xx >= SIZE) continue;
+          if (src[(yy * SIZE + xx) * 4 + 3] > threshold) {
+            on = 1;
+            break;
+          }
+        }
+      }
+      out[y * SIZE + x] = on;
+    }
+  }
+  return out;
+}
+
+function dilateBinary(mask: Uint8Array, radius: number): Uint8Array {
+  const out = new Uint8Array(SIZE * SIZE);
+  for (let y = 0; y < SIZE; y += 1) {
+    for (let x = 0; x < SIZE; x += 1) {
+      if (!mask[y * SIZE + x]) continue;
+      const y0 = Math.max(0, y - radius);
+      const y1 = Math.min(SIZE - 1, y + radius);
+      const x0 = Math.max(0, x - radius);
+      const x1 = Math.min(SIZE - 1, x + radius);
+      for (let yy = y0; yy <= y1; yy += 1) {
+        out.fill(1, yy * SIZE + x0, yy * SIZE + x1 + 1);
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Hair-back layers leave a dark line hugging the jaw on heart faces.
+ * Clear hair that sits just outside the skin. A ponytail hangs farther out, so it stays.
+ */
+function trimStrayStrands(hair: ImageData, onSkin: Uint8Array, halo: Uint8Array): void {
+  const px = hair.data;
+  for (let y = 310; y < SIZE; y += 1) {
+    for (let x = 0; x < SIZE; x += 1) {
+      const p = y * SIZE + x;
+      if (px[p * 4 + 3] < 16) continue;
+      if (onSkin[p]) continue;
+      if (halo[p]) px[p * 4 + 3] = 0;
+    }
+  }
+}
+
+function hatCovers(hat: Uint8ClampedArray, x: number, y: number): boolean {
+  for (let dy = -2; dy <= 2; dy += 1) {
+    const yy = y + dy;
+    if (yy < 0 || yy >= SIZE) return false;
+    for (let dx = -2; dx <= 2; dx += 1) {
+      const xx = x + dx;
+      if (xx < 0 || xx >= SIZE) return false;
+      if (hat[(yy * SIZE + xx) * 4 + 3] < 48) return false;
+    }
+  }
+  return true;
+}
+
+function faceHoleMask(hat: ImageData): Uint8Array {
+  const mask = new Uint8Array(SIZE * SIZE);
+  const a = hat.data;
+  for (let y = 0; y < SIZE; y += 1) {
+    let bestL = -1;
+    let bestR = -1;
+    let bestGap = 0;
+    let prev = -1;
+    for (let x = 0; x < SIZE; x += 1) {
+      if (a[(y * SIZE + x) * 4 + 3] < 180) continue;
+      if (prev >= 0) {
+        const gap = x - prev;
+        if (gap > bestGap) {
+          bestGap = gap;
+          bestL = prev;
+          bestR = x;
+        }
+      }
+      prev = x;
+    }
+    if (bestGap < 28 || bestL < 0) continue;
+    for (let x = bestL + 1; x < bestR; x += 1) mask[y * SIZE + x] = 1;
+  }
+  return mask;
+}
+
+function maskSkinToHole(skin: ImageData, hat: ImageData): void {
+  const hole = faceHoleMask(hat);
+  const px = skin.data;
+  for (let p = 0; p < SIZE * SIZE; p += 1) {
+    if (!hole[p]) px[p * 4 + 3] = 0;
+  }
+}
+
 function clipToHat(hair: ImageData, hat: ImageData, clip: HatClip): void {
   const h = hair.data;
   const a = hat.data;
-  for (let p = 0; p < SIZE * SIZE; p += 1) {
-    const i = p * 4;
-    if (h[i + 3] === 0) continue;
-    const y = (p / SIZE) | 0;
-    if (clip.mode === "crown" && y >= clip.coverBottom) continue;
-    if (a[i + 3] < 36) h[i + 3] = 0;
+  for (let y = 0; y < SIZE; y += 1) {
+    for (let x = 0; x < SIZE; x += 1) {
+      const p = y * SIZE + x;
+      const i = p * 4;
+      if (h[i + 3] === 0) continue;
+      if (clip.mode === "crown" && y >= clip.coverBottom) continue;
+      if (clip.mode === "tuck") {
+        // Close caps hide the hair. Anything outside the cloth is a wisp or a flat shelf.
+        if (!hatCovers(a, x, y)) h[i + 3] = 0;
+        continue;
+      }
+      if (a[i + 3] < 36) h[i + 3] = 0;
+    }
   }
 }
 
@@ -422,16 +558,25 @@ async function compose(req: FaceDrawRequest): Promise<HTMLCanvasElement> {
     clipHairRules(hairFront, face.gender, face.shape, face.hair, true);
   }
 
+  const base = await layerData(`/puppet/layers/skin_base/${shapeKey}.webp`);
+  const onSkin = dilateMask(base.data, 0, 40);
+  const halo = dilateBinary(onSkin, 12);
+  if (hairBack) trimStrayStrands(hairBack, onSkin, halo);
+  if (hairFront) trimStrayStrands(hairFront, onSkin, halo);
   const skin = tintSkin(
-    await layerData(`/puppet/layers/skin_base/${shapeKey}.webp`),
+    base,
     await layerData(`/puppet/layers/skin_shade/${shapeKey}.webp`),
     face.skinHex,
+    shapeKey,
+    face.tone,
+    face.gender,
   );
   if (hairFront && face.hair !== "bald" && face.hair !== "horseshoe" && face.hair !== "none") {
     hideSkinAboveHairline(skin, hairFront, face.hair === "crew");
   }
-  if (req.hat && (hairBack || hairFront)) {
+  if (req.hat && (hairBack || hairFront || req.hat.maskSkinToHole)) {
     const hat = await rasterHat(req.hat);
+    if (req.hat.maskSkinToHole) maskSkinToHole(skin, hat);
     if (hairBack) clipToHat(hairBack, hat, req.hat);
     if (hairFront) clipToHat(hairFront, hat, req.hat);
   }

@@ -196,7 +196,30 @@ export function headwearAdjust(
   if (headwearId.startsWith("baseball_cap")) return { dy: -70, scale: 1 };
   if (headwearId === "ketayap") return { dy: -30, scale: 1 };
   if (headwearId === "turban") return { dy: 0, scale: round ? 1.28 : 1.14 };
+  if (headwearId === "tudung") return { dy: 0, scale: tudungScale(headId) };
   return { dy: 0, scale: 1 };
+}
+
+/** Half-width of each face at its centre. The scarf opening is 132px, so wider faces need a larger tudung or the cheek sticks out. */
+function tudungScale(headId: string): number {
+  const half: Record<string, number> = {
+    f_oval: 130,
+    f_head_1: 130,
+    f_round: 142,
+    f_head_2: 142,
+    f_heart: 150,
+    f_long: 149,
+    m_oval: 160,
+    m_head_1: 160,
+    m_round: 181,
+    m_head_2: 181,
+    m_square: 170,
+    m_head_3: 170,
+    m_long: 146,
+  };
+  const face = half[headId] ?? 140;
+  // Hole a little smaller than the face so the cloth overlaps the cheek.
+  return Math.max(1, ((face * 0.94) / 132));
 }
 
 /** Placed headwear rectangle. Brim hats use `placement.headwear_brim_dy` plus {@link headwearAdjust}. Tudung uses the face hole. */

@@ -96,7 +96,6 @@ const HAIR_F: { id: string; label: string }[] = [
   { id: "long", label: "Panjang" },
   { id: "bouffant", label: "Bouffant" },
   { id: "pixie", label: "Pixie" },
-  { id: "none", label: "Tiada" },
 ];
 
 const FACIAL_HAIR: { id: FacialHairId; label: string }[] = [
@@ -200,7 +199,7 @@ function randomConfig(current?: PuppetConfig): PuppetConfig {
     hair: pick(hairs).id,
     facialHair: gender === "m" ? pick(FACIAL_HAIR).id : "none",
     extra: pick(EXTRAS).id,
-    headwear: pick(HATS).id,
+    headwear: pick(gender === "f" ? HATS : HATS.filter((hat) => hat.id !== "tudung")).id,
     outfit: pick(OUTFITS).id,
     lower: pick(LOWERS).id,
     footwear: pick(FOOTWEAR).id,
@@ -243,6 +242,7 @@ export function PuppetLab() {
   const activeGender = active.gender ?? "m";
   const availableShapes = activeGender === "m" ? SHAPES_M : SHAPES_F;
   const availableHair = activeGender === "m" ? HAIR_M : HAIR_F;
+  const availableHats = activeGender === "f" ? HATS : HATS.filter((hat) => hat.id !== "tudung");
 
   const update = (patch: Partial<PuppetConfig>) => {
     setCast((prev) =>
@@ -250,11 +250,12 @@ export function PuppetLab() {
         if (i !== selected) return cfg;
         const next = { ...cfg, ...patch };
         if (patch.gender && patch.gender !== cfg.gender) {
-          if (patch.gender === "m") {
+            if (patch.gender === "m") {
             if (next.faceShape === "heart") next.faceShape = "oval";
             next.hair = "sidepart";
             next.brows = "thick_arched";
             next.nose = "medium";
+            if (next.headwear === "tudung") next.headwear = null;
           } else {
             if (next.faceShape === "square") next.faceShape = "oval";
             next.hair = "bun";
@@ -465,7 +466,7 @@ export function PuppetLab() {
             {/* Hiasan kepala */}
             <Picker
               legend="Hiasan kepala"
-              options={HATS}
+              options={availableHats}
               value={active.headwear}
               onChange={(headwear) => update({ headwear })}
             />

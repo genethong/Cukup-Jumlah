@@ -291,20 +291,17 @@ function hatClipFor(
   const x = draw.x - hx;
   const y = draw.y - hy;
   const brimPinY = hat.pins.brim ? y + hat.pins.brim[1] * draw.scale : y + draw.h;
+  const closeCap = headwear === "ketayap";
   const coversAll = headwear === "turban" || headwear === "tudung";
-  // Caps keep hair below the band. Ketayap clears the bun around the dome.
-  // Songkok only loses hair that sticks out above the crown.
-  let coverBottom = y + 8;
-  if (headwear === "ketayap") coverBottom = y + draw.h;
-  else if (headwear.startsWith("baseball_cap")) coverBottom = brimPinY - 48;
   return {
     src: rigFileUrl(hat.file),
     x,
     y,
     w: draw.w,
     h: draw.h,
-    mode: coversAll ? "all" : "crown",
-    coverBottom,
+    mode: coversAll ? "all" : closeCap ? "tuck" : "crown",
+    coverBottom: headwear.startsWith("baseball_cap") ? brimPinY - 48 : y + draw.h,
+    maskSkinToHole: headwear === "tudung",
   };
 }
 
@@ -381,10 +378,11 @@ export function PuppetAvatar({
   const lower = config.lower ? rig.parts[`lower/${config.lower}`] : null;
 
   const resolvedHead = resolvedFace.shapeKey;
-  const hat = config.headwear ? rig.parts[`headwear/${config.headwear}`] : null;
-  const hatDraw =
-    config.headwear && hat ? headwearDraw(rig, resolvedHead, config.headwear, frame.torsoX, frame.torsoY) : null;
-  const hatClip = hatClipFor(config.headwear, resolvedHead, frame.torsoX, frame.torsoY);
+  const headwear =
+    config.headwear === "tudung" && resolvedFace.gender === "m" ? null : config.headwear;
+  const hat = headwear ? rig.parts[`headwear/${headwear}`] : null;
+  const hatDraw = headwear && hat ? headwearDraw(rig, resolvedHead, headwear, frame.torsoX, frame.torsoY) : null;
+  const hatClip = hatClipFor(headwear, resolvedHead, frame.torsoX, frame.torsoY);
 
   const neck = torso.pins.neck;
   const torsoX = frame.torsoX;
@@ -542,7 +540,7 @@ export function PuppetAvatar({
               }}
             >
               <PuppetFace face={resolvedFace} hat={hatClip} />
-              {hat && hatDraw && config.headwear && (
+              {hat && hatDraw && headwear && (
                 <img
                   src={rigFileUrl(hat.file)}
                   alt=""
