@@ -174,7 +174,7 @@
         ],
         "hat_brim": [
           183,
-          143
+          172
         ],
         "face_center": [
           183,
@@ -276,13 +276,13 @@
     "headwear/ketayap": {
       "file": "parts/headwear/ketayap.webp",
       "size": [
-        283,
-        195
+        336,
+        205
       ],
       "pins": {
         "brim": [
-          141,
-          187
+          168,
+          196
         ]
       }
     },
@@ -302,13 +302,13 @@
     "headwear/baseball_cap": {
       "file": "parts/headwear/baseball_cap.webp",
       "size": [
-        336,
-        146
+        332,
+        136
       ],
       "pins": {
         "brim": [
-          168,
-          138
+          166,
+          126
         ]
       }
     },
@@ -483,26 +483,26 @@
     "sleeves/business_suit_upper": {
       "file": "parts/sleeves/business_suit_upper.webp",
       "size": [
-        87,
-        205
+        98,
+        224
       ],
       "pins": {
         "shoulder": [
-          44,
-          28
+          49,
+          32
         ]
       }
     },
     "sleeves/business_suit_forearm": {
       "file": "parts/sleeves/business_suit_forearm.webp",
       "size": [
-        110,
-        202
+        88,
+        206
       ],
       "pins": {
         "elbow": [
-          55,
-          20
+          44,
+          22
         ]
       }
     },
@@ -621,7 +621,7 @@
       "songkok": 15,
       "ketayap": 15,
       "turban": 15,
-      "baseball_cap": 12
+      "baseball_cap": 10
     },
     "headwear_note": "place headwear.brim at head.hat_brim + (0, dy)",
     "tudung": "place tudung.face_hole_center at head.face_center",

@@ -71,13 +71,35 @@ function pick<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)] as T;
 }
 
-function randomConfig(): PuppetConfig {
-  const gender: "m" | "f" = Math.random() > 0.5 ? "m" : "f";
-  const headsForGender = HEADS.filter((h) => h.gender === gender);
+function randomConfig(current?: PuppetConfig): PuppetConfig {
+  let attempts = 0;
+  while (attempts < 10) {
+    const gender: "m" | "f" = Math.random() > 0.5 ? "m" : "f";
+    const headsForGender = HEADS.filter((h) => h.gender === gender);
+    const candidate: PuppetConfig = {
+      gender,
+      tone: pick(TONES).id,
+      head: pick(headsForGender).id,
+      headwear: pick(HATS).id,
+      outfit: pick(OUTFITS).id,
+      lower: pick(LOWERS).id,
+    };
+    if (!current) return candidate;
+    // Ensure candidate visibly differs in outfit or head or headwear
+    if (
+      candidate.outfit !== current.outfit ||
+      candidate.head !== current.head ||
+      candidate.headwear !== current.headwear ||
+      candidate.tone !== current.tone
+    ) {
+      return candidate;
+    }
+    attempts++;
+  }
   return {
-    gender,
+    gender: current?.gender === "m" ? "f" : "m",
     tone: pick(TONES).id,
-    head: pick(headsForGender).id,
+    head: pick(HEADS).id,
     headwear: pick(HATS).id,
     outfit: pick(OUTFITS).id,
     lower: pick(LOWERS).id,
@@ -282,13 +304,19 @@ export function PuppetLab() {
 
           <div className="mb-3 flex flex-wrap gap-2">
             <PaperButton
-              onClick={() => update(randomConfig())}
+              onClick={() => {
+                update(randomConfig(active));
+                trigger(selected, "hop");
+              }}
               label="Rawak boneka ini"
             >
               Rawak
             </PaperButton>
             <PaperButton
-              onClick={() => setCast([randomConfig(), randomConfig(), randomConfig()])}
+              onClick={() => {
+                setCast([randomConfig(cast[0]), randomConfig(cast[1]), randomConfig(cast[2])]);
+                trigger(selected, "hop");
+              }}
               label="Rawak ketiga-tiga boneka"
             >
               Rawak semua

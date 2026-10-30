@@ -33,7 +33,7 @@ describe("puppet rig", () => {
       songkok: 15,
       ketayap: 15,
       turban: 15,
-      baseball_cap: 12,
+      baseball_cap: 10,
     });
     expect(puppetRig.placement.lower_waist_dy_from_hips).toEqual({
       songket_samping: -110,
@@ -57,7 +57,7 @@ describe("puppet rig", () => {
 
   it("places songkok, samping, and sarong from the rig offsets", () => {
     expect(headwearOrigin(puppetRig, "m_head_1", "songkok", 0, 0)).toEqual([74, -484]);
-    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-388);
+    expect(headwearOrigin(puppetRig, "m_head_2", "baseball_cap", 0, 0)[1]).toBe(-378);
     expect(lowerOrigin(puppetRig, "songket_samping", 0, 0)).toEqual([29, 394]);
     expect(lowerOrigin(puppetRig, "sarong", 0, 0)).toEqual([-9, 444]);
   });
@@ -92,7 +92,7 @@ describe("puppet rig", () => {
     const sarongHem = lowerHemY(puppetRig, "sarong", 0);
     const sampingHem = lowerHemY(puppetRig, "songket_samping", 0);
     expect(sarongHem).toBeGreaterThan(shoeTop);
-    expect(sampingHem).toBeCloseTo(knee, 0);
+    expect(sampingHem).toBeCloseTo(knee + 14, 0);
   });
 
   it("angles both arms outward from the rest pose", () => {

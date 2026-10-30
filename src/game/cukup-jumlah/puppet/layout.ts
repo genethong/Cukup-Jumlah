@@ -93,7 +93,7 @@ const SARONG_WIDE_FRAC = 0.94;
  * Samping stops at the knee pin.
  */
 export function lowerHemY(rig: PuppetRig, lowerId: string, torsoY: number): number {
-  if (lowerId === "songket_samping") return legJointY(rig, "knee", torsoY);
+  if (lowerId === "songket_samping") return legJointY(rig, "knee", torsoY) + 14;
   const ankle = legJointY(rig, "ankle", torsoY);
   const foot = rig.parts["base/foot"];
   // The foot sprite is bare skin from the top down to about y=100; the brown
