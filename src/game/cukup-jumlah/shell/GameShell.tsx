@@ -386,8 +386,8 @@ function RoundStage({
   const { Game, layout, howTo, beatPins } = microgameFor(round);
   // Play has begun once the beat starts (stand-ins) or the fuse starts burning (games).
   const started = beat > 0 || (timeLeft !== null && timeLeft.share < 0.999);
-  // A full-stage game takes the puppet off until the result is in.
-  const showPuppet = layout !== "full" || moment !== null;
+  // A full-stage game keeps the whole kelir for itself, result stamp included.
+  const showPuppet = layout !== "full";
   const party = PARTIES.find((p) => p.id === candidate.party);
 
   return (

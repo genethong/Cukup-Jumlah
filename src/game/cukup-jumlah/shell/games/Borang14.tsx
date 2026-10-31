@@ -298,7 +298,7 @@ export function Borang14({
       />
 
       {won && (
-        <p className="absolute top-[47%] left-[7%] w-[86%] rotate-[-2deg] rounded-sm bg-[#efe1c3] px-[3cqw] py-[1.6cqw] text-center text-[3.4cqw] font-semibold text-[var(--ink)] italic shadow-[0_4px_8px_rgba(40,14,6,0.3)]">
+        <p className="absolute top-[58%] left-[7%] w-[86%] rotate-[-2deg] rounded-sm bg-[#efe1c3] px-[3cqw] py-[1.6cqw] text-center text-[3.4cqw] font-semibold text-[var(--ink)] italic shadow-[0_4px_8px_rgba(40,14,6,0.3)]">
           ✍️ {T.signed[lang]}
           <br />
           <span className="font-tally text-[4.4cqw] not-italic">

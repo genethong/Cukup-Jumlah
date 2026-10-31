@@ -34,8 +34,8 @@ export type MicrogameProps = {
 
 /**
  * How the shell lays out the stage around a game. `center` keeps the puppet big in the
- * middle; `side` tucks it into the bottom-left; `full` takes the puppet off while the game
- * plays (it comes back for the result stamp).
+ * middle; `side` tucks it into the bottom-left; `full` leaves the puppet off so the game
+ * has the whole kelir.
  */
 export type StageLayout = "center" | "side" | "full";
 
