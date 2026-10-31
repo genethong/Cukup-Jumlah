@@ -507,12 +507,91 @@ function faceHoleMask(hat: ImageData): Uint8Array {
   return mask;
 }
 
-function maskSkinToHole(skin: ImageData, hat: ImageData): void {
-  const hole = faceHoleMask(hat);
+function maskSkinToHole(skin: ImageData, hole: Uint8Array, chin: number): void {
   const px = skin.data;
-  for (let p = 0; p < SIZE * SIZE; p += 1) {
-    if (!hole[p]) px[p * 4 + 3] = 0;
+  for (let y = 0; y < SIZE; y += 1) {
+    // The tudung covers the neck, so the neck tab below the chin goes too.
+    const neckFade = y <= chin ? 1 : Math.max(0, 1 - (y - chin) / 4);
+    for (let x = 0; x < SIZE; x += 1) {
+      const p = y * SIZE + x;
+      if (!hole[p]) px[p * 4 + 3] = 0;
+      else if (neckFade < 1) px[p * 4 + 3] *= neckFade;
+    }
   }
+}
+
+function rowWidth(px: Uint8ClampedArray, y: number): number {
+  let left = -1;
+  let right = -1;
+  for (let x = 0; x < SIZE; x += 1) {
+    if (px[(y * SIZE + x) * 4 + 3] <= 40) continue;
+    if (left < 0) left = x;
+    right = x;
+  }
+  return left < 0 ? 0 : right - left;
+}
+
+/**
+ * First row where the skin base narrows to the neck tab. `headgeo.chin` sits
+ * above the real jaw on some shapes (f_long), and cutting there flattens the chin.
+ */
+function chinFromBase(base: ImageData): number {
+  const neck = rowWidth(base.data, 450);
+  for (let y = 340; y < 450; y += 1) {
+    if (rowWidth(base.data, y) <= neck + 4) return y;
+  }
+  return 420;
+}
+
+/** Mean colour of solid cloth in a thin band just outside the opening. */
+function clothColour(hat: ImageData, hole: Uint8Array): [number, number, number] {
+  const ring = dilateBinary(hole, 14);
+  const a = hat.data;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let n = 0;
+  for (let p = 0; p < SIZE * SIZE; p += 1) {
+    if (!ring[p] || hole[p] || a[p * 4 + 3] < 220) continue;
+    r += a[p * 4];
+    g += a[p * 4 + 1];
+    b += a[p * 4 + 2];
+    n += 1;
+  }
+  return n ? [r / n, g / n, b / n] : [150, 90, 80];
+}
+
+/**
+ * Underscarf (anak tudung) behind the face. The opening is wider than the
+ * cheeks and chin, so without it the stage and the top show through.
+ * Same hue as the tudung, darker, with a soft shadow under the rim.
+ */
+function underscarf(hat: ImageData, hole: Uint8Array): ImageData {
+  const fill = dilateBinary(hole, 3);
+  const [cr, cg, cb] = clothColour(hat, hole);
+  const out = new ImageData(SIZE, SIZE);
+  const d = out.data;
+  for (let y = 0; y < SIZE; y += 1) {
+    let left = -1;
+    let right = -1;
+    for (let x = 0; x < SIZE; x += 1) {
+      if (!fill[y * SIZE + x]) continue;
+      if (left < 0) left = x;
+      right = x;
+    }
+    if (left < 0) continue;
+    for (let x = left; x <= right; x += 1) {
+      const p = y * SIZE + x;
+      if (!fill[p]) continue;
+      const edge = Math.min(x - left, right - x);
+      const k = 0.62 + 0.1 * Math.min(1, edge / 18);
+      d[p * 4] = cr * k;
+      d[p * 4 + 1] = cg * k;
+      d[p * 4 + 2] = cb * k;
+      d[p * 4 + 3] = 255;
+    }
+  }
+  return out;
 }
 
 function clipToHat(hair: ImageData, hat: ImageData, clip: HatClip): void {
@@ -576,7 +655,11 @@ async function compose(req: FaceDrawRequest): Promise<HTMLCanvasElement> {
   }
   if (req.hat && (hairBack || hairFront || req.hat.maskSkinToHole)) {
     const hat = await rasterHat(req.hat);
-    if (req.hat.maskSkinToHole) maskSkinToHole(skin, hat);
+    if (req.hat.maskSkinToHole) {
+      const hole = faceHoleMask(hat);
+      over(out.data, underscarf(hat, hole).data);
+      maskSkinToHole(skin, hole, chinFromBase(base));
+    }
     if (hairBack) clipToHat(hairBack, hat, req.hat);
     if (hairFront) clipToHat(hairFront, hat, req.hat);
   }
