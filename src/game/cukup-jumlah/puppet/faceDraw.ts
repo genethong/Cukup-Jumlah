@@ -165,7 +165,11 @@ function drawMat(img: HTMLImageElement, mat: Mat): ImageData {
   return ctx.getImageData(0, 0, SIZE, SIZE);
 }
 
-function sampleBilinear(src: Uint8ClampedArray, x: number, y: number): [number, number, number, number] {
+function sampleBilinear(
+  src: Uint8ClampedArray,
+  x: number,
+  y: number,
+): [number, number, number, number] {
   if (x < 0 || y < 0 || x > SIZE - 1 || y > SIZE - 1) return [0, 0, 0, 0];
   const x0 = Math.floor(x);
   const y0 = Math.floor(y);
@@ -317,7 +321,8 @@ function tintSkin(
     Number.parseInt(hex.slice(5, 7), 16),
   ];
   const chin = geos[shapeKey]?.chin ?? 420;
-  const lightMale = gender === "m" && (toneId === "tone_1" || toneId === "tone_2" || toneId === "tone_3");
+  const lightMale =
+    gender === "m" && (toneId === "tone_1" || toneId === "tone_2" || toneId === "tone_3");
   const softenLong = shapeKey === "f_long";
   const out = new ImageData(SIZE, SIZE);
   const b = base.data;
@@ -464,6 +469,47 @@ function trimStrayStrands(hair: ImageData, onSkin: Uint8Array, halo: Uint8Array)
       if (px[p * 4 + 3] < 16) continue;
       if (onSkin[p]) continue;
       if (halo[p]) px[p * 4 + 3] = 0;
+    }
+  }
+}
+
+/**
+ * Stretching hair to some face shapes leaves small dark flecks floating by the jaw.
+ * Clear any loose piece smaller than `minPx`; real loose locks (long hair, bouffant) are bigger.
+ * Pieces are found on solid pixels only, since a faint haze can bridge a fleck to the head.
+ */
+export function clearLooseFlecks(px: Uint8ClampedArray, minPx = 800): void {
+  const SOLID = 32;
+  const seen = new Uint8Array(SIZE * SIZE);
+  const stack: number[] = [];
+  const piece: number[] = [];
+  for (let start = 0; start < SIZE * SIZE; start += 1) {
+    if (seen[start] || px[start * 4 + 3] <= SOLID) continue;
+    seen[start] = 1;
+    stack.push(start);
+    piece.length = 0;
+    while (stack.length) {
+      const p = stack.pop()!;
+      piece.push(p);
+      const x = p % SIZE;
+      const near = [x > 0 ? p - 1 : -1, x < SIZE - 1 ? p + 1 : -1, p - SIZE, p + SIZE];
+      for (const q of near) {
+        if (q < 0 || q >= SIZE * SIZE || seen[q] || px[q * 4 + 3] <= SOLID) continue;
+        seen[q] = 1;
+        stack.push(q);
+      }
+    }
+    if (piece.length >= minPx) continue;
+    // Clear the piece and the faint haze around it.
+    for (const p of piece) {
+      const x = p % SIZE;
+      const y = (p - x) / SIZE;
+      for (let yy = Math.max(0, y - 2); yy <= Math.min(SIZE - 1, y + 2); yy += 1) {
+        for (let xx = Math.max(0, x - 2); xx <= Math.min(SIZE - 1, x + 2); xx += 1) {
+          const q = yy * SIZE + xx;
+          if (q === p || px[q * 4 + 3] <= SOLID) px[q * 4 + 3] = 0;
+        }
+      }
     }
   }
 }
@@ -774,6 +820,7 @@ async function compose(req: FaceDrawRequest): Promise<HTMLCanvasElement> {
     if (mole) overMole(out.data, mole.data);
   }
   if (hairFront) over(out.data, hairFront.data);
+  clearLooseFlecks(out.data);
   if ((face.extra === "glasses" || face.extra === "sunglasses") && face.actualExtraFile) {
     const glasses = await blit(face.actualExtraFile, "glasses");
     if (glasses) {
