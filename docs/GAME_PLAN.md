@@ -92,7 +92,7 @@ Verdicts: **Keep** (fine as is, apart from the look), **Fix** (keep the idea, ch
 ## 6. Build order (one PR and preview each; Axel approves each)
 
 1. **Style frame:** one still puppet-show scene at `/dev?lab=panggung` (stage, lamp glow, HUD, puppet, stamp, gunungan). Approve the look.
-2. **Beat clock:** audio-driven timing, Perfect/Good/Miss, latency calibration, test page `/dev?lab=beat`.
+2. **Beat clock:** audio-driven timing, Perfect/Good/Miss, latency calibration, test page `/dev?lab=rentak`.
 3. **New game shell:** screens, HUD, transitions, all text in one BM/EN file, old code removed, parties renamed, endings fixed.
 4. **Slice games, one PR each:** Borang 14 → Goreng Kuey Teow → Celup Dakwat Kekal → Perang Speaker. Playtest on phones.
 5. **The other 13 games** (18, minus 1 cut, minus the 4 slice games) and the endings, then art/audio polish, playtest, lawyer review, launch.
