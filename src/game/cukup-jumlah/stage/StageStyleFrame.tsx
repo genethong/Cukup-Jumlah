@@ -95,8 +95,8 @@ export function StageStyleFrame() {
 
   return (
     <div className="panggung h-dvh overflow-y-auto bg-[#1a0f08] text-[var(--cream)]">
-      <div className="mx-auto flex max-w-5xl flex-col gap-5 px-4 py-5">
-        <header className="flex flex-wrap items-baseline justify-between gap-2">
+      <div className="mx-auto flex max-w-5xl flex-col gap-5 px-4 py-5 lg:grid lg:grid-cols-[auto_1fr] lg:items-start lg:gap-x-8">
+        <header className="flex flex-wrap items-baseline justify-between gap-2 lg:col-span-2">
           <div>
             <p className="font-tally text-[11px] tracking-[0.18em] text-[var(--brass)] uppercase">
               Bingkai gaya · draf
@@ -110,16 +110,22 @@ export function StageStyleFrame() {
 
         <StageBox>
           <Kelir>
-            <Hud deposits={deposits} seats={seats} beat={beat} call={current.call} hint={current.hint} />
+            <Hud
+              deposits={deposits}
+              seats={seats}
+              beat={beat}
+              call={current.call}
+              hint={current.hint}
+            />
 
-            <div className="absolute inset-x-0 bottom-0 flex h-[64%] items-end justify-center">
-              <div className="bayang absolute bottom-[14%] left-[4%] hidden h-[62%] w-[26%] sm:block">
+            <div className="absolute inset-x-0 bottom-0 flex h-[62%] items-end justify-center">
+              <div className="bayang absolute bottom-[16%] left-[-4%] h-[62%] w-[38%]">
                 <PuppetAvatar config={CAST[(scene + 1) % CAST.length]!} anim="idle" />
               </div>
-              <div className="bayang absolute right-[4%] bottom-[14%] h-[58%] w-[30%] sm:w-[26%]">
+              <div className="bayang absolute right-[-4%] bottom-[16%] h-[62%] w-[38%]">
                 <PuppetAvatar config={CAST[(scene + 2) % CAST.length]!} anim="idle" />
               </div>
-              <div className="relative h-full w-[56%] sm:w-[38%]">
+              <div className="relative h-full w-[64%]">
                 <PuppetAvatar config={CAST[scene]!} anim={anim} label="YB anda" />
               </div>
             </div>
@@ -128,7 +134,7 @@ export function StageStyleFrame() {
             {sweep > 0 && (
               <div
                 key={sweep}
-                className="gunungan-sweep pointer-events-none absolute top-1/2 left-1/2 z-30 h-[118%] drop-shadow-[0_18px_18px_rgba(30,12,4,0.55)]"
+                className="gunungan-sweep pointer-events-none absolute top-1/2 left-1/2 z-30 h-[96%] drop-shadow-[0_18px_18px_rgba(30,12,4,0.55)]"
               >
                 <Gunungan className="h-full w-auto" />
               </div>
@@ -136,18 +142,21 @@ export function StageStyleFrame() {
           </Kelir>
         </StageBox>
 
-        <section aria-label="Cuba" className="flex flex-wrap gap-2">
-          <ControlButton onClick={() => fireStamp("padu")}>Cop PADU!</ControlButton>
-          <ControlButton onClick={() => fireStamp("hilang")}>Cop HILANG DEPOSIT!</ControlButton>
-          <ControlButton onClick={fireSweep}>Peralihan gunungan</ControlButton>
-        </section>
+        <div className="flex flex-col gap-5">
+          <section aria-label="Cuba" className="flex flex-wrap gap-2">
+            <ControlButton onClick={() => fireStamp("padu")}>Cop PADU!</ControlButton>
+            <ControlButton onClick={() => fireStamp("hilang")}>Cop HILANG DEPOSIT!</ControlButton>
+            <ControlButton onClick={fireSweep}>Peralihan gunungan</ControlButton>
+          </section>
 
-        <FactCard />
+          <FactCard />
 
-        <p className="copy-pretty max-w-2xl text-sm text-[#cdb79a]">
-          Draf gaya sahaja. Boneka ialah aset sebenar; gunungan, sampul deposit, peti undi dan pelita
-          dilukis dengan kod sebagai pemegang tempat dan akan dilukis semula dalam gaya kertas/felt.
-        </p>
+          <p className="copy-pretty max-w-2xl text-sm text-[#cdb79a]">
+            Draf gaya sahaja. Boneka ialah aset sebenar; gunungan, sampul deposit, peti undi dan
+            pelita dilukis dengan kod sebagai pemegang tempat dan akan dilukis semula dalam gaya
+            kertas/felt. Pentas sentiasa 9:16 (potret) pada semua peranti.
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -156,20 +165,22 @@ export function StageStyleFrame() {
 function StageBox({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative rounded-[18px] p-[10px] shadow-[0_24px_40px_rgba(0,0,0,0.55)] sm:p-[14px]"
+      className="relative mx-auto w-full max-w-[min(100%,calc((100dvh-8rem)*9/16))] min-w-[280px] rounded-[18px] p-[10px] shadow-[0_24px_40px_rgba(0,0,0,0.55)] lg:w-[min(440px,calc((100dvh-8rem)*9/16))]"
       style={{
         background:
           "linear-gradient(160deg, var(--wood-light), var(--wood) 35%, var(--wood-dark) 100%)",
       }}
     >
       <div className="pointer-events-none absolute inset-[5px] rounded-[14px] border-2 border-[var(--brass)]/60" />
-      {(["top-1 left-1", "top-1 right-1", "bottom-1 left-1", "bottom-1 right-1"] as const).map((pos) => (
-        <span
-          key={pos}
-          className={`beat-pin absolute ${pos} z-10 h-3 w-3 rounded-full sm:h-3.5 sm:w-3.5`}
-          aria-hidden="true"
-        />
-      ))}
+      {(["top-1 left-1", "top-1 right-1", "bottom-1 left-1", "bottom-1 right-1"] as const).map(
+        (pos) => (
+          <span
+            key={pos}
+            className={`beat-pin absolute ${pos} z-10 h-3 w-3 rounded-full`}
+            aria-hidden="true"
+          />
+        ),
+      )}
       {children}
     </div>
   );
@@ -177,7 +188,7 @@ function StageBox({ children }: { children: React.ReactNode }) {
 
 function Kelir({ children }: { children: React.ReactNode }) {
   return (
-    <div className="kelir relative aspect-[3/4] w-full overflow-hidden rounded-[8px] sm:aspect-[16/10]">
+    <div className="kelir @container relative aspect-[9/16] w-full overflow-hidden rounded-[8px]">
       <div className="kelir-glow pointer-events-none absolute inset-0" />
       <Pelita />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[14%] bg-gradient-to-t from-[#6e4426]/35 to-transparent" />
@@ -190,12 +201,25 @@ function Pelita() {
   return (
     <svg
       viewBox="0 0 40 50"
-      className="pointer-events-none absolute top-0 left-1/2 h-[9%] -translate-x-1/2"
+      className="pointer-events-none absolute top-[1%] left-1/2 h-[6%] -translate-x-1/2"
       aria-hidden="true"
     >
-      <path className="pelita-flame" d="M20 4 C27 16 28 24 20 30 C12 24 13 16 20 4 Z" fill="#ffb347" />
-      <path className="pelita-flame" d="M20 13 C24 20 24 25 20 28 C16 25 16 20 20 13 Z" fill="#fff1c4" />
-      <path d="M6 32 Q20 44 34 32 L31 38 Q20 47 9 38 Z" fill="#9d7a2f" stroke="#5d4415" strokeWidth="1.5" />
+      <path
+        className="pelita-flame"
+        d="M20 4 C27 16 28 24 20 30 C12 24 13 16 20 4 Z"
+        fill="#ffb347"
+      />
+      <path
+        className="pelita-flame"
+        d="M20 13 C24 20 24 25 20 28 C16 25 16 20 20 13 Z"
+        fill="#fff1c4"
+      />
+      <path
+        d="M6 32 Q20 44 34 32 L31 38 Q20 47 9 38 Z"
+        fill="#9d7a2f"
+        stroke="#5d4415"
+        strokeWidth="1.5"
+      />
     </svg>
   );
 }
@@ -215,32 +239,40 @@ function Hud({
 }) {
   return (
     <>
-      <div className="absolute top-[3%] left-[3%] z-20 flex gap-1 sm:gap-1.5" aria-label={`Deposit tinggal ${deposits}`}>
+      <div
+        className="absolute top-[2.5%] left-[4%] z-20 flex gap-[1.5cqw]"
+        aria-label={`Deposit tinggal ${deposits}`}
+      >
         {[0, 1, 2].map((i) => (
           <DepositEnvelope key={i} lost={i >= deposits} />
         ))}
       </div>
 
-      <div className="absolute top-[3%] right-[3%] z-20" aria-label={`${seats} daripada ${SEAT_GOAL} kerusi`}>
+      <div
+        className="absolute top-[2.5%] right-[4%] z-20"
+        aria-label={`${seats} daripada ${SEAT_GOAL} kerusi`}
+      >
         <BallotBox seats={seats} />
       </div>
 
-      <div className="absolute top-[14%] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 sm:top-[12%]">
+      <div className="absolute top-[12%] left-1/2 z-20 flex w-[90%] -translate-x-1/2 flex-col items-center gap-[2cqw]">
         <div
-          className="bg-[var(--sambal)] px-6 py-1.5 text-[var(--cream)] shadow-[0_4px_6px_rgba(40,14,6,0.35)] sm:px-9"
+          className="bg-[var(--sambal)] px-[9cqw] py-[1.2cqw] text-[var(--cream)] shadow-[0_4px_6px_rgba(40,14,6,0.35)]"
           style={{ clipPath: "polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%)" }}
         >
-          <span className="font-display text-3xl font-bold italic tracking-tight sm:text-5xl">{call}</span>
+          <span className="font-display text-[12cqw] leading-tight font-bold italic tracking-tight">
+            {call}
+          </span>
         </div>
-        <span className="rounded-sm bg-[#fbf3e4]/85 px-2 py-0.5 text-center text-xs font-medium text-[var(--ink)] sm:text-sm">
+        <span className="rounded-sm bg-[#fbf3e4]/85 px-[2cqw] py-[0.5cqw] text-center text-[3.8cqw] font-medium text-[var(--ink)]">
           {hint}
         </span>
-        <div className="flex gap-2.5 pt-1" aria-label={`Ketukan ${beat}`}>
+        <div className="flex items-center gap-[3cqw] pt-[1cqw]" aria-label={`Ketukan ${beat}`}>
           {[1, 2, 3, 4].map((n) => (
             <span
               key={n}
               data-on={n === beat}
-              className={`beat-pin rounded-full transition-transform duration-100 ${n === 4 ? "h-4 w-4" : "h-3 w-3"}`}
+              className={`beat-pin rounded-full transition-transform duration-100 ${n === 4 ? "h-[4.4cqw] w-[4.4cqw]" : "h-[3.2cqw] w-[3.2cqw]"}`}
             />
           ))}
         </div>
@@ -253,15 +285,32 @@ function DepositEnvelope({ lost }: { lost: boolean }) {
   return (
     <svg
       viewBox="0 0 64 44"
-      className={`h-6 w-auto drop-shadow-[0_3px_3px_rgba(40,14,6,0.35)] transition-all duration-300 sm:h-11 ${
+      className={`h-[7cqw] w-auto drop-shadow-[0_3px_3px_rgba(40,14,6,0.35)] transition-all duration-300 ${
         lost ? "translate-y-1 rotate-6 opacity-30 grayscale" : ""
       }`}
       aria-hidden="true"
     >
-      <rect x="2" y="4" width="60" height="38" rx="2" fill="#d8b98a" stroke="#7a5a32" strokeWidth="1.5" />
+      <rect
+        x="2"
+        y="4"
+        width="60"
+        height="38"
+        rx="2"
+        fill="#d8b98a"
+        stroke="#7a5a32"
+        strokeWidth="1.5"
+      />
       <path d="M2 6 L32 24 L62 6" fill="#c9a774" stroke="#7a5a32" strokeWidth="1.5" />
       <circle cx="32" cy="24" r="4" fill="#8a1c19" />
-      <text x="32" y="38" textAnchor="middle" fontSize="8.5" fontWeight="700" fill="#3a2410" fontFamily="Oswald, Impact, sans-serif">
+      <text
+        x="32"
+        y="38"
+        textAnchor="middle"
+        fontSize="8.5"
+        fontWeight="700"
+        fill="#3a2410"
+        fontFamily="Oswald, Impact, sans-serif"
+      >
         RM10,000
       </text>
     </svg>
@@ -271,27 +320,56 @@ function DepositEnvelope({ lost }: { lost: boolean }) {
 function BallotBox({ seats }: { seats: number }) {
   const fill = Math.min(1, seats / SEAT_GOAL);
   return (
-    <div className="flex items-end gap-1.5">
-      <svg viewBox="0 0 54 60" className="h-11 w-auto drop-shadow-[0_3px_3px_rgba(40,14,6,0.35)] sm:h-14" aria-hidden="true">
+    <div className="flex items-end gap-[1.5cqw]">
+      <svg
+        viewBox="0 0 54 60"
+        className="h-[12cqw] w-auto drop-shadow-[0_3px_3px_rgba(40,14,6,0.35)]"
+        aria-hidden="true"
+      >
         <defs>
           <clipPath id="ballot-inside">
             <rect x="6" y="14" width="42" height="42" />
           </clipPath>
         </defs>
-        <rect x="4" y="12" width="46" height="46" rx="2" fill="#efe1c3" stroke="#5a3a1c" strokeWidth="2" />
+        <rect
+          x="4"
+          y="12"
+          width="46"
+          height="46"
+          rx="2"
+          fill="#efe1c3"
+          stroke="#5a3a1c"
+          strokeWidth="2"
+        />
         <g clipPath="url(#ballot-inside)">
-          <rect x="6" y={56 - 42 * fill} width="42" height={42 * fill} fill="#c56e61" opacity="0.85" />
+          <rect
+            x="6"
+            y={56 - 42 * fill}
+            width="42"
+            height={42 * fill}
+            fill="#c56e61"
+            opacity="0.85"
+          />
           {Array.from({ length: 6 }, (_, i) => (
-            <line key={i} x1="6" x2="48" y1={56 - i * 7} y2={56 - i * 7} stroke="#783c2d" strokeWidth="0.8" opacity="0.5" />
+            <line
+              key={i}
+              x1="6"
+              x2="48"
+              y1={56 - i * 7}
+              y2={56 - i * 7}
+              stroke="#783c2d"
+              strokeWidth="0.8"
+              opacity="0.5"
+            />
           ))}
         </g>
         <rect x="2" y="6" width="50" height="8" rx="1.5" fill="#5a3a1c" />
         <rect x="16" y="9" width="22" height="2.5" rx="1" fill="#1a0f08" />
         <path d="M22 2 L32 2 L31 9 L23 9 Z" fill="#fbf3e4" stroke="#7a5a32" strokeWidth="1" />
       </svg>
-      <div className="rounded-sm bg-[#fbf3e4]/90 px-1.5 py-0.5 text-right leading-none text-[var(--ink)]">
-        <div className="font-tally text-lg sm:text-2xl">{seats}</div>
-        <div className="font-tally text-[10px] text-[#6a4a32] sm:text-xs">/ {SEAT_GOAL} kerusi</div>
+      <div className="rounded-sm bg-[#fbf3e4]/90 px-[1.5cqw] py-[0.8cqw] text-right leading-none text-[var(--ink)]">
+        <div className="font-tally text-[6.5cqw]">{seats}</div>
+        <div className="font-tally text-[2.8cqw] text-[#6a4a32]">/ {SEAT_GOAL} kerusi</div>
       </div>
     </div>
   );
@@ -305,9 +383,17 @@ function CutStamp({ kind }: { kind: Stamp["kind"] }) {
     return `${60 + Math.cos(a) * r * 1.15},${50 + Math.sin(a) * r * 0.85}`;
   }).join(" ");
   return (
-    <div className="stamp-pop pointer-events-none absolute top-[48%] left-1/2 z-40 w-[62%] sm:w-[36%]" role="status">
+    <div
+      className="stamp-pop pointer-events-none absolute top-[50%] left-1/2 z-40 w-[78%]"
+      role="status"
+    >
       <svg viewBox="0 0 120 100" className="w-full drop-shadow-[0_6px_6px_rgba(40,14,6,0.45)]">
-        <polygon points={points} fill={padu ? "#e8b04a" : "#8a1c19"} stroke="#3a1f0f" strokeWidth="2" />
+        <polygon
+          points={points}
+          fill={padu ? "#e8b04a" : "#8a1c19"}
+          stroke="#3a1f0f"
+          strokeWidth="2"
+        />
         <polygon
           points={points}
           fill="none"
@@ -329,7 +415,16 @@ function CutStamp({ kind }: { kind: Stamp["kind"] }) {
           {padu ? "PADU!" : "HILANG"}
         </text>
         {!padu && (
-          <text x="60" y="64" textAnchor="middle" fontFamily="Fraunces, Georgia, serif" fontStyle="italic" fontWeight="700" fontSize="15" fill="#f6ead8">
+          <text
+            x="60"
+            y="64"
+            textAnchor="middle"
+            fontFamily="Fraunces, Georgia, serif"
+            fontStyle="italic"
+            fontWeight="700"
+            fontSize="15"
+            fill="#f6ead8"
+          >
             DEPOSIT!
           </text>
         )}
@@ -341,11 +436,16 @@ function CutStamp({ kind }: { kind: Stamp["kind"] }) {
 function FactCard() {
   return (
     <aside className="relative max-w-xl rounded-sm bg-[#efe1c3] px-5 py-4 text-[var(--ink)] shadow-[0_8px_14px_rgba(0,0,0,0.4)]">
-      <span className="beat-pin absolute top-2 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full" aria-hidden="true" />
-      <p className="font-tally text-[11px] tracking-[0.16em] text-[#8a1c19] uppercase">Fakta antara pusingan</p>
+      <span
+        className="beat-pin absolute top-2 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full"
+        aria-hidden="true"
+      />
+      <p className="font-tally text-[11px] tracking-[0.16em] text-[#8a1c19] uppercase">
+        Fakta antara pusingan
+      </p>
       <p className="copy-pretty mt-1 font-display text-lg font-semibold">
-        Calon Parlimen membayar deposit RM10,000. Deposit itu hangus jika calon mendapat 1/8 undi atau
-        kurang.
+        Calon Parlimen membayar deposit RM10,000. Deposit itu hangus jika calon mendapat 1/8 undi
+        atau kurang.
       </p>
     </aside>
   );
