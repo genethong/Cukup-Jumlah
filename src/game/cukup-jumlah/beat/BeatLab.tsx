@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type PointerEvent } from "rea
 import { Link } from "@tanstack/react-router";
 import { PuppetAvatar } from "../puppet/PuppetAvatar";
 import type { PuppetConfig } from "../puppet/loadRig";
+import { DEFAULT_PUPPET, loadCandidate } from "../creator/candidate";
 import type { PuppetAnim } from "../puppet/motion";
 import {
   BeatPins,
@@ -35,16 +36,6 @@ const CALIBRATION_BEATS = 14;
 const HISTORY = 12;
 const COUNT_CALLS = ["SATU", "DUA", "TIGA", "TEPUK!"] as const;
 
-const YB: PuppetConfig = {
-  gender: "m",
-  tone: "tone_5",
-  faceShape: "oval",
-  hair: "sidepart",
-  headwear: "songkok",
-  outfit: "baju_melayu",
-  lower: "songket_samping",
-};
-
 type Tap = { offsetMs: number; grade: Grade };
 type Stamp = { lines: readonly string[]; tone: StampTone; token: number };
 
@@ -58,6 +49,7 @@ const STAMPS: Record<Grade | "terlepas", { lines: readonly string[]; tone: Stamp
 export function BeatLab() {
   const [mode, setMode] = useState<Mode>("idle");
   const [mesra, setMesra] = useState(false);
+  const [yb, setYb] = useState<PuppetConfig>(DEFAULT_PUPPET);
   const [offsetMs, setOffsetMs] = useState(0);
   const [beat, setBeat] = useState(0);
   const [taps, setTaps] = useState<Tap[]>([]);
@@ -80,6 +72,14 @@ export function BeatLab() {
     const saved = loadOffsetMs();
     offsetRef.current = saved;
     setOffsetMs(saved);
+  }, []);
+
+  // Use the candidate made backstage, if this device has one.
+  useEffect(() => {
+    const saved = loadCandidate();
+    if (!saved) return;
+    setYb(saved.puppet);
+    setMesra(saved.talent === "mesra_rakyat");
   }, []);
 
   useEffect(() => {
@@ -264,8 +264,8 @@ export function BeatLab() {
             </p>
             <h1 className="font-display text-2xl font-bold sm:text-3xl">Rentak Dalang</h1>
           </div>
-          <Link to="/dev" search={{ lab: "panggung" }} className="text-sm font-bold underline">
-            Panggung →
+          <Link to="/dev" search={{ lab: "belakang" }} className="text-sm font-bold underline">
+            ← Belakang Tabir
           </Link>
         </header>
 
@@ -283,7 +283,7 @@ export function BeatLab() {
 
             <div className="absolute inset-x-0 bottom-0 flex h-[62%] items-end justify-center">
               <div className="relative h-full w-[64%]">
-                <PuppetAvatar config={YB} anim={anim} label="YB anda" />
+                <PuppetAvatar config={yb} anim={anim} label="YB anda" />
               </div>
             </div>
 

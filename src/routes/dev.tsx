@@ -5,13 +5,24 @@ import { PuppetLab } from "@/game/cukup-jumlah/puppet/PuppetLab";
 import { PuppetSheet } from "@/game/cukup-jumlah/puppet/PuppetSheet";
 import { StageStyleFrame } from "@/game/cukup-jumlah/stage/StageStyleFrame";
 import { BeatLab } from "@/game/cukup-jumlah/beat/BeatLab";
+import { Backstage } from "@/game/cukup-jumlah/creator/Backstage";
+import { OptionAudit } from "@/game/cukup-jumlah/puppet/OptionAudit";
 import { HeadGridInspector } from "@/game/cukup-jumlah/voxel/HeadGridInspector";
 import { StageComparisonViewer } from "@/game/cukup-jumlah/voxel/StageComparisonViewer";
 import { VoxelComparisonViewer } from "@/game/cukup-jumlah/voxel/VoxelComparisonViewer";
 import type { StageStyleOption } from "@/game/cukup-jumlah/voxel/stageBuilder";
 import type { VoxelStyleOption } from "@/game/cukup-jumlah/voxel/voxelBuilder";
 
-const LABS = ["head", "character", "stage", "puppet", "panggung", "rentak"] as const;
+const LABS = [
+  "head",
+  "character",
+  "stage",
+  "puppet",
+  "panggung",
+  "rentak",
+  "belakang",
+  "audit",
+] as const;
 type LabId = (typeof LABS)[number];
 
 const LAB_LABEL: Record<LabId, string> = {
@@ -21,6 +32,8 @@ const LAB_LABEL: Record<LabId, string> = {
   puppet: "Wayang",
   panggung: "Panggung",
   rentak: "Rentak",
+  belakang: "Belakang Tabir",
+  audit: "Audit pilihan",
 };
 
 const sampleProfile: CandidateProfile = {
@@ -76,6 +89,8 @@ function DevLabPage() {
   if (lab === "puppet") return <PuppetLab />;
   if (lab === "panggung") return <StageStyleFrame />;
   if (lab === "rentak") return <BeatLab />;
+  if (lab === "belakang") return <Backstage />;
+  if (lab === "audit") return <OptionAudit />;
 
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100">
