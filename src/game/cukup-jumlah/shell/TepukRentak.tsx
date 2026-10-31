@@ -7,6 +7,7 @@ import {
   nearestTarget,
 } from "../beat/timing";
 import { canang, gendangHit, gendangMiss, gong, kesi } from "../beat/wayangSounds";
+import { leadInStep, scheduleLeadIn } from "./leadIn";
 import type { MicrogameProps } from "./microgame";
 import { UI } from "./strings";
 
@@ -22,11 +23,12 @@ export function TepukRentak({
   bars,
   offsetMs,
   onBeat,
+  onLeadIn,
   onJudge,
   onFinish,
 }: MicrogameProps) {
-  const callbacks = useRef({ onBeat, onJudge, onFinish });
-  callbacks.current = { onBeat, onJudge, onFinish };
+  const callbacks = useRef({ onBeat, onLeadIn, onJudge, onFinish });
+  callbacks.current = { onBeat, onLeadIn, onJudge, onFinish };
   const mesra = talent === "mesra_rakyat";
   const targets = useRef<number[]>([]);
   const judged = useRef(new Set<number>());
@@ -41,7 +43,7 @@ export function TepukRentak({
     );
     const lastBeat = (bars + 1) * BEATS_PER_BAR;
     void clock.begin((index, when, out) => {
-      if (index >= lastBeat) return;
+      if (index >= lastBeat || scheduleLeadIn(clock.ctx, out, index, when)) return;
       const inBar = index % BEATS_PER_BAR;
       if (inBar === 0) gong(clock.ctx, out, when);
       else if (inBar === HIT_BEAT_IN_BAR) canang(clock.ctx, out, when);
@@ -57,6 +59,7 @@ export function TepukRentak({
     };
 
     let raf = 0;
+    let step = -1;
     const frame = () => {
       // The clock starts a moment after mount, once the audio context has resumed.
       if (!clock.running) {
@@ -64,6 +67,10 @@ export function TepukRentak({
         return;
       }
       const pos = (clock.heardTime() - clock.start) / clock.spb;
+      if (leadInStep(pos) !== step) {
+        step = leadInStep(pos);
+        callbacks.current.onLeadIn?.(step);
+      }
       callbacks.current.onBeat(
         pos < 0 || pos >= lastBeat ? 0 : (Math.floor(pos) % BEATS_PER_BAR) + 1,
       );

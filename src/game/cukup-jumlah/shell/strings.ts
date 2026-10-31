@@ -53,6 +53,7 @@ export const UI = {
   tapHint: { ms: "Tepuk pada ketukan ke-4", en: "Tap on beat 4" },
   tapPad: { ms: "Pad tepuk", en: "Tap pad" },
   ready: { ms: "SEDIA...", en: "READY..." },
+  go: { ms: "MULA!", en: "GO!" },
   comingSoon: {
     ms: "Permainan sebenar akan datang · tepuk pada ketukan ke-4",
     en: "Real game coming soon · tap on beat 4",

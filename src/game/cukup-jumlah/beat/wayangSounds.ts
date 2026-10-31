@@ -147,3 +147,10 @@ export function paperSlap(ctx: BaseAudioContext, out: AudioNode, when: number) {
 export function tick(ctx: BaseAudioContext, out: AudioNode, when: number) {
   ring(ctx, out, when, [{ freq: 1250, gain: 0.12, decay: 0.04 }], "square");
 }
+
+/** The dalang's cempala: a hard wooden knocker struck on the puppet chest to cue the show. */
+export function cempala(ctx: BaseAudioContext, out: AudioNode, when: number, loud = false) {
+  noiseBurst(ctx, out, when, "bandpass", 1350, 3, loud ? 0.55 : 0.4, 0.045);
+  thump(ctx, out, when, 820, 420, loud ? 0.32 : 0.22, 0.06);
+  ring(ctx, out, when, [{ freq: 610, gain: 0.05, decay: 0.08 }], "triangle");
+}

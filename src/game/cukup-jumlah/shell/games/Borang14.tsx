@@ -4,13 +4,13 @@ import {
   gendangDum,
   gendangMiss,
   gendangTak,
-  gong,
   kesi,
   paperSlap,
   tick,
 } from "../../beat/wayangSounds";
 import { PARTIES, type Party } from "../../creator/candidate";
 import type { MicrogameProps } from "../microgame";
+import { LEAD_IN_BEATS, leadInStep, scheduleLeadIn } from "../leadIn";
 import { GAME_TEXT, fill, type Lang } from "../strings";
 import {
   BALLOTS,
@@ -27,7 +27,7 @@ import {
 } from "./borang14Rules";
 
 const T = GAME_TEXT.borang14;
-const FLY_MS = 140;
+const FLY_MS = 260;
 /** Ten ballots need about a second each: two bars more than the shell's default. */
 const EXTRA_BARS = 2;
 /** The fuse starts ticking with this many seconds left. */
@@ -47,12 +47,13 @@ export function Borang14({
   lang,
   talent,
   bars,
+  onLeadIn,
   onTimeLeft,
   onJudge,
   onFinish,
 }: MicrogameProps) {
-  const callbacks = useRef({ onTimeLeft, onJudge, onFinish });
-  callbacks.current = { onTimeLeft, onJudge, onFinish };
+  const callbacks = useRef({ onLeadIn, onTimeLeft, onJudge, onFinish });
+  callbacks.current = { onLeadIn, onTimeLeft, onJudge, onFinish };
   const freeMistakes = talent === "mesra_rakyat" ? 1 : 0;
   const [ballots] = useState(() => ballotSequence(BALLOTS));
   const [rivalParty] = useState(() => {
@@ -63,13 +64,13 @@ export function Borang14({
 
   const [live, setLive] = useState(false);
   const [count, setCount] = useState<Count>(EMPTY_COUNT);
-  const [flying, setFlying] = useState<Pile | null>(null);
+  // Thrown ballots fly to their pile as separate pieces, so the next one is up at once.
+  const [flyers, setFlyers] = useState<Flyer[]>([]);
   const [wrong, setWrong] = useState(0);
   const [won, setWon] = useState(false);
 
   const countRef = useRef<Count>(EMPTY_COUNT);
   const liveRef = useRef(false);
-  const busy = useRef(false);
   const done = useRef(false);
   const card = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; width: number } | null>(null);
@@ -88,8 +89,7 @@ export function Borang14({
   useEffect(() => {
     const limitS = (bars + EXTRA_BARS) * BEATS_PER_BAR * clock.spb;
     void clock.begin((index, when, out) => {
-      if (index === 0) gong(clock.ctx, out, when);
-      if (index < BEATS_PER_BAR) return;
+      if (scheduleLeadIn(clock.ctx, out, index, when)) return;
       if (index % 2 === 0) gendangDum(clock.ctx, out, when);
       else gendangTak(clock.ctx, out, when);
       kesi(clock.ctx, out, when + clock.spb / 2);
@@ -97,13 +97,20 @@ export function Borang14({
 
     let raf = 0;
     let nextTick = 0;
+    let step = -1;
     const frame = () => {
       if (done.current) return;
       if (!clock.running) {
         raf = requestAnimationFrame(frame);
         return;
       }
-      const playS = clock.heardTime() - clock.start - BEATS_PER_BAR * clock.spb;
+      const heardBeats = (clock.heardTime() - clock.start) / clock.spb;
+      const nextStep = leadInStep(heardBeats);
+      if (nextStep !== step) {
+        step = nextStep;
+        callbacks.current.onLeadIn?.(step);
+      }
+      const playS = clock.heardTime() - clock.start - LEAD_IN_BEATS * clock.spb;
       if (playS >= 0 && !liveRef.current) {
         liveRef.current = true;
         setLive(true);
@@ -135,8 +142,8 @@ export function Borang14({
     el.style.transform = `translateX(${dx}px) rotate(${dx / 12}deg)`;
   };
 
-  const throwTo = (pile: Pile) => {
-    if (!liveRef.current || done.current || busy.current) return;
+  const throwTo = (pile: Pile, fromX = 0) => {
+    if (!liveRef.current || done.current) return;
     const index = sorted(countRef.current);
     const { count: next, correct } = sortBallot(countRef.current, ballots, index, pile);
     countRef.current = next;
@@ -152,14 +159,13 @@ export function Borang14({
     }
     paperSlap(clock.ctx, clock.out, now);
     buzz(12);
-    callbacks.current.onJudge("perfect");
-    busy.current = true;
-    setFlying(pile);
-    window.setTimeout(() => {
-      busy.current = false;
-      setFlying(null);
-      if (verdict(countRef.current, BALLOTS, false) === "won") finishRef.current(true);
-    }, FLY_MS);
+    callbacks.current.onJudge(next.streak >= COMBO_AT ? "perfect" : "good");
+    const flyer: Flyer = { id: index, pile, marked: ballots[index]!, fromX };
+    setFlyers((f) => [...f, flyer]);
+    window.setTimeout(() => setFlyers((f) => f.filter((x) => x !== flyer)), FLY_MS);
+    // The next ballot is already up; the card resets for it.
+    setCardX(0, false);
+    if (verdict(next, BALLOTS, false) === "won") finish(true);
   };
 
   useEffect(() => {
@@ -175,7 +181,7 @@ export function Borang14({
 
   // The card follows the finger by writing its transform directly: no re-render per move.
   const onDown = (e: PointerEvent<HTMLDivElement>) => {
-    if (!liveRef.current || busy.current || done.current) return;
+    if (!liveRef.current || done.current) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -190,9 +196,15 @@ export function Borang14({
     const start = drag.current;
     drag.current = null;
     if (!start) return;
-    const pile = pileForSwipe(e.clientX - start.x, start.width);
-    if (pile) throwTo(pile);
+    const dx = e.clientX - start.x;
+    const pile = pileForSwipe(dx, start.width);
+    if (pile) throwTo(pile, dx);
     else setCardX(0, true);
+  };
+  // A cancelled touch (the browser took it over) never counts as a throw.
+  const onCancel = () => {
+    drag.current = null;
+    setCardX(0, true);
   };
 
   const index = sorted(count);
@@ -224,22 +236,10 @@ export function Borang14({
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
-          onPointerCancel={onUp}
+          onPointerCancel={onCancel}
           className="absolute top-[45%] left-[15%] w-[70%] cursor-grab touch-none"
         >
-          <div
-            key={wrong}
-            className={`ballot-show ${wrong ? "ballot-shake" : ""}`}
-            style={
-              flying
-                ? {
-                    transform: `translate(${flying === "yours" ? "-60%" : "60%"}, 120%) rotate(${flying === "yours" ? -25 : 25}deg) scale(0.35)`,
-                    opacity: 0,
-                    transition: `transform ${FLY_MS}ms ease-in, opacity ${FLY_MS}ms ease-in`,
-                  }
-                : undefined
-            }
-          >
+          <div key={wrong} className={`ballot-show ${wrong ? "ballot-shake" : ""}`}>
             <BallotPaper
               marked={current}
               lang={lang}
@@ -253,6 +253,27 @@ export function Borang14({
           </div>
         </div>
       )}
+
+      {flyers.map((f) => (
+        <div
+          key={`fly-${f.id}`}
+          className="pointer-events-none absolute top-[45%] left-[15%] z-20 w-[70%]"
+          style={{ transform: `translateX(${f.fromX}px)` }}
+        >
+          <div className={f.pile === "yours" ? "ballot-fly-left" : "ballot-fly-right"}>
+            <BallotPaper
+              marked={f.marked}
+              lang={lang}
+              you={{ name: candidate.name, party: yourParty }}
+              rival={{
+                name: fill(T.rivalName[lang], { party: rivalParty.name }),
+                party: rivalParty,
+              }}
+              helper={false}
+            />
+          </div>
+        </div>
+      ))}
 
       {live && !won && (
         <p className="absolute top-[40.5%] left-1/2 -translate-x-1/2 font-tally text-[3.6cqw] text-[#6a4a32]">
@@ -284,7 +305,7 @@ export function Borang14({
         label={T.yours[lang]}
         n={count.yours}
         mark="yours"
-        bump={flying === "yours"}
+        bump={flyers.some((f) => f.pile === "yours")}
         onTap={() => throwTo("yours")}
       />
       <PileTray
@@ -293,7 +314,7 @@ export function Borang14({
         label={T.rival[lang]}
         n={count.rival}
         mark="rival"
-        bump={flying === "rival"}
+        bump={flyers.some((f) => f.pile === "rival")}
         onTap={() => throwTo("rival")}
       />
 
@@ -311,6 +332,8 @@ export function Borang14({
 }
 
 type Row = { name: string; party: Party };
+
+type Flyer = { id: number; pile: Pile; marked: Pile; fromX: number };
 
 /** A paper ballot: two candidates, the X in the box of the one voted for. */
 function BallotPaper({
@@ -378,7 +401,7 @@ function MiniBallot({ i, mark }: { i: number; mark: Pile }) {
   const shift = ((i * 53) % 7) - 3;
   return (
     <div
-      className="absolute left-1/2 h-[9cqw] w-[24cqw] rounded-[1px] border border-[#cdbb96] bg-[#fdfaf2] shadow-[0_1px_2px_rgba(40,14,6,0.3)]"
+      className="absolute left-1/2 h-[8cqw] w-[21cqw] rounded-[1px] border border-[#cdbb96] bg-[#fdfaf2] shadow-[0_1px_2px_rgba(40,14,6,0.3)]"
       style={{
         bottom: `${2 + i * 1.1}cqw`,
         transform: `translateX(calc(-50% + ${shift}cqw)) rotate(${tilt}deg)`,
@@ -418,8 +441,8 @@ function PileTray({
       type="button"
       onClick={onTap}
       aria-label={`${label}: ${n}`}
-      className={`absolute bottom-[3%] h-[25%] w-[44%] rounded-sm border-[0.8cqw] bg-[#efe1c3]/90 text-[var(--ink)] shadow-[0_6px_10px_rgba(40,14,6,0.35)] transition-transform duration-100 ${
-        side === "left" ? "left-[4%]" : "right-[4%]"
+      className={`absolute bottom-[3%] h-[25%] w-[35%] rounded-sm border-[0.8cqw] bg-[#efe1c3]/90 text-[var(--ink)] shadow-[0_6px_10px_rgba(40,14,6,0.35)] transition-transform duration-100 ${
+        side === "left" ? "left-[3%]" : "right-[3%]"
       } ${bump ? "scale-[1.06]" : ""}`}
       style={{ borderColor: party.colour }}
     >

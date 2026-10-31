@@ -350,6 +350,7 @@ function RoundStage({
   const [moment, setMoment] = useState<Moment | null>(null);
   const [sweep, setSweep] = useState(0);
   const [timeLeft, setTimeLeft] = useState<{ share: number; seconds: number } | null>(null);
+  const [leadIn, setLeadIn] = useState(0);
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
 
@@ -361,6 +362,7 @@ function RoundStage({
     setMoment(null);
     setAnim("idle");
     setTimeLeft(null);
+    setLeadIn(0);
   }, [roundKey]);
 
   // When the reducer records the result, stamp it, then sweep the gunungan into the next round.
@@ -377,9 +379,17 @@ function RoundStage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
 
+  // The puppet plays along: a hop and a grin for a good move, a wobble and a gasp for a bad one.
+  const reaction = useRef(0);
   const onJudge = (grade: Grade) => {
+    const mine = ++reaction.current;
     setAnim(grade === "miss" ? "rod-wiggle" : "hop");
-    later(() => setAnim("idle"), 600);
+    setFace(grade === "miss" ? "shocked_o" : grade === "perfect" ? "smug_grin" : null);
+    later(() => {
+      if (reaction.current !== mine) return;
+      setAnim("idle");
+      setFace((f) => (state.lastResult ? f : null));
+    }, 600);
   };
 
   const words = ROUNDS[round];
@@ -409,14 +419,22 @@ function RoundStage({
           layout === "side" ? "justify-start pl-[1%]" : "justify-center"
         }`}
       >
-        <div className={layout === "side" ? "relative h-[66%] w-[42%]" : "relative h-full w-[60%]"}>
+        <div
+          className={
+            layout === "side"
+              ? "relative h-[66%] w-[42%]"
+              : layout === "between"
+                ? "relative mb-[1%] h-[56%] w-[28%]"
+                : "relative h-full w-[60%]"
+          }
+        >
           <PuppetAvatar
             config={face ? { ...candidate.puppet, expression: face } : candidate.puppet}
             anim={anim}
             label={candidate.name}
           />
         </div>
-        {party && (
+        {party && layout !== "between" && (
           <span
             className="absolute bottom-[3%] left-[4%] px-[2cqw] py-[0.6cqw] text-[3cqw] font-bold text-[var(--cream)]"
             style={{ backgroundColor: party.colour }}
@@ -437,10 +455,13 @@ function RoundStage({
         bars={roundBars(candidate.talent)}
         offsetMs={offsetMs}
         onBeat={setBeat}
+        onLeadIn={setLeadIn}
         onTimeLeft={(share, seconds) => setTimeLeft({ share, seconds })}
         onJudge={onJudge}
         onFinish={onDone}
       />
+
+      <ReadyGo step={leadIn} lang={lang} />
 
       {moment && (
         <CutStamp
@@ -466,6 +487,54 @@ function RoundStage({
         </div>
       )}
     </>
+  );
+}
+
+/**
+ * The dalang's start signal, drawn on the kelir: the gunungan stands centre stage through
+ * three cempala knocks (3 · 2 · 1), then MULA! and the gunungan lifts away.
+ */
+function ReadyGo({ step, lang }: { step: number; lang: Lang }) {
+  const [leaving, setLeaving] = useState(false);
+  const last = useRef(0);
+  useEffect(() => {
+    if (last.current === 4 && step === 0) {
+      setLeaving(true);
+      const t = window.setTimeout(() => setLeaving(false), 520);
+      last.current = step;
+      return () => window.clearTimeout(t);
+    }
+    last.current = step;
+  }, [step]);
+
+  if (step === 0 && !leaving) return null;
+  const go = step === 4 || leaving;
+  return (
+    <div className="pointer-events-none absolute inset-0 z-30" aria-live="polite">
+      <div
+        className={`absolute top-[30%] left-1/2 h-[62%] drop-shadow-[0_18px_18px_rgba(30,12,4,0.5)] ${
+          leaving ? "gunungan-lift" : "gunungan-stand"
+        }`}
+      >
+        <Gunungan className="h-full w-auto" />
+      </div>
+      {go ? (
+        <CutStamp
+          key="go"
+          lines={[UI.go[lang]]}
+          tone="gold"
+          className="top-[56%] w-[62%]"
+          stay={!leaving}
+        />
+      ) : (
+        <span
+          key={step}
+          className="count-pop absolute top-[56%] left-1/2 flex h-[30cqw] w-[30cqw] items-center justify-center rounded-full border-[1.4cqw] border-[var(--brass)] bg-[var(--sambal)] font-display text-[20cqw] leading-none font-bold text-[var(--cream)] italic shadow-[0_8px_14px_rgba(40,14,6,0.5)]"
+        >
+          {4 - step}
+        </span>
+      )}
+    </div>
   );
 }
 
