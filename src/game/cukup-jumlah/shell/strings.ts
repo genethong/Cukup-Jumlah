@@ -142,10 +142,7 @@ export const ROUNDS: Record<RoundId, { call: Text; hint: Text }> = {
   },
   celup_dakwat: {
     call: { ms: "CELUP!", en: "DIP!" },
-    hint: {
-      ms: "Dakwat kekal pada jari telunjuk kiri, sebelum mengundi",
-      en: "Indelible ink on the left index finger, before voting",
-    },
+    hint: { ms: "Dakwat pada jari telunjuk kiri", en: "Ink on the left index finger" },
   },
   tapis_undi_rosak: {
     call: { ms: "BANTAH!", en: "OBJECT!" },

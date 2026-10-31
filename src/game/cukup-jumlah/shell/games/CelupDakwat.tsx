@@ -42,7 +42,7 @@ const FINGER_X = [49, 71, 93, 115, 128, 192, 205, 227, 249, 271];
 // Where the hands sit on the stage, in % of the kelir.
 const HANDS_LEFT = 4;
 const HANDS_WIDTH = 92;
-const HANDS_TOP = 55;
+const HANDS_TOP = 59;
 const HANDS_HEIGHT = 27.5;
 
 function tipOnStage(i: number): { left: string; top: string } {
@@ -180,8 +180,8 @@ export function CelupDakwat({
 
   return (
     <div className="absolute inset-0 z-10 select-none">
-      {/* The polling desk. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(180deg,#b88a5a,#8a5a34)] shadow-[0_-3px_0_#d9b78a]" />
+      {/* The polling desk, with a pale cloth so the hands stand out. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] bg-[linear-gradient(180deg,#e3ebf1,#c9d6e0)] shadow-[0_-3px_0_#f4f8fb,0_-6px_10px_rgba(40,14,6,0.25)]" />
 
       {/* The YB's hands, held out across the desk, palms down. */}
       <div
@@ -218,7 +218,17 @@ export function CelupDakwat({
             const shape =
               f.name === "thumb" ? (
                 <g transform={`translate(${x} 34) rotate(${f.hand === "right" ? -32 : 32})`}>
-                  <rect x="-10" y="0" width="20" height={len} rx="10" fill={skin} />
+                  <rect
+                    x="-10"
+                    y="0"
+                    width="20"
+                    height={len}
+                    rx="10"
+                    fill={skin}
+                    stroke="#3a2414"
+                    strokeOpacity="0.45"
+                    strokeWidth="1.5"
+                  />
                   <rect
                     x="-6"
                     y={len - 15}
@@ -231,7 +241,17 @@ export function CelupDakwat({
                 </g>
               ) : (
                 <g>
-                  <rect x={x - 9.5} y={FINGER_TOP} width="19" height={len} rx="9.5" fill={skin} />
+                  <rect
+                    x={x - 9.5}
+                    y={FINGER_TOP}
+                    width="19"
+                    height={len}
+                    rx="9.5"
+                    fill={skin}
+                    stroke="#3a2414"
+                    strokeOpacity="0.45"
+                    strokeWidth="1.5"
+                  />
                   <rect
                     x={x - 6}
                     y={FINGER_TOP + len - 16}
