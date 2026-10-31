@@ -1,39 +1,30 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { CukupJumlahGame } from "./CukupJumlahGame";
+import { PARTIES } from "./types";
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({
-    children,
-    to,
-    search,
-  }: {
-    children?: React.ReactNode;
-    to: string;
-    search?: { lab?: string };
-  }) => <a href={search?.lab ? `${to}?lab=${search.lab}` : to}>{children}</a>,
-}));
-
-// The candidacy screen mounts WebGL viewers. jsdom has no WebGL context, so
-// these stand-ins let the smoke test check that the game shell renders.
-vi.mock("./voxel/HeadGridInspector", () => ({
-  HeadGridInspector: () => <div data-testid="voxel-stub" />,
-}));
-vi.mock("./voxel/VoxelSinglePreview", () => ({
-  VoxelSinglePreview: () => <div data-testid="voxel-preview-stub" />,
-}));
-vi.mock("./voxel/VoxelComparisonViewer", () => ({
-  VoxelComparisonViewer: () => null,
-}));
-vi.mock("./voxel/StageComparisonViewer", () => ({
-  StageComparisonViewer: () => null,
+  Link: ({ children, to }: { children?: React.ReactNode; to: string }) => (
+    <a href={to}>{children}</a>
+  ),
+  useNavigate: () => () => undefined,
 }));
 
 describe("CukupJumlahGame", () => {
-  it("renders the candidacy screen", () => {
+  it("opens on the backstage candidate creator", () => {
     render(<CukupJumlahGame />);
-    expect(screen.getByText("CUKUP JUMLAH!")).toBeTruthy();
-    expect(screen.getByText("BORANG PENAMAAN")).toBeTruthy();
-    expect(screen.getByRole("tab", { name: "🎨 RUPA" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Belakang Tabir" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Mula/ })).toBeTruthy();
+    // In the game the creator hands off to the game, so the lab link is hidden.
+    expect(screen.queryByText(/Makmal boneka/)).toBeNull();
+  });
+
+  it("uses the renamed food parties everywhere", () => {
+    expect(Object.values(PARTIES).map((p) => [p.name, p.fullName])).toEqual([
+      ["PNL", "Parti Nasi Lemak"],
+      ["PD", "Parti Durian"],
+      ["PTT", "Parti Teh Tarik"],
+      ["PB", "Parti Boba"],
+    ]);
   });
 });

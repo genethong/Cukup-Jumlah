@@ -166,17 +166,8 @@ const STAGES_ACT3: StageOption[] = [
   {
     act: 3,
     gameIndex: 2,
-    id: "blackout_peti",
-    name: "16. Blackout Peti Undi (BARU)",
-    icon: "🔦",
-    prompt: "BLACKOUT PETI UNDI!",
-    desc: "Suluh lampu pada Peti Undi dalam gelap & halau tangan misteri.",
-  },
-  {
-    act: 3,
-    gameIndex: 3,
     id: "borang_14",
-    name: "17. Borang 14",
+    name: "16. Borang 14",
     icon: "🗳️",
     prompt: "KIRA BORANG 14!",
     desc: "Kira undi sah saluran dengan PACA pada beat ke-4.",
@@ -435,7 +426,7 @@ export function LevelSelectModal({
           {/* Finale & Endgames */}
           <div>
             <div className="text-xs font-black text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <span>👑</span> BABAK KEMUNCAK & PENENTU KERAJAAN PERPADUAN
+              <span>🏛️</span> BABAK KEMUNCAK & PENENTU KERAJAAN PERPADUAN
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2">
@@ -451,7 +442,7 @@ export function LevelSelectModal({
                 <div>
                   <div className="text-2xl mb-1">🤝</div>
                   <div className="text-xs font-black text-emerald-300">
-                    18. Runding Perpaduan (BARU)
+                    17. Runding Perpaduan (BARU)
                   </div>
                   <div className="text-[9px] font-mono text-amber-400 mt-0.5">
                     Stage Penentu PM
@@ -491,7 +482,7 @@ export function LevelSelectModal({
                 className="p-3 bg-gradient-to-b from-amber-950/60 to-slate-900 hover:from-amber-900/60 active:scale-95 text-left rounded-2xl border-2 border-amber-500/80 transition cursor-pointer flex flex-col justify-between group shadow"
               >
                 <div>
-                  <div className="text-2xl mb-1">👑</div>
+                  <div className="text-2xl mb-1">🏛️</div>
                   <div className="text-xs font-black text-amber-300">Cukup Jumlah! (Jadi PM)</div>
                   <div className="text-[9px] font-mono text-emerald-400 mt-0.5">116 Kerusi Dewan Rakyat</div>
                 </div>

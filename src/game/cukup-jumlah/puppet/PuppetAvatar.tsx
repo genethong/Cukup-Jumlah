@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from "react";
 import {
   puppetRig,
   resolveFaceConfig,
@@ -166,14 +173,14 @@ function Leg({
     footwear === "sneakers" && rig.parts["footwear/sneakers"]
       ? rig.parts["footwear/sneakers"]
       : footwear === "selipar" && rig.parts["footwear/selipar"]
-      ? rig.parts["footwear/selipar"]
-      : rig.parts["base/foot"];
+        ? rig.parts["footwear/selipar"]
+        : rig.parts["base/foot"];
   const footSrc =
     footwear === "sneakers"
       ? "/puppet/footwear/sneakers.webp"
       : footwear === "selipar"
-      ? "/puppet/footwear/selipar.webp"
-      : tonePartUrl(tone, "foot");
+        ? "/puppet/footwear/selipar.webp"
+        : tonePartUrl(tone, "foot");
   const hip = rig.parts["base/torso"].pins[side === "L" ? "hip_L" : "hip_R"];
   const mirror = side === "R";
   return (
@@ -305,6 +312,30 @@ function hatClipFor(
   };
 }
 
+/**
+ * The puppet's head with its headwear on a 512 canvas (neck pin at 256, 456), for places
+ * that draw onto a canvas themselves, such as the share card.
+ */
+export async function renderPortrait(config: PuppetConfig): Promise<HTMLCanvasElement> {
+  const face = resolveFaceConfig(config);
+  const headwear = config.headwear === "tudung" && face.gender === "m" ? null : config.headwear;
+  const hat = hatClipFor(headwear, face.shapeKey, frame.torsoX, frame.torsoY);
+  const painted = await renderFace({ face, hat });
+  const out = document.createElement("canvas");
+  out.width = 512;
+  out.height = 512;
+  const ctx = out.getContext("2d");
+  if (!ctx) return out;
+  ctx.drawImage(painted, 0, 0);
+  if (hat) {
+    const img = new Image();
+    img.src = hat.src;
+    await img.decode();
+    ctx.drawImage(img, hat.x, hat.y, hat.w, hat.h);
+  }
+  return out;
+}
+
 /** Layered face: 512 canvas, neck pin at (256, 456). Composited to match the approved shade math. */
 export function PuppetFace({ face, hat }: { face: ResolvedFaceConfig; hat: HatClip | null }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -356,7 +387,6 @@ export function PuppetFace({ face, hat }: { face: ResolvedFaceConfig; hat: HatCl
   );
 }
 
-
 export function PuppetAvatar({
   config,
   pose,
@@ -381,7 +411,8 @@ export function PuppetAvatar({
   const headwear =
     config.headwear === "tudung" && resolvedFace.gender === "m" ? null : config.headwear;
   const hat = headwear ? rig.parts[`headwear/${headwear}`] : null;
-  const hatDraw = headwear && hat ? headwearDraw(rig, resolvedHead, headwear, frame.torsoX, frame.torsoY) : null;
+  const hatDraw =
+    headwear && hat ? headwearDraw(rig, resolvedHead, headwear, frame.torsoX, frame.torsoY) : null;
   const hatClip = hatClipFor(headwear, resolvedHead, frame.torsoX, frame.torsoY);
 
   const neck = torso.pins.neck;
@@ -484,8 +515,7 @@ export function PuppetAvatar({
                 borderRadius: 999,
                 background:
                   "linear-gradient(90deg, #4a301c 0%, #a56b3c 38%, #e6c79a 50%, #8a5a32 62%, #3d2618 100%)",
-                boxShadow:
-                  "inset 0 0 0 1px rgba(40, 22, 10, 0.28), 0 10px 0 0 #6b4424",
+                boxShadow: "inset 0 0 0 1px rgba(40, 22, 10, 0.28), 0 10px 0 0 #6b4424",
               }}
             />
             <Leg
