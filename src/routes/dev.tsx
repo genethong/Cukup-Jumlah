@@ -5,8 +5,9 @@ import { StageStyleFrame } from "@/game/cukup-jumlah/stage/StageStyleFrame";
 import { BeatLab } from "@/game/cukup-jumlah/beat/BeatLab";
 import { Backstage } from "@/game/cukup-jumlah/creator/Backstage";
 import { OptionAudit } from "@/game/cukup-jumlah/puppet/OptionAudit";
+import { GameShell } from "@/game/cukup-jumlah/shell/GameShell";
 
-const LABS = ["puppet", "panggung", "rentak", "belakang", "audit"] as const;
+const LABS = ["puppet", "panggung", "rentak", "belakang", "audit", "shell"] as const;
 type LabId = (typeof LABS)[number];
 
 function isLab(value: unknown): value is LabId {
@@ -36,5 +37,6 @@ function DevLabPage() {
   if (lab === "rentak") return <BeatLab />;
   if (lab === "belakang") return <Backstage />;
   if (lab === "audit") return <OptionAudit />;
+  if (lab === "shell") return <GameShell />;
   return <PuppetLab />;
 }

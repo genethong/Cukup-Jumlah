@@ -116,15 +116,17 @@ const STAMP_COLOURS: Record<StampTone, { fill: string; dash: string; text: strin
   pale: { fill: "#efe1c3", dash: "#9b896a", text: "#3a1f0f" },
 };
 
-/** Cut-paper starburst stamp. Remount (new `key`) to replay the pop. */
+/** Cut-paper starburst stamp. Remount (new `key`) to replay the pop. `stay` keeps it up. */
 export function CutStamp({
   lines,
   tone,
   className = "top-[50%] w-[78%]",
+  stay = false,
 }: {
   lines: readonly string[];
   tone: StampTone;
   className?: string;
+  stay?: boolean;
 }) {
   const c = STAMP_COLOURS[tone];
   const points = Array.from({ length: 28 }, (_, i) => {
@@ -136,7 +138,7 @@ export function CutStamp({
   const fontSize = single ? (lines[0]!.length <= 6 ? 28 : 19) : 15;
   return (
     <div
-      className={`stamp-pop pointer-events-none absolute left-1/2 z-40 ${className}`}
+      className={`${stay ? "stamp-stay" : "stamp-pop"} pointer-events-none absolute left-1/2 z-40 ${className}`}
       role="status"
     >
       <svg viewBox="0 0 120 100" className="w-full drop-shadow-[0_6px_6px_rgba(40,14,6,0.45)]">
