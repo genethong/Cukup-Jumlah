@@ -19,7 +19,7 @@ Last updated: 31 Oct 2026. This page replaces `GAME_DESIGN_ORIGINAL.md` as the p
 
 ## 3. Look: the whole game is a puppet show
 
-The stage is a lit cloth screen (*kelir*) with a warm oil-lamp glow. The gunungan sweeps across between microgames. The dalang calls out each command. The HUD is paper props: cut-out banknote deposits and a paper ballot box that fills with seats. "PADU!" and "HILANG DEPOSIT!" are cut-paper stamps. Menus sit backstage. The newsprint, pixel and 3D voxel looks are retired.
+The stage is a fixed 9:16 portrait frame on every device (phone-first; centred on laptops). It is a lit cloth screen (*kelir*) with a warm oil-lamp glow. The gunungan sweeps across between microgames. The dalang calls out each command. The HUD is paper props: cut-out banknote deposits and a paper ballot box that fills with seats. "PADU!" and "HILANG DEPOSIT!" are cut-paper stamps. Menus sit backstage. The newsprint, pixel and 3D voxel looks are retired.
 
 Treat wayang kulit with respect: the jokes are about the fictional politicians, never about the art form, the gunungan or the dalang.
 
