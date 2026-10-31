@@ -49,6 +49,21 @@
   animation: ballot-show 220ms cubic-bezier(0.2, 1.2, 0.4, 1) both;
 }
 
+/* A ballot thrown on the wrong pile shakes its head and settles back. */
+.ballot-shake {
+  animation: ballot-shake 320ms ease-out both;
+}
+
+/* Combo callout: pops in big and settles. */
+.combo-pop {
+  animation: combo-pop 420ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+/* The last seconds of the fuse. */
+.fuse-hot {
+  animation: fuse-hot 480ms ease-in-out infinite;
+}
+
 .gunungan-sweep {
   animation: gunungan-sweep 1300ms cubic-bezier(0.55, 0, 0.35, 1) forwards;
 }
@@ -94,6 +109,25 @@
   100% { transform: translateY(0) rotate(-2deg); opacity: 1; }
 }
 
+@keyframes ballot-shake {
+  0%, 100% { transform: translateX(0) rotate(-2deg); }
+  20% { transform: translateX(-6%) rotate(-5deg); }
+  40% { transform: translateX(5%) rotate(2deg); }
+  60% { transform: translateX(-3%) rotate(-3deg); }
+  80% { transform: translateX(2%) rotate(-1deg); }
+}
+
+@keyframes combo-pop {
+  0% { transform: scale(2.2) rotate(-12deg); opacity: 0; }
+  60% { transform: scale(0.95) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(3deg); opacity: 1; }
+}
+
+@keyframes fuse-hot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
 @keyframes gunungan-sweep {
   0% { transform: translate(-50%, -50%) translateX(75%) rotate(10deg) scale(0.5); opacity: 0; }
   12% { opacity: 1; }
@@ -114,6 +148,9 @@
     opacity: 1;
     transform: translate(-50%, -50%) rotate(-8deg);
   }
+  .ballot-shake,
+  .combo-pop,
+  .fuse-hot,
   .ballot-show {
     animation: none;
     transform: rotate(-2deg);

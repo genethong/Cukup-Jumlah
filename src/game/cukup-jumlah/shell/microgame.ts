@@ -24,8 +24,8 @@ export type MicrogameProps = {
   offsetMs: number;
   /** Beat 1–4 as heard, 0 before the first beat; drives the beat pins. */
   onBeat: (beatInBar: number) => void;
-  /** Share of the time limit left, 1 → 0; drives the fuse. */
-  onTimeLeft?: (fraction: number) => void;
+  /** Share of the time limit left (1 → 0) and the seconds left; drives the fuse. */
+  onTimeLeft?: (fraction: number, seconds: number) => void;
   /** Each good or bad move; the shell can react (sound, puppet). */
   onJudge: (grade: Grade) => void;
   /** Call once, when the round is decided. */

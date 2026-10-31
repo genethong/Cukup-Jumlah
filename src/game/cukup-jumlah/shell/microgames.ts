@@ -10,11 +10,18 @@ import { TepukRentak } from "./TepukRentak";
 export type MicrogameEntry = {
   Game: ComponentType<MicrogameProps>;
   layout: StageLayout;
-  /** One line under the beat pins telling the player what to do. */
+  /** One line under the banner telling the player what to do. */
   howTo: Text;
+  /** Show the four beat pins. Only the tap-on-beat stand-in needs them. */
+  beatPins?: boolean;
 };
 
-const STAND_IN: MicrogameEntry = { Game: TepukRentak, layout: "center", howTo: UI.comingSoon };
+const STAND_IN: MicrogameEntry = {
+  Game: TepukRentak,
+  layout: "center",
+  howTo: UI.comingSoon,
+  beatPins: true,
+};
 
 const BUILT: Partial<Record<RoundId, MicrogameEntry>> = {
   borang_14: { Game: Borang14, layout: "full", howTo: GAME_TEXT.borang14.tapHint },

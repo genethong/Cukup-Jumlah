@@ -126,3 +126,24 @@ export function gendangMiss(ctx: BaseAudioContext, out: AudioNode, when: number)
   thump(ctx, out, when, 150, 85, 0.3, 0.25);
   ring(ctx, out, when, [{ freq: 157, gain: 0.08, decay: 0.2 }], "triangle");
 }
+
+/** Groove: the gendang's deep open "dum". */
+export function gendangDum(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  thump(ctx, out, when, 120, 70, 0.32, 0.18);
+}
+
+/** Groove: a light closed "tak" between the dums. */
+export function gendangTak(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  noiseBurst(ctx, out, when, "bandpass", 2100, 1.4, 0.14, 0.04);
+}
+
+/** A sheet of paper landing on a pile. */
+export function paperSlap(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  noiseBurst(ctx, out, when, "lowpass", 1800, 0.8, 0.4, 0.05);
+  thump(ctx, out, when, 220, 140, 0.12, 0.05);
+}
+
+/** Last seconds: a dry woodblock tick. */
+export function tick(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  ring(ctx, out, when, [{ freq: 1250, gain: 0.12, decay: 0.04 }], "square");
+}

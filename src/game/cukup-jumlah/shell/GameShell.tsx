@@ -349,7 +349,7 @@ function RoundStage({
   const [face, setFace] = useState<ExpressionId | null>(null);
   const [moment, setMoment] = useState<Moment | null>(null);
   const [sweep, setSweep] = useState(0);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState<{ share: number; seconds: number } | null>(null);
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
 
@@ -383,7 +383,7 @@ function RoundStage({
   };
 
   const words = ROUNDS[round];
-  const { Game, layout, howTo } = microgameFor(round);
+  const { Game, layout, howTo, beatPins } = microgameFor(round);
   // A full-stage game takes the puppet off until the result is in.
   const showPuppet = layout !== "full" || moment !== null;
   const party = PARTIES.find((p) => p.id === candidate.party);
@@ -394,8 +394,8 @@ function RoundStage({
 
       <div className="absolute top-[15%] left-1/2 z-20 flex w-[90%] -translate-x-1/2 flex-col items-center gap-[1.6cqw]">
         <DalangBanner call={words.call[lang]} hint={words.hint[lang]} />
-        <BeatPins beat={beat} />
-        {timeLeft !== null && !moment && <Fuse left={timeLeft} />}
+        {beatPins && <BeatPins beat={beat} />}
+        {timeLeft !== null && !moment && <Fuse share={timeLeft.share} seconds={timeLeft.seconds} />}
         <span className="font-tally text-[3.2cqw] tracking-[0.12em] text-[var(--ink)] uppercase">
           {beat === 0 && !moment ? UI.ready[lang] : howTo[lang]}
         </span>
@@ -435,7 +435,7 @@ function RoundStage({
         bars={roundBars(candidate.talent)}
         offsetMs={offsetMs}
         onBeat={setBeat}
-        onTimeLeft={setTimeLeft}
+        onTimeLeft={(share, seconds) => setTimeLeft({ share, seconds })}
         onJudge={onJudge}
         onFinish={onDone}
       />
@@ -467,19 +467,38 @@ function RoundStage({
   );
 }
 
-/** A burning wick: the time left in the round. */
-function Fuse({ left }: { left: number }) {
-  const pct = Math.max(0, Math.min(1, left)) * 100;
+/** A burning fuse running down to a firecracker: the time left in the round. */
+function Fuse({ share, seconds }: { share: number; seconds: number }) {
+  const pct = Math.max(0, Math.min(1, share)) * 100;
+  const hot = share < 0.3;
   return (
-    <div className="relative h-[1.6cqw] w-[56%] rounded-full bg-[#5a3a1c]/25" aria-hidden="true">
-      <div
-        className="absolute inset-y-0 left-0 rounded-full bg-[linear-gradient(90deg,#8a1c19,#c9963f)]"
-        style={{ width: `${pct}%` }}
-      />
+    <div
+      className="flex w-[84%] items-center gap-[2cqw]"
+      role="timer"
+      aria-label={`${seconds.toFixed(1)} s`}
+    >
+      <span className="text-[7cqw] leading-none" aria-hidden="true">
+        🧨
+      </span>
+      <div className="relative h-[3cqw] flex-1 rounded-full bg-[#5a3a1c]/25" aria-hidden="true">
+        <div
+          className={`absolute inset-y-0 left-0 rounded-full ${
+            hot ? "fuse-hot bg-[var(--sambal)]" : "bg-[linear-gradient(90deg,#8a5a2b,#c9963f)]"
+          }`}
+          style={{ width: `${pct}%` }}
+        />
+        <span
+          className="pelita-flame absolute top-1/2 h-[6cqw] w-[4cqw] -translate-x-1/2 -translate-y-[75%] rounded-[50%_50%_45%_45%] bg-[radial-gradient(circle_at_50%_70%,#fff1c4,#ffb347_55%,#e4572e)]"
+          style={{ left: `${pct}%` }}
+        />
+      </div>
       <span
-        className="pelita-flame absolute top-1/2 h-[3.4cqw] w-[2.4cqw] -translate-x-1/2 -translate-y-[70%] rounded-[50%_50%_45%_45%] bg-[radial-gradient(circle_at_50%_70%,#fff1c4,#ffb347_55%,#e4572e)]"
-        style={{ left: `${pct}%` }}
-      />
+        className={`w-[11cqw] text-right font-tally text-[5.4cqw] leading-none tabular-nums ${
+          hot ? "text-[var(--sambal)]" : "text-[var(--ink)]"
+        }`}
+      >
+        {seconds.toFixed(1)}
+      </span>
     </div>
   );
 }

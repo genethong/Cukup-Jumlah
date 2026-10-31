@@ -269,6 +269,8 @@ export const GAME_TEXT = {
     rival: { ms: "Undi lawan", en: "Rival's vote" },
     rivalName: { ms: "Calon {party}", en: "{party} candidate" },
     wrong: { ms: "Salah longgok!", en: "Wrong pile!" },
+    penalty: { ms: "−1 saat", en: "−1 sec" },
+    combo: { ms: "LAJU! ×{n}", en: "FAST! ×{n}" },
     left: { ms: "{n} lagi", en: "{n} left" },
     signed: {
       ms: "Borang 14 ditandatangani Ketua Tempat Mengundi",

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { mistakesAllowed } from "../microgame";
 import {
   BALLOTS,
   EMPTY_COUNT,
+  PENALTY_S,
   ballotSequence,
+  penaltySeconds,
   pileForSwipe,
   sortBallot,
   verdict,
@@ -27,23 +28,25 @@ describe("Borang 14 rules", () => {
     expect(pileForSwipe(30, 200)).toBeNull();
   });
 
-  it("counts a right pile, and keeps a wrong-pile ballot to be sorted again", () => {
-    const ballots = ["yours", "rival"] as const;
-    const right = sortBallot(EMPTY_COUNT, ballots, 0, "yours");
-    expect(right).toEqual({ correct: true, count: { yours: 1, rival: 0, mistakes: 0 } });
-    const wrong = sortBallot(right.count, ballots, 1, "yours");
+  it("builds a streak on right piles and breaks it on a wrong one", () => {
+    const ballots = ["yours", "rival", "yours"] as const;
+    let s = sortBallot(EMPTY_COUNT, ballots, 0, "yours");
+    s = sortBallot(s.count, ballots, 1, "rival");
+    expect(s.count).toEqual({ yours: 1, rival: 1, mistakes: 0, streak: 2 });
+    const wrong = sortBallot(s.count, ballots, 2, "rival");
     expect(wrong.correct).toBe(false);
-    expect(wrong.count).toEqual({ yours: 1, rival: 0, mistakes: 1 });
+    expect(wrong.count).toEqual({ yours: 1, rival: 1, mistakes: 1, streak: 0 });
   });
 
-  it("wins once all are sorted, loses past the mistakes allowed or when time runs out", () => {
-    const allowed = mistakesAllowed("lidah_manis");
-    expect(verdict({ yours: 3, rival: 3, mistakes: 1 }, 6, allowed, false)).toBe("won");
-    expect(verdict({ yours: 2, rival: 1, mistakes: 0 }, 6, allowed, false)).toBe("sorting");
-    expect(verdict({ yours: 2, rival: 1, mistakes: 0 }, 6, allowed, true)).toBe("lost");
-    expect(verdict({ yours: 1, rival: 0, mistakes: 2 }, 6, allowed, false)).toBe("lost");
-    expect(
-      verdict({ yours: 1, rival: 0, mistakes: 2 }, 6, mistakesAllowed("mesra_rakyat"), false),
-    ).toBe("sorting");
+  it("burns time for mistakes, with Mesra Rakyat's first one free", () => {
+    expect(penaltySeconds(2)).toBe(2 * PENALTY_S);
+    expect(penaltySeconds(2, 1)).toBe(PENALTY_S);
+    expect(penaltySeconds(1, 1)).toBe(0);
+  });
+
+  it("wins once every ballot is sorted and loses only when the fuse burns out", () => {
+    expect(verdict({ ...EMPTY_COUNT, yours: 5, rival: 5, mistakes: 4 }, 10, false)).toBe("won");
+    expect(verdict({ ...EMPTY_COUNT, yours: 3 }, 10, false)).toBe("sorting");
+    expect(verdict({ ...EMPTY_COUNT, yours: 3 }, 10, true)).toBe("lost");
   });
 });
