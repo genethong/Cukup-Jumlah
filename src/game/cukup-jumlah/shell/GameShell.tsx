@@ -495,17 +495,19 @@ function RoundStage({
  * three cempala knocks (3 · 2 · 1), then MULA! and the gunungan lifts away.
  */
 function ReadyGo({ step, lang }: { step: number; lang: Lang }) {
+  // Leaving is decided during render, the moment MULA! (4) hands over to play (0), so the
+  // overlay never blinks out for a frame and pops MULA! a second time.
+  const [prevStep, setPrevStep] = useState(step);
   const [leaving, setLeaving] = useState(false);
-  const last = useRef(0);
+  if (step !== prevStep) {
+    setPrevStep(step);
+    setLeaving(prevStep === 4 && step === 0);
+  }
   useEffect(() => {
-    if (last.current === 4 && step === 0) {
-      setLeaving(true);
-      const t = window.setTimeout(() => setLeaving(false), 520);
-      last.current = step;
-      return () => window.clearTimeout(t);
-    }
-    last.current = step;
-  }, [step]);
+    if (!leaving) return;
+    const t = window.setTimeout(() => setLeaving(false), 520);
+    return () => window.clearTimeout(t);
+  }, [leaving]);
 
   if (step === 0 && !leaving) return null;
   const go = step === 4 || leaving;
