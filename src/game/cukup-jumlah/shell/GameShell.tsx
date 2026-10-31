@@ -233,7 +233,7 @@ function TitleScreen({
 }) {
   return (
     <div className="absolute inset-0 z-10 flex flex-col items-center px-[6%] pt-[12%] pb-[5%] text-center text-[var(--ink)]">
-      <Gunungan className="bayang pointer-events-none absolute top-[16%] left-1/2 h-[52%] w-auto -translate-x-1/2" />
+      <Gunungan className="pointer-events-none absolute top-[17%] left-1/2 h-[50%] w-auto -translate-x-1/2 opacity-25" />
       <h1 className="relative font-display text-[13cqw] leading-none font-bold italic tracking-tight text-[var(--sambal)] drop-shadow-[0_3px_0_rgba(251,243,228,0.9)]">
         {UI.title[lang]}
       </h1>
