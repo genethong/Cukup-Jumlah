@@ -274,7 +274,7 @@ export function GorengKueyTeow({
         onContextMenu={(e) => e.preventDefault()}
         disabled={!live || outcome !== null}
         aria-pressed={holding}
-        className={`absolute bottom-[3%] left-1/2 z-20 flex h-[13%] w-[54%] -translate-x-1/2 touch-none items-center justify-center gap-[2cqw] rounded-full border-[1cqw] font-display text-[6cqw] font-bold italic shadow-[0_6px_0_rgba(40,14,6,0.5)] transition-transform ${
+        className={`absolute bottom-[3%] left-1/2 z-20 flex h-[12%] w-[44%] -translate-x-1/2 touch-none items-center justify-center gap-[2cqw] rounded-full border-[1cqw] font-display text-[6cqw] font-bold italic shadow-[0_6px_0_rgba(40,14,6,0.5)] transition-transform ${
           holding
             ? "translate-y-[0.8cqw] border-[var(--brass)] bg-[var(--sambal)] text-[var(--cream)] shadow-[0_2px_0_rgba(40,14,6,0.5)]"
             : cameraReady
@@ -364,8 +364,8 @@ function StallFront() {
 function Photographer({ side, count, lang }: { side: Camera["side"]; count: number; lang: Lang }) {
   return (
     <div
-      className={`press-in pointer-events-none absolute bottom-[10%] z-20 h-[30%] w-[32%] ${
-        side === "left" ? "left-[-3%]" : "right-[-3%]"
+      className={`press-in pointer-events-none absolute -bottom-[3%] z-20 h-[23%] w-[28%] ${
+        side === "left" ? "-left-[5%]" : "-right-[5%]"
       }`}
     >
       <svg
@@ -392,7 +392,7 @@ function Photographer({ side, count, lang }: { side: Camera["side"]; count: numb
       {count > 0 ? (
         <span
           key={count}
-          className="count-pop absolute top-[-6%] left-1/2 flex h-[12cqw] w-[12cqw] items-center justify-center rounded-full border-[0.8cqw] border-[var(--sambal)] bg-[#fbf3e4] font-display text-[7cqw] font-bold text-[var(--sambal)]"
+          className="count-pop absolute -top-[22%] left-[62%] flex h-[11cqw] w-[11cqw] items-center justify-center rounded-full border-[0.8cqw] border-[var(--sambal)] bg-[#fbf3e4] font-display text-[7cqw] font-bold text-[var(--sambal)]"
         >
           {count}
         </span>
@@ -401,8 +401,8 @@ function Photographer({ side, count, lang }: { side: Camera["side"]; count: numb
       )}
       {count > 0 && (
         <span
-          className={`absolute -top-[22%] font-display text-[4.4cqw] font-bold whitespace-nowrap text-[var(--sambal)] italic drop-shadow-[0_2px_0_#fbf3e4] ${
-            side === "left" ? "left-[30%]" : "right-[30%]"
+          className={`absolute -top-[40%] font-display text-[4.4cqw] font-bold whitespace-nowrap text-[var(--sambal)] italic drop-shadow-[0_2px_0_#fbf3e4] ${
+            side === "left" ? "left-[38%]" : "right-[38%]"
           }`}
         >
           {T.pose[lang]}
