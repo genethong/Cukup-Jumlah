@@ -1,151 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { PuppetAvatar } from "./PuppetAvatar";
+import type { PuppetConfig } from "./loadRig";
 import {
-  type BrowId,
-  type ExpressionId,
-  type ExtraId,
-  type EyeId,
-  type FaceShapeId,
-  type FacialHairId,
-  type FootwearId,
-  type HeadwearId,
-  type LowerId,
-  type NoseId,
-  type OutfitId,
-  type PuppetConfig,
-  type ToneId,
-} from "./loadRig";
+  BROWS,
+  EXPRESSIONS,
+  EXTRAS,
+  EYES,
+  FACIAL_HAIR,
+  FOOTWEAR,
+  GENDERS,
+  LOWERS,
+  NOSES,
+  OUTFITS,
+  TONES,
+  hairFor,
+  hatsFor,
+  randomConfig,
+  shapesFor,
+  withPatch,
+} from "./options";
 import { PUPPET_BPM, beatPhase, type PuppetAnim } from "./motion";
-
-const TONES: { id: ToneId; hex: string; label: string }[] = [
-  { id: "tone_1", hex: "#F6DABA", label: "1" },
-  { id: "tone_2", hex: "#ECC49A", label: "2" },
-  { id: "tone_3", hex: "#D6A472", label: "3" },
-  { id: "tone_4", hex: "#C48854", label: "4" },
-  { id: "tone_5", hex: "#B27647", label: "5" },
-  { id: "tone_6", hex: "#A0643A", label: "6" },
-  { id: "tone_7", hex: "#764628", label: "7" },
-  { id: "tone_8", hex: "#563420", label: "8" },
-];
-
-const GENDERS: { id: "m" | "f"; label: string }[] = [
-  { id: "m", label: "Lelaki" },
-  { id: "f", label: "Perempuan" },
-];
-
-const SHAPES_M: { id: FaceShapeId; label: string }[] = [
-  { id: "oval", label: "Bujur" },
-  { id: "round", label: "Bulat" },
-  { id: "square", label: "Segi Empat" },
-  { id: "long", label: "Panjang" },
-];
-
-const SHAPES_F: { id: FaceShapeId; label: string }[] = [
-  { id: "oval", label: "Bujur" },
-  { id: "round", label: "Bulat" },
-  { id: "heart", label: "Bentuk Hati" },
-  { id: "long", label: "Panjang" },
-];
-
-const EYES: { id: EyeId; label: string }[] = [
-  { id: "normal", label: "Normal" },
-  { id: "sleepy", label: "Mengantuk" },
-  { id: "round", label: "Bulat" },
-];
-
-const BROWS: { id: BrowId; label: string }[] = [
-  { id: "natural", label: "Semula Jadi" },
-  { id: "thick_arched", label: "Tebal" },
-  { id: "bushy", label: "Lebat" },
-  { id: "thin", label: "Nipis" },
-];
-
-const NOSES: { id: NoseId; label: string }[] = [
-  { id: "soft", label: "Lembut" },
-  { id: "medium", label: "Sederhana" },
-  { id: "prominent", label: "Menonjol" },
-];
-
-const EXPRESSIONS: { id: ExpressionId; label: string }[] = [
-  { id: "neutral", label: "Biasa" },
-  { id: "smug_grin", label: "Senyum Sinis" },
-  { id: "big_laugh", label: "Gelak Besar" },
-  { id: "angry_shout", label: "Jerit Marah" },
-  { id: "nervous_smile", label: "Senyum Gementar" },
-  { id: "shocked_o", label: "Terkejut" },
-  { id: "sly_smirk", label: "Senyum Senget" },
-  { id: "crying_pout", label: "Menangis" },
-];
-
-const HAIR_M: { id: string; label: string }[] = [
-  { id: "sidepart", label: "Belah Tepi" },
-  { id: "crew", label: "Crew Cut" },
-  { id: "curly", label: "Kerinting" },
-  { id: "pompadour", label: "Pompadour" },
-  { id: "long", label: "Panjang" },
-  { id: "horseshoe", label: "Horseshoe" },
-  { id: "bald", label: "Botak" },
-];
-
-const HAIR_F: { id: string; label: string }[] = [
-  { id: "bun", label: "Sanggul" },
-  { id: "bob", label: "Bob" },
-  { id: "ponytail", label: "Ekor Kuda" },
-  { id: "curly", label: "Kerinting" },
-  { id: "long", label: "Panjang" },
-  { id: "bouffant", label: "Bouffant" },
-  { id: "pixie", label: "Pixie" },
-];
-
-const FACIAL_HAIR: { id: FacialHairId; label: string }[] = [
-  { id: "none", label: "Tiada" },
-  { id: "handlebar", label: "Handlebar" },
-  { id: "thin", label: "Nipis" },
-  { id: "full_beard", label: "Janggut Penuh" },
-  { id: "stubble", label: "Renjis" },
-];
-
-const EXTRAS: { id: ExtraId; label: string }[] = [
-  { id: "none", label: "Tiada" },
-  { id: "glasses", label: "Cermin Mata" },
-  { id: "sunglasses", label: "Cermin Gelap" },
-  { id: "blush", label: "Pipi Merah" },
-  { id: "mole", label: "Tahi Lalat" },
-];
-
-const HATS: { id: HeadwearId | null; label: string }[] = [
-  { id: null, label: "Tiada" },
-  { id: "songkok", label: "Songkok" },
-  { id: "tudung", label: "Tudung" },
-  { id: "ketayap", label: "Ketayap" },
-  { id: "turban", label: "Serban" },
-  { id: "baseball_cap", label: "Topi Biru" },
-  { id: "baseball_cap_red", label: "Topi Merah" },
-  { id: "baseball_cap_mustard", label: "Topi Mustard" },
-];
-
-const OUTFITS: { id: OutfitId; label: string }[] = [
-  { id: "baju_melayu", label: "Baju Melayu" },
-  { id: "batik_shirt", label: "Batik" },
-  { id: "business_suit", label: "Suit" },
-  { id: "baju_kurung", label: "Baju Kurung" },
-  { id: "tshirt", label: "T-shirt" },
-  { id: "hoodie", label: "Hoodie" },
-];
-
-const LOWERS: { id: LowerId | null; label: string }[] = [
-  { id: null, label: "Tiada" },
-  { id: "jeans", label: "Jeans" },
-  { id: "songket_samping", label: "Samping" },
-  { id: "sarong", label: "Kain" },
-];
-
-const FOOTWEAR: { id: FootwearId; label: string }[] = [
-  { id: "default", label: "Kaki Ayam" },
-  { id: "selipar", label: "Selipar" },
-  { id: "sneakers", label: "Sneakers" },
-];
 
 const CAST: PuppetConfig[] = [
   {
@@ -178,33 +53,6 @@ const CAST: PuppetConfig[] = [
 ];
 
 type Burst = { index: number; anim: Extract<PuppetAnim, "hop" | "rod-wiggle">; token: number };
-
-function pick<T>(items: readonly T[]): T {
-  return items[Math.floor(Math.random() * items.length)] as T;
-}
-
-function randomConfig(current?: PuppetConfig): PuppetConfig {
-  const gender: "m" | "f" = Math.random() > 0.5 ? "m" : "f";
-  const shapes = gender === "m" ? SHAPES_M : SHAPES_F;
-  const hairs = gender === "m" ? HAIR_M : HAIR_F;
-
-  return {
-    gender,
-    tone: pick(TONES).id,
-    faceShape: pick(shapes).id,
-    eyes: pick(EYES).id,
-    brows: pick(BROWS).id,
-    nose: pick(NOSES).id,
-    expression: pick(EXPRESSIONS).id,
-    hair: pick(hairs).id,
-    facialHair: gender === "m" ? pick(FACIAL_HAIR).id : "none",
-    extra: pick(EXTRAS).id,
-    headwear: pick(gender === "f" ? HATS : HATS.filter((hat) => hat.id !== "tudung")).id,
-    outfit: pick(OUTFITS).id,
-    lower: pick(LOWERS).id,
-    footwear: pick(FOOTWEAR).id,
-  };
-}
 
 function BeatLamp() {
   const ref = useRef<HTMLSpanElement>(null);
@@ -240,33 +88,12 @@ export function PuppetLab() {
 
   const active = cast[selected];
   const activeGender = active.gender ?? "m";
-  const availableShapes = activeGender === "m" ? SHAPES_M : SHAPES_F;
-  const availableHair = activeGender === "m" ? HAIR_M : HAIR_F;
-  const availableHats = activeGender === "f" ? HATS : HATS.filter((hat) => hat.id !== "tudung");
+  const availableShapes = shapesFor(activeGender);
+  const availableHair = hairFor(activeGender);
+  const availableHats = hatsFor(activeGender);
 
   const update = (patch: Partial<PuppetConfig>) => {
-    setCast((prev) =>
-      prev.map((cfg, i) => {
-        if (i !== selected) return cfg;
-        const next = { ...cfg, ...patch };
-        if (patch.gender && patch.gender !== cfg.gender) {
-            if (patch.gender === "m") {
-            if (next.faceShape === "heart") next.faceShape = "oval";
-            next.hair = "sidepart";
-            next.brows = "thick_arched";
-            next.nose = "medium";
-            if (next.headwear === "tudung") next.headwear = null;
-          } else {
-            if (next.faceShape === "square") next.faceShape = "oval";
-            next.hair = "bun";
-            next.brows = "natural";
-            next.nose = "soft";
-            next.facialHair = "none";
-          }
-        }
-        return next;
-      }),
-    );
+    setCast((prev) => prev.map((cfg, i) => (i === selected ? withPatch(cfg, patch) : cfg)));
   };
 
   const trigger = (index: number, anim: Extract<PuppetAnim, "hop" | "rod-wiggle">) => {
@@ -305,8 +132,7 @@ export function PuppetLab() {
         >
           {cast.map((cfg, idx) => {
             const isSelected = idx === selected;
-            const anim: PuppetAnim =
-              burst && burst.index === idx ? burst.anim : "idle";
+            const anim: PuppetAnim = burst && burst.index === idx ? burst.anim : "idle";
             return (
               <div
                 key={idx}
@@ -318,11 +144,7 @@ export function PuppetLab() {
                   }`}
                   onClick={() => setSelected(idx)}
                 >
-                  <PuppetAvatar
-                    config={cfg}
-                    anim={anim}
-                    label={`Boneka ${idx + 1}`}
-                  />
+                  <PuppetAvatar config={cfg} anim={anim} label={`Boneka ${idx + 1}`} />
                 </div>
                 <button
                   type="button"
@@ -345,7 +167,7 @@ export function PuppetLab() {
           <div className="flex flex-wrap items-center gap-2">
             <PaperButton
               onClick={() => {
-                setCast([randomConfig(cast[0]), randomConfig(cast[1]), randomConfig(cast[2])]);
+                setCast([randomConfig(), randomConfig(), randomConfig()]);
                 trigger(selected, "hop");
               }}
               label="Rawak ketiga-tiga boneka"
@@ -355,7 +177,10 @@ export function PuppetLab() {
             <PaperButton onClick={() => trigger(selected, "hop")} label="Lompat dan sorak">
               Lompat
             </PaperButton>
-            <PaperButton onClick={() => trigger(selected, "rod-wiggle")} label="Goyang batang wayang">
+            <PaperButton
+              onClick={() => trigger(selected, "rod-wiggle")}
+              label="Goyang batang wayang"
+            >
               Goyang batang
             </PaperButton>
           </div>
