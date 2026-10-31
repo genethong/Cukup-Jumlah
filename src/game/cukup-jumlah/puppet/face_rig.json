@@ -1,0 +1,1704 @@
+{
+ "version": 5,
+ "canvas": [
+  512,
+  512
+ ],
+ "pin": [
+  256,
+  456
+ ],
+ "pin_layer": "layers/pin/neck_brass.webp",
+ "tint": {
+  "skin_base": "neutral grey, fill-tint to skin hex",
+  "skin_shade": "grey/128 = factor f; rgb = tint*f if f<=1 else 1-(1-tint)*(1-(f-1)*0.6)"
+ },
+ "layer_order": [
+  "hair_back",
+  "skin_base*tint",
+  "skin_shade(multiply)",
+  "nose(multiply map)",
+  "blush",
+  "eyes",
+  "brows",
+  "beard/stubble",
+  "mouth",
+  "moustache",
+  "mole",
+  "hair_front",
+  "glasses/sunglasses",
+  "sweat_drop",
+  "pin"
+ ],
+ "reference_shape": {
+  "m": "m_oval",
+  "f": "f_oval"
+ },
+ "anchor_note": "feature layers are authored at the reference shape anchors; for other shapes map slot (x,y,scale) from reference to that shape; hair uses per-row sx_profile (fraction of crown->chin) and sy anchored at crown",
+ "headgeo": {
+  "m_round": {
+   "prof": [
+    116,
+    158,
+    188,
+    211,
+    230,
+    245,
+    258,
+    268,
+    276,
+    283,
+    288,
+    292,
+    294,
+    296
+   ],
+   "crown": 105,
+   "chin": 435,
+   "w_temple": 283,
+   "w_cheek": 274,
+   "w_eye": 350
+  },
+  "m_oval": {
+   "prof": [
+    104,
+    144,
+    171,
+    193,
+    210,
+    224,
+    236,
+    245,
+    253,
+    259,
+    263,
+    265,
+    267,
+    267
+   ],
+   "crown": 77,
+   "chin": 406,
+   "w_temple": 259,
+   "w_cheek": 297,
+   "w_eye": 263
+  },
+  "m_square": {
+   "prof": [
+    266,
+    266,
+    266,
+    266,
+    266,
+    266,
+    266,
+    266,
+    266,
+    266,
+    266,
+    266,
+    266,
+    264
+   ],
+   "crown": 71,
+   "chin": 401,
+   "w_temple": 266,
+   "w_cheek": 287,
+   "w_eye": 328
+  },
+  "m_long": {
+   "prof": [
+    102,
+    141,
+    168,
+    188,
+    204,
+    216,
+    226,
+    233,
+    239,
+    243,
+    246,
+    247,
+    247,
+    246
+   ],
+   "crown": 49,
+   "chin": 378,
+   "w_temple": 243,
+   "w_cheek": 252,
+   "w_eye": 273
+  },
+  "f_round": {
+   "prof": [
+    107,
+    144,
+    172,
+    191,
+    206,
+    219,
+    229,
+    237,
+    245,
+    250,
+    253,
+    256,
+    256,
+    256
+   ],
+   "crown": 120,
+   "chin": 432,
+   "w_temple": 250,
+   "w_cheek": 243,
+   "w_eye": 268
+  },
+  "f_oval": {
+   "prof": [
+    97,
+    128,
+    153,
+    171,
+    184,
+    197,
+    206,
+    214,
+    220,
+    224,
+    228,
+    229,
+    230,
+    230
+   ],
+   "crown": 105,
+   "chin": 417,
+   "w_temple": 224,
+   "w_cheek": 219,
+   "w_eye": 254
+  },
+  "f_long": {
+   "prof": [
+    107,
+    143,
+    168,
+    190,
+    205,
+    217,
+    228,
+    236,
+    242,
+    248,
+    251,
+    253,
+    254,
+    254
+   ],
+   "crown": 94,
+   "chin": 405,
+   "w_temple": 248,
+   "w_cheek": 275,
+   "w_eye": 249
+  },
+  "f_heart": {
+   "prof": [
+    173,
+    200,
+    221,
+    235,
+    246,
+    256,
+    264,
+    268,
+    272,
+    274,
+    276,
+    276,
+    274,
+    282
+   ],
+   "crown": 115,
+   "chin": 427,
+   "w_temple": 274,
+   "w_cheek": 224,
+   "w_eye": 310
+  }
+ },
+ "anchors": {
+  "m_round": {
+   "slots": {
+    "brows": {
+     "anchor": [
+      256,
+      237
+     ],
+     "scale": 1.004
+    },
+    "eyes": {
+     "anchor": [
+      256,
+      270
+     ],
+     "scale": 1.004
+    },
+    "nose": {
+     "anchor": [
+      256,
+      310
+     ],
+     "scale": 1.004
+    },
+    "moustache": {
+     "anchor": [
+      256,
+      348
+     ],
+     "scale": 1.004
+    },
+    "mouth": {
+     "anchor": [
+      256,
+      369
+     ],
+     "scale": 1.004
+    },
+    "beard": {
+     "anchor": [
+      256,
+      369
+     ],
+     "scale": 1.004
+    },
+    "blush": {
+     "anchor": [
+      256,
+      333
+     ],
+     "scale": 1.004,
+     "spread": 82
+    },
+    "glasses": {
+     "anchor": [
+      256,
+      270
+     ],
+     "scale": 1.004
+    },
+    "mole": {
+     "anchor": [
+      256,
+      349
+     ],
+     "scale": 1.004,
+     "offset_x": 47
+    },
+    "sweat": {
+     "anchor": [
+      256,
+      204
+     ],
+     "scale": 1.004,
+     "offset_x": 102
+    }
+   },
+   "hair": {
+    "anchor": [
+     256,
+     105
+    ],
+    "sx": 1.093,
+    "sy": 1.003,
+    "sx_profile": [
+     [
+      0.03,
+      1.16
+     ],
+     [
+      0.06,
+      1.141
+     ],
+     [
+      0.09,
+      1.143
+     ],
+     [
+      0.12,
+      1.137
+     ],
+     [
+      0.15,
+      1.139
+     ],
+     [
+      0.18,
+      1.137
+     ],
+     [
+      0.21,
+      1.137
+     ],
+     [
+      0.24,
+      1.138
+     ],
+     [
+      0.27,
+      1.135
+     ],
+     [
+      0.3,
+      1.136
+     ],
+     [
+      0.33,
+      1.139
+     ],
+     [
+      0.36,
+      1.146
+     ],
+     [
+      0.39,
+      1.145
+     ],
+     [
+      0.42,
+      1.153
+     ]
+    ]
+   }
+  },
+  "m_oval": {
+   "slots": {
+    "brows": {
+     "anchor": [
+      256,
+      209
+     ],
+     "scale": 1.0
+    },
+    "eyes": {
+     "anchor": [
+      256,
+      242
+     ],
+     "scale": 1.0
+    },
+    "nose": {
+     "anchor": [
+      256,
+      281
+     ],
+     "scale": 1.0
+    },
+    "moustache": {
+     "anchor": [
+      256,
+      319
+     ],
+     "scale": 1.0
+    },
+    "mouth": {
+     "anchor": [
+      256,
+      340
+     ],
+     "scale": 1.0
+    },
+    "beard": {
+     "anchor": [
+      256,
+      340
+     ],
+     "scale": 1.0
+    },
+    "blush": {
+     "anchor": [
+      256,
+      304
+     ],
+     "scale": 1.0,
+     "spread": 89
+    },
+    "glasses": {
+     "anchor": [
+      256,
+      242
+     ],
+     "scale": 1.0
+    },
+    "mole": {
+     "anchor": [
+      256,
+      320
+     ],
+     "scale": 1.0,
+     "offset_x": 50
+    },
+    "sweat": {
+     "anchor": [
+      256,
+      176
+     ],
+     "scale": 1.0,
+     "offset_x": 93
+    }
+   },
+   "hair": {
+    "anchor": [
+     256,
+     77
+    ],
+    "sx": 1.0,
+    "sy": 1.0,
+    "sx_profile": [
+     [
+      0.03,
+      1.0
+     ],
+     [
+      0.06,
+      1.0
+     ],
+     [
+      0.09,
+      1.0
+     ],
+     [
+      0.12,
+      1.0
+     ],
+     [
+      0.15,
+      1.0
+     ],
+     [
+      0.18,
+      1.0
+     ],
+     [
+      0.21,
+      1.0
+     ],
+     [
+      0.24,
+      1.0
+     ],
+     [
+      0.27,
+      1.0
+     ],
+     [
+      0.3,
+      1.0
+     ],
+     [
+      0.33,
+      1.0
+     ],
+     [
+      0.36,
+      1.0
+     ],
+     [
+      0.39,
+      1.0
+     ],
+     [
+      0.42,
+      1.0
+     ]
+    ]
+   }
+  },
+  "m_square": {
+   "slots": {
+    "brows": {
+     "anchor": [
+      256,
+      203
+     ],
+     "scale": 0.996
+    },
+    "eyes": {
+     "anchor": [
+      256,
+      236
+     ],
+     "scale": 0.996
+    },
+    "nose": {
+     "anchor": [
+      256,
+      276
+     ],
+     "scale": 0.996
+    },
+    "moustache": {
+     "anchor": [
+      256,
+      314
+     ],
+     "scale": 0.996
+    },
+    "mouth": {
+     "anchor": [
+      256,
+      335
+     ],
+     "scale": 0.996
+    },
+    "beard": {
+     "anchor": [
+      256,
+      335
+     ],
+     "scale": 0.996
+    },
+    "blush": {
+     "anchor": [
+      256,
+      299
+     ],
+     "scale": 0.996,
+     "spread": 86
+    },
+    "glasses": {
+     "anchor": [
+      256,
+      236
+     ],
+     "scale": 0.996
+    },
+    "mole": {
+     "anchor": [
+      256,
+      315
+     ],
+     "scale": 0.996,
+     "offset_x": 49
+    },
+    "sweat": {
+     "anchor": [
+      256,
+      170
+     ],
+     "scale": 0.996,
+     "offset_x": 96
+    }
+   },
+   "hair": {
+    "anchor": [
+     256,
+     71
+    ],
+    "sx": 1.027,
+    "sy": 1.003,
+    "sx_profile": [
+     [
+      0.03,
+      1.6
+     ],
+     [
+      0.06,
+      1.6
+     ],
+     [
+      0.09,
+      1.6
+     ],
+     [
+      0.12,
+      1.433
+     ],
+     [
+      0.15,
+      1.317
+     ],
+     [
+      0.18,
+      1.235
+     ],
+     [
+      0.21,
+      1.172
+     ],
+     [
+      0.24,
+      1.129
+     ],
+     [
+      0.27,
+      1.093
+     ],
+     [
+      0.3,
+      1.068
+     ],
+     [
+      0.33,
+      1.011
+     ],
+     [
+      0.36,
+      1.004
+     ],
+     [
+      0.39,
+      0.996
+     ],
+     [
+      0.42,
+      0.989
+     ]
+    ]
+   }
+  },
+  "m_long": {
+   "slots": {
+    "brows": {
+     "anchor": [
+      256,
+      181
+     ],
+     "scale": 0.892
+    },
+    "eyes": {
+     "anchor": [
+      256,
+      214
+     ],
+     "scale": 0.892
+    },
+    "nose": {
+     "anchor": [
+      256,
+      253
+     ],
+     "scale": 0.892
+    },
+    "moustache": {
+     "anchor": [
+      256,
+      291
+     ],
+     "scale": 0.892
+    },
+    "mouth": {
+     "anchor": [
+      256,
+      312
+     ],
+     "scale": 0.892
+    },
+    "beard": {
+     "anchor": [
+      256,
+      312
+     ],
+     "scale": 0.892
+    },
+    "blush": {
+     "anchor": [
+      256,
+      276
+     ],
+     "scale": 0.892,
+     "spread": 76
+    },
+    "glasses": {
+     "anchor": [
+      256,
+      214
+     ],
+     "scale": 0.892
+    },
+    "mole": {
+     "anchor": [
+      256,
+      292
+     ],
+     "scale": 0.892,
+     "offset_x": 43
+    },
+    "sweat": {
+     "anchor": [
+      256,
+      148
+     ],
+     "scale": 0.892,
+     "offset_x": 87
+    }
+   },
+   "hair": {
+    "anchor": [
+     256,
+     49
+    ],
+    "sx": 0.938,
+    "sy": 1.0,
+    "sx_profile": [
+     [
+      0.03,
+      0.981
+     ],
+     [
+      0.06,
+      0.979
+     ],
+     [
+      0.09,
+      0.982
+     ],
+     [
+      0.12,
+      0.974
+     ],
+     [
+      0.15,
+      0.971
+     ],
+     [
+      0.18,
+      0.964
+     ],
+     [
+      0.21,
+      0.958
+     ],
+     [
+      0.24,
+      0.951
+     ],
+     [
+      0.27,
+      0.945
+     ],
+     [
+      0.3,
+      0.938
+     ],
+     [
+      0.33,
+      0.935
+     ],
+     [
+      0.36,
+      0.932
+     ],
+     [
+      0.39,
+      0.925
+     ],
+     [
+      0.42,
+      0.921
+     ]
+    ]
+   }
+  },
+  "f_round": {
+   "slots": {
+    "brows": {
+     "anchor": [
+      256,
+      245
+     ],
+     "scale": 1.113
+    },
+    "eyes": {
+     "anchor": [
+      256,
+      276
+     ],
+     "scale": 1.113
+    },
+    "nose": {
+     "anchor": [
+      256,
+      317
+     ],
+     "scale": 1.113
+    },
+    "moustache": {
+     "anchor": [
+      256,
+      349
+     ],
+     "scale": 1.113
+    },
+    "mouth": {
+     "anchor": [
+      256,
+      368
+     ],
+     "scale": 1.113
+    },
+    "beard": {
+     "anchor": [
+      256,
+      370
+     ],
+     "scale": 1.113
+    },
+    "blush": {
+     "anchor": [
+      256,
+      332
+     ],
+     "scale": 1.113,
+     "spread": 73
+    },
+    "glasses": {
+     "anchor": [
+      256,
+      276
+     ],
+     "scale": 1.113
+    },
+    "mole": {
+     "anchor": [
+      256,
+      354
+     ],
+     "scale": 1.113,
+     "offset_x": 41
+    },
+    "sweat": {
+     "anchor": [
+      256,
+      214
+     ],
+     "scale": 1.113,
+     "offset_x": 90
+    }
+   },
+   "hair": {
+    "anchor": [
+     256,
+     120
+    ],
+    "sx": 1.116,
+    "sy": 1.0,
+    "sx_profile": [
+     [
+      0.03,
+      1.147
+     ],
+     [
+      0.06,
+      1.17
+     ],
+     [
+      0.09,
+      1.169
+     ],
+     [
+      0.12,
+      1.162
+     ],
+     [
+      0.15,
+      1.164
+     ],
+     [
+      0.18,
+      1.156
+     ],
+     [
+      0.21,
+      1.156
+     ],
+     [
+      0.24,
+      1.152
+     ],
+     [
+      0.27,
+      1.158
+     ],
+     [
+      0.3,
+      1.161
+     ],
+     [
+      0.33,
+      1.154
+     ],
+     [
+      0.36,
+      1.163
+     ],
+     [
+      0.39,
+      1.158
+     ],
+     [
+      0.42,
+      1.158
+     ]
+    ]
+   }
+  },
+  "f_oval": {
+   "slots": {
+    "brows": {
+     "anchor": [
+      256,
+      230
+     ],
+     "scale": 1.0
+    },
+    "eyes": {
+     "anchor": [
+      256,
+      261
+     ],
+     "scale": 1.0
+    },
+    "nose": {
+     "anchor": [
+      256,
+      302
+     ],
+     "scale": 1.0
+    },
+    "moustache": {
+     "anchor": [
+      256,
+      334
+     ],
+     "scale": 1.0
+    },
+    "mouth": {
+     "anchor": [
+      256,
+      353
+     ],
+     "scale": 1.0
+    },
+    "beard": {
+     "anchor": [
+      256,
+      355
+     ],
+     "scale": 1.0
+    },
+    "blush": {
+     "anchor": [
+      256,
+      317
+     ],
+     "scale": 1.0,
+     "spread": 66
+    },
+    "glasses": {
+     "anchor": [
+      256,
+      261
+     ],
+     "scale": 1.0
+    },
+    "mole": {
+     "anchor": [
+      256,
+      339
+     ],
+     "scale": 1.0,
+     "offset_x": 37
+    },
+    "sweat": {
+     "anchor": [
+      256,
+      199
+     ],
+     "scale": 1.0,
+     "offset_x": 81
+    }
+   },
+   "hair": {
+    "anchor": [
+     256,
+     105
+    ],
+    "sx": 1.0,
+    "sy": 1.0,
+    "sx_profile": [
+     [
+      0.03,
+      1.0
+     ],
+     [
+      0.06,
+      1.0
+     ],
+     [
+      0.09,
+      1.0
+     ],
+     [
+      0.12,
+      1.0
+     ],
+     [
+      0.15,
+      1.0
+     ],
+     [
+      0.18,
+      1.0
+     ],
+     [
+      0.21,
+      1.0
+     ],
+     [
+      0.24,
+      1.0
+     ],
+     [
+      0.27,
+      1.0
+     ],
+     [
+      0.3,
+      1.0
+     ],
+     [
+      0.33,
+      1.0
+     ],
+     [
+      0.36,
+      1.0
+     ],
+     [
+      0.39,
+      1.0
+     ],
+     [
+      0.42,
+      1.0
+     ]
+    ]
+   }
+  },
+  "f_long": {
+   "slots": {
+    "brows": {
+     "anchor": [
+      256,
+      218
+     ],
+     "scale": 1.15
+    },
+    "eyes": {
+     "anchor": [
+      256,
+      250
+     ],
+     "scale": 1.15
+    },
+    "nose": {
+     "anchor": [
+      256,
+      290
+     ],
+     "scale": 1.15
+    },
+    "moustache": {
+     "anchor": [
+      256,
+      323
+     ],
+     "scale": 1.15
+    },
+    "mouth": {
+     "anchor": [
+      256,
+      341
+     ],
+     "scale": 1.15
+    },
+    "beard": {
+     "anchor": [
+      256,
+      343
+     ],
+     "scale": 1.15
+    },
+    "blush": {
+     "anchor": [
+      256,
+      305
+     ],
+     "scale": 1.15,
+     "spread": 82
+    },
+    "glasses": {
+     "anchor": [
+      256,
+      250
+     ],
+     "scale": 1.15
+    },
+    "mole": {
+     "anchor": [
+      256,
+      327
+     ],
+     "scale": 1.15,
+     "offset_x": 47
+    },
+    "sweat": {
+     "anchor": [
+      256,
+      187
+     ],
+     "scale": 1.15,
+     "offset_x": 89
+    }
+   },
+   "hair": {
+    "anchor": [
+     256,
+     94
+    ],
+    "sx": 1.107,
+    "sy": 0.997,
+    "sx_profile": [
+     [
+      0.03,
+      1.147
+     ],
+     [
+      0.06,
+      1.162
+     ],
+     [
+      0.09,
+      1.142
+     ],
+     [
+      0.12,
+      1.156
+     ],
+     [
+      0.15,
+      1.159
+     ],
+     [
+      0.18,
+      1.146
+     ],
+     [
+      0.21,
+      1.151
+     ],
+     [
+      0.24,
+      1.147
+     ],
+     [
+      0.27,
+      1.144
+     ],
+     [
+      0.3,
+      1.151
+     ],
+     [
+      0.33,
+      1.145
+     ],
+     [
+      0.36,
+      1.149
+     ],
+     [
+      0.39,
+      1.149
+     ],
+     [
+      0.42,
+      1.149
+     ]
+    ]
+   }
+  },
+  "f_heart": {
+   "slots": {
+    "brows": {
+     "anchor": [
+      256,
+      240
+     ],
+     "scale": 1.119
+    },
+    "eyes": {
+     "anchor": [
+      256,
+      271
+     ],
+     "scale": 1.119
+    },
+    "nose": {
+     "anchor": [
+      256,
+      312
+     ],
+     "scale": 1.119
+    },
+    "moustache": {
+     "anchor": [
+      256,
+      344
+     ],
+     "scale": 1.119
+    },
+    "mouth": {
+     "anchor": [
+      256,
+      363
+     ],
+     "scale": 1.119
+    },
+    "beard": {
+     "anchor": [
+      256,
+      365
+     ],
+     "scale": 1.119
+    },
+    "blush": {
+     "anchor": [
+      256,
+      327
+     ],
+     "scale": 1.119,
+     "spread": 67
+    },
+    "glasses": {
+     "anchor": [
+      256,
+      271
+     ],
+     "scale": 1.119
+    },
+    "mole": {
+     "anchor": [
+      256,
+      349
+     ],
+     "scale": 1.119,
+     "offset_x": 38
+    },
+    "sweat": {
+     "anchor": [
+      256,
+      209
+     ],
+     "scale": 1.119,
+     "offset_x": 99
+    }
+   },
+   "hair": {
+    "anchor": [
+     256,
+     115
+    ],
+    "sx": 1.223,
+    "sy": 1.0,
+    "sx_profile": [
+     [
+      0.03,
+      1.6
+     ],
+     [
+      0.06,
+      1.6
+     ],
+     [
+      0.09,
+      1.502
+     ],
+     [
+      0.12,
+      1.429
+     ],
+     [
+      0.15,
+      1.39
+     ],
+     [
+      0.18,
+      1.351
+     ],
+     [
+      0.21,
+      1.333
+     ],
+     [
+      0.24,
+      1.302
+     ],
+     [
+      0.27,
+      1.286
+     ],
+     [
+      0.3,
+      1.272
+     ],
+     [
+      0.33,
+      1.259
+     ],
+     [
+      0.36,
+      1.253
+     ],
+     [
+      0.39,
+      1.239
+     ],
+     [
+      0.42,
+      1.275
+     ]
+    ]
+   }
+  }
+ },
+ "expressions": {
+  "neutral": {},
+  "smug_grin": {},
+  "big_laugh": {
+   "eyes": "expr_laugh",
+   "brows": null
+  },
+  "angry_shout": {
+   "eyes": "expr_angry",
+   "brows": null
+  },
+  "nervous_smile": {
+   "brows": "worried",
+   "extra": "sweat_drop"
+  },
+  "shocked_o": {
+   "eyes": "expr_shocked",
+   "brows": "shocked"
+  },
+  "sly_smirk": {
+   "brows": "angry_soft"
+  },
+  "crying_pout": {
+   "eyes": "expr_crying",
+   "brows": null
+  }
+ },
+ "options": {
+  "m": {
+   "shape": [
+    "long",
+    "oval",
+    "round",
+    "square"
+   ],
+   "eyes": [
+    "normal",
+    "round",
+    "sleepy",
+    "squint"
+   ],
+   "brows": [
+    "bushy",
+    "thick_arched",
+    "thin"
+   ],
+   "expression_only_brows": [
+    "angry",
+    "worried",
+    "shocked"
+   ],
+   "nose": [
+    "pointy",
+    "bulbous",
+    "button"
+   ],
+   "expressions": [
+    "neutral",
+    "smug_grin",
+    "big_laugh",
+    "angry_shout",
+    "nervous_smile",
+    "shocked_o",
+    "sly_smirk",
+    "crying_pout"
+   ],
+   "hair": [
+    "bald",
+    "crew",
+    "curly",
+    "horseshoe",
+    "long",
+    "pompadour",
+    "sidepart"
+   ],
+   "facial_hair": [
+    "none",
+    "handlebar",
+    "thin",
+    "full_beard",
+    "stubble"
+   ],
+   "extras": [
+    "none",
+    "glasses",
+    "sunglasses",
+    "blush",
+    "mole"
+   ]
+  },
+  "f": {
+   "shape": [
+    "heart",
+    "long",
+    "oval",
+    "round"
+   ],
+   "eyes": [
+    "almond",
+    "cat_eye",
+    "side_eye",
+    "wide"
+   ],
+   "brows": [
+    "bushy",
+    "thick_arched",
+    "thin"
+   ],
+   "expression_only_brows": [
+    "angry",
+    "worried",
+    "shocked"
+   ],
+   "nose": [
+    "pointy",
+    "bulbous",
+    "button"
+   ],
+   "expressions": [
+    "neutral",
+    "smug_grin",
+    "big_laugh",
+    "angry_shout",
+    "nervous_smile",
+    "shocked_o",
+    "sly_smirk",
+    "crying_pout"
+   ],
+   "hair": [
+    "bob",
+    "bouffant",
+    "bun",
+    "curly",
+    "long",
+    "none",
+    "pixie",
+    "ponytail"
+   ],
+   "facial_hair": [
+    "none"
+   ],
+   "extras": [
+    "none",
+    "glasses",
+    "sunglasses",
+    "blush",
+    "mole"
+   ]
+  }
+ },
+ "files": {
+  "brows": {
+   "f_angry": "layers/brows/f_angry.webp",
+   "f_bushy": "layers/brows/f_bushy.webp",
+   "f_shocked": "layers/brows/f_shocked.webp",
+   "f_thick_arched": "layers/brows/f_thick_arched.webp",
+   "f_thin": "layers/brows/f_thin.webp",
+   "f_worried": "layers/brows/f_worried.webp",
+   "m_angry": "layers/brows/m_angry.webp",
+   "m_bushy": "layers/brows/m_bushy.webp",
+   "m_shocked": "layers/brows/m_shocked.webp",
+   "m_thick_arched": "layers/brows/m_thick_arched.webp",
+   "m_thin": "layers/brows/m_thin.webp",
+   "m_worried": "layers/brows/m_worried.webp"
+  },
+  "extras": {
+   "f_blush": "layers/extras/f_blush.webp",
+   "f_glasses": "layers/extras/f_glasses.webp",
+   "f_mole": "layers/extras/f_mole.webp",
+   "f_sunglasses": "layers/extras/f_sunglasses.webp",
+   "f_sweat_drop": "layers/extras/f_sweat_drop.webp",
+   "m_blush": "layers/extras/m_blush.webp",
+   "m_glasses": "layers/extras/m_glasses.webp",
+   "m_mole": "layers/extras/m_mole.webp",
+   "m_sunglasses": "layers/extras/m_sunglasses.webp",
+   "m_sweat_drop": "layers/extras/m_sweat_drop.webp"
+  },
+  "eyes": {
+   "f_almond": "layers/eyes/f_almond.webp",
+   "f_cat_eye": "layers/eyes/f_cat_eye.webp",
+   "f_expr_angry": "layers/eyes/f_expr_angry.webp",
+   "f_expr_crying": "layers/eyes/f_expr_crying.webp",
+   "f_expr_laugh": "layers/eyes/f_expr_laugh.webp",
+   "f_expr_shocked": "layers/eyes/f_expr_shocked.webp",
+   "f_side_eye": "layers/eyes/f_side_eye.webp",
+   "f_wide": "layers/eyes/f_wide.webp",
+   "m_expr_angry": "layers/eyes/m_expr_angry.webp",
+   "m_expr_crying": "layers/eyes/m_expr_crying.webp",
+   "m_expr_laugh": "layers/eyes/m_expr_laugh.webp",
+   "m_expr_shocked": "layers/eyes/m_expr_shocked.webp",
+   "m_normal": "layers/eyes/m_normal.webp",
+   "m_round": "layers/eyes/m_round.webp",
+   "m_sleepy": "layers/eyes/m_sleepy.webp",
+   "m_squint": "layers/eyes/m_squint.webp"
+  },
+  "facial_hair": {
+   "m_full_beard": "layers/facial_hair/m_full_beard.webp",
+   "m_handlebar": "layers/facial_hair/m_handlebar.webp",
+   "m_stubble": "layers/facial_hair/m_stubble.webp",
+   "m_thin": "layers/facial_hair/m_thin.webp"
+  },
+  "hair_back": {
+   "f_bob": "layers/hair_back/f_bob.webp",
+   "f_bouffant": "layers/hair_back/f_bouffant.webp",
+   "f_bun": "layers/hair_back/f_bun.webp",
+   "f_curly": "layers/hair_back/f_curly.webp",
+   "f_long": "layers/hair_back/f_long.webp",
+   "f_pixie": "layers/hair_back/f_pixie.webp",
+   "f_ponytail": "layers/hair_back/f_ponytail.webp",
+   "m_crew": "layers/hair_back/m_crew.webp",
+   "m_curly": "layers/hair_back/m_curly.webp",
+   "m_horseshoe": "layers/hair_back/m_horseshoe.webp",
+   "m_long": "layers/hair_back/m_long.webp",
+   "m_pompadour": "layers/hair_back/m_pompadour.webp",
+   "m_sidepart": "layers/hair_back/m_sidepart.webp"
+  },
+  "hair_front": {
+   "f_bob": "layers/hair_front/f_bob.webp",
+   "f_bouffant": "layers/hair_front/f_bouffant.webp",
+   "f_bun": "layers/hair_front/f_bun.webp",
+   "f_curly": "layers/hair_front/f_curly.webp",
+   "f_long": "layers/hair_front/f_long.webp",
+   "f_pixie": "layers/hair_front/f_pixie.webp",
+   "f_ponytail": "layers/hair_front/f_ponytail.webp",
+   "m_crew": "layers/hair_front/m_crew.webp",
+   "m_curly": "layers/hair_front/m_curly.webp",
+   "m_horseshoe": "layers/hair_front/m_horseshoe.webp",
+   "m_long": "layers/hair_front/m_long.webp",
+   "m_pompadour": "layers/hair_front/m_pompadour.webp",
+   "m_sidepart": "layers/hair_front/m_sidepart.webp"
+  },
+  "mouth": {
+   "f_angry_shout": "layers/mouth/f_angry_shout.webp",
+   "f_big_laugh": "layers/mouth/f_big_laugh.webp",
+   "f_crying_pout": "layers/mouth/f_crying_pout.webp",
+   "f_nervous_smile": "layers/mouth/f_nervous_smile.webp",
+   "f_neutral": "layers/mouth/f_neutral.webp",
+   "f_shocked_o": "layers/mouth/f_shocked_o.webp",
+   "f_sly_smirk": "layers/mouth/f_sly_smirk.webp",
+   "f_smug_grin": "layers/mouth/f_smug_grin.webp",
+   "m_angry_shout": "layers/mouth/m_angry_shout.webp",
+   "m_big_laugh": "layers/mouth/m_big_laugh.webp",
+   "m_crying_pout": "layers/mouth/m_crying_pout.webp",
+   "m_nervous_smile": "layers/mouth/m_nervous_smile.webp",
+   "m_neutral": "layers/mouth/m_neutral.webp",
+   "m_shocked_o": "layers/mouth/m_shocked_o.webp",
+   "m_sly_smirk": "layers/mouth/m_sly_smirk.webp",
+   "m_smug_grin": "layers/mouth/m_smug_grin.webp"
+  },
+  "nose": {
+   "f_bulbous": "layers/nose/f_bulbous.webp",
+   "f_button": "layers/nose/f_button.webp",
+   "f_pointy": "layers/nose/f_pointy.webp",
+   "m_bulbous": "layers/nose/m_bulbous.webp",
+   "m_button": "layers/nose/m_button.webp",
+   "m_pointy": "layers/nose/m_pointy.webp"
+  },
+  "skin_base": {
+   "f_heart": "layers/skin_base/f_heart.webp",
+   "f_long": "layers/skin_base/f_long.webp",
+   "f_oval": "layers/skin_base/f_oval.webp",
+   "f_round": "layers/skin_base/f_round.webp",
+   "m_long": "layers/skin_base/m_long.webp",
+   "m_oval": "layers/skin_base/m_oval.webp",
+   "m_round": "layers/skin_base/m_round.webp",
+   "m_square": "layers/skin_base/m_square.webp"
+  },
+  "skin_shade": {
+   "f_heart": "layers/skin_shade/f_heart.webp",
+   "f_long": "layers/skin_shade/f_long.webp",
+   "f_oval": "layers/skin_shade/f_oval.webp",
+   "f_round": "layers/skin_shade/f_round.webp",
+   "m_long": "layers/skin_shade/m_long.webp",
+   "m_oval": "layers/skin_shade/m_oval.webp",
+   "m_round": "layers/skin_shade/m_round.webp",
+   "m_square": "layers/skin_shade/m_square.webp"
+  }
+ },
+ "v2_notes": {
+  "felt_bake": "all feature/hair layers baked with felt grain, top-left cut-edge bevel and (2,4) stacked drop shadow; skin_shade grain only",
+  "lips": "F mouths: f_<expr> = natural rose (default), f_<expr>_brown, f_<expr>_bold (optional lipstick)",
+  "beard": "m_full_beard uses beardM (sx=cheek ratio, sy=crown-chin ratio); draw facial_hair/m_full_beard_moustache AFTER mouth",
+  "hair_rules": "short M styles: clip hair below chin-30; crew: clip hair_front below brow line-10; hide skin above hairline (top+45 px) where hair_front alpha<0.5",
+  "neck": "procedural std neck plate: m 40 / f 34 half-width, chin-40..478"
+ },
+ "options_v3": {
+  "eyes": [
+   "monolid",
+   "soft_lid",
+   "hooded",
+   "deep_set"
+  ],
+  "nose": [
+   "soft",
+   "medium",
+   "prominent"
+  ],
+  "brows": [
+   "natural",
+   "thick_arched",
+   "bushy",
+   "thin"
+  ],
+  "defaults": {
+   "m": {
+    "eyes": "soft_lid",
+    "nose": "medium",
+    "brows": "thick_arched"
+   },
+   "f": {
+    "eyes": "soft_lid",
+    "nose": "soft",
+    "brows": "natural"
+   }
+  },
+  "hair_colour": "black / very dark brown felt by default (all styles)",
+  "retired": [
+   "eyes: normal,sleepy,squint,round,side_eye,cat_eye,almond,wide",
+   "nose: pointy,bulbous,button"
+  ]
+ },
+ "v3_notes": {
+  "chin_shadow": "neck plate chin cast shadow 0.38 -> 0.20",
+  "crew": "curved hairline + elliptical crown mask; skin hidden 80px below hair top"
+ },
+ "v4_notes": "eyes rebuilt procedurally (eyes_v4.py) at ~70% of v3; expr eyes scaled (shocked 0.82); stronger nose edge/shadow; square+crew crown rounded",
+ "options_v5": {
+  "eyes": [
+   "normal",
+   "sleepy",
+   "round"
+  ]
+ },
+ "v5_notes": "eyes derived from style-check m_normal/f_normal at 0.88 via lid-line edits (eyes_v5.py)"
+}

@@ -12,3 +12,7 @@ screenshots
 .env.*
 .DS_Store
 .node_modules.lock
+
+puppet-kit/raw/
+puppet-kit/v3/
+

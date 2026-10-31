@@ -1,19 +1,22 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { CandidateProfile } from "@/game/cukup-jumlah/types";
+import { PuppetLab } from "@/game/cukup-jumlah/puppet/PuppetLab";
+import { PuppetSheet } from "@/game/cukup-jumlah/puppet/PuppetSheet";
 import { HeadGridInspector } from "@/game/cukup-jumlah/voxel/HeadGridInspector";
 import { StageComparisonViewer } from "@/game/cukup-jumlah/voxel/StageComparisonViewer";
 import { VoxelComparisonViewer } from "@/game/cukup-jumlah/voxel/VoxelComparisonViewer";
 import type { StageStyleOption } from "@/game/cukup-jumlah/voxel/stageBuilder";
 import type { VoxelStyleOption } from "@/game/cukup-jumlah/voxel/voxelBuilder";
 
-const LABS = ["head", "character", "stage"] as const;
+const LABS = ["head", "character", "stage", "puppet"] as const;
 type LabId = (typeof LABS)[number];
 
 const LAB_LABEL: Record<LabId, string> = {
   head: "Kepala & muka",
   character: "YB model",
   stage: "Pentas",
+  puppet: "Wayang",
 };
 
 const sampleProfile: CandidateProfile = {
@@ -41,21 +44,32 @@ const sampleProfile: CandidateProfile = {
 };
 
 function isLab(value: unknown): value is LabId {
-  return value === "head" || value === "character" || value === "stage";
+  return value === "head" || value === "character" || value === "stage" || value === "puppet";
+}
+
+function isSheet(value: unknown) {
+  return value === 1 || value === "1" || value === true;
 }
 
 export const Route = createFileRoute("/dev")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    lab: isLab(search.lab) ? search.lab : "head",
-  }),
+  validateSearch: (search: Record<string, unknown>) => {
+    const parsed: { lab: LabId; sheet?: 1 } = {
+      lab: isLab(search.lab) ? search.lab : "head",
+    };
+    if (isSheet(search.sheet)) parsed.sheet = 1;
+    return parsed;
+  },
   component: DevLabPage,
 });
 
 function DevLabPage() {
-  const { lab } = Route.useSearch();
+  const { lab, sheet } = Route.useSearch();
   const navigate = useNavigate();
   const [voxelStyle, setVoxelStyle] = useState<VoxelStyleOption>("A");
   const [stageStyle, setStageStyle] = useState<StageStyleOption>("1");
+
+  if (lab === "puppet" && sheet === 1) return <PuppetSheet />;
+  if (lab === "puppet") return <PuppetLab />;
 
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100">
