@@ -1,26 +1,23 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
-import {
-  BEATS_PER_BAR,
-  HIT_BEAT_IN_BAR,
-  hitWindows,
-  judgeTap,
-  nearestTarget,
-} from "../../beat/timing";
+import { BEATS_PER_BAR, HIT_BEAT_IN_BAR } from "../../beat/timing";
 import { canang, gendangHit, gendangMiss, gong, kesi } from "../../beat/wayangSounds";
 import { PARTIES, type Party } from "../../creator/candidate";
-import type { MicrogameProps } from "../microgame";
-import { GAME_TEXT, UI, fill, type Lang } from "../strings";
+import { mistakesAllowed, type MicrogameProps } from "../microgame";
+import { GAME_TEXT, fill, type Lang } from "../strings";
 import {
-  EMPTY_TALLY,
-  ballotAt,
+  BALLOTS,
+  EMPTY_COUNT,
   ballotSequence,
-  ballotTarget,
+  pileForSwipe,
+  sortBallot,
+  sorted,
   verdict,
-  type Ballot,
-  type Tally,
+  type Count,
+  type Pile,
 } from "./borang14Rules";
 
 const T = GAME_TEXT.borang14;
+const FLY_MS = 160;
 
 export function Borang14({
   clock,
@@ -28,36 +25,51 @@ export function Borang14({
   lang,
   talent,
   bars,
-  offsetMs,
   onBeat,
+  onTimeLeft,
   onJudge,
   onFinish,
 }: MicrogameProps) {
-  const callbacks = useRef({ onBeat, onJudge, onFinish });
-  callbacks.current = { onBeat, onJudge, onFinish };
-  const mesra = talent === "mesra_rakyat";
-  const [ballots] = useState(() => ballotSequence(bars));
+  const callbacks = useRef({ onBeat, onTimeLeft, onJudge, onFinish });
+  callbacks.current = { onBeat, onTimeLeft, onJudge, onFinish };
+  const allowed = mistakesAllowed(talent);
+  // Six ballots need about a second each; one bar more than the shell's default.
+  const timeBars = bars + 1;
+  const [ballots] = useState(() => ballotSequence(BALLOTS));
   const [rivalParty] = useState(() => {
     const others = PARTIES.filter((p) => p.id !== candidate.party);
     return others[Math.floor(Math.random() * others.length)] ?? PARTIES[1]!;
   });
   const yourParty = PARTIES.find((p) => p.id === candidate.party) ?? PARTIES[0]!;
 
-  const [showing, setShowing] = useState(-1);
-  const [tally, setTally] = useState<Tally>(EMPTY_TALLY);
+  const [live, setLive] = useState(false);
+  const [count, setCount] = useState<Count>(EMPTY_COUNT);
+  const [dx, setDx] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [flying, setFlying] = useState<Pile | null>(null);
   const [wrong, setWrong] = useState(0);
-  const tallyRef = useRef<Tally>(EMPTY_TALLY);
-  const judged = useRef(new Set<number>());
+  const [won, setWon] = useState(false);
+
+  const countRef = useRef<Count>(EMPTY_COUNT);
+  const liveRef = useRef(false);
+  const busy = useRef(false);
   const done = useRef(false);
+  const drag = useRef<{ x: number; width: number } | null>(null);
 
-  const record = (patch: Partial<Tally>) => {
-    const next = { ...tallyRef.current, ...patch };
-    tallyRef.current = next;
-    setTally(next);
+  const finish = (success: boolean) => {
+    if (done.current) return;
+    done.current = true;
+    clock.halt();
+    callbacks.current.onBeat(0);
+    if (success) setWon(true);
+    callbacks.current.onFinish(success);
   };
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
 
+  // Music and the countdown: a lead-in bar, then `timeBars` bars to sort every ballot.
   useEffect(() => {
-    const lastBeat = (bars + 1) * BEATS_PER_BAR;
+    const lastBeat = (timeBars + 1) * BEATS_PER_BAR;
     void clock.begin((index, when, out) => {
       if (index >= lastBeat) return;
       const inBar = index % BEATS_PER_BAR;
@@ -66,16 +78,9 @@ export function Borang14({
       else kesi(clock.ctx, out, when);
     });
 
-    const finish = (success: boolean) => {
-      if (done.current) return;
-      done.current = true;
-      clock.halt();
-      callbacks.current.onBeat(0);
-      callbacks.current.onFinish(success);
-    };
-
     let raf = 0;
     const frame = () => {
+      if (done.current) return;
       if (!clock.running) {
         raf = requestAnimationFrame(frame);
         return;
@@ -84,26 +89,16 @@ export function Borang14({
       callbacks.current.onBeat(
         pos < 0 || pos >= lastBeat ? 0 : (Math.floor(pos) % BEATS_PER_BAR) + 1,
       );
-      setShowing(ballotAt(pos, bars));
-
-      // A ballot is settled once its beat-4 window has passed without a decisive tap.
-      const now = clock.ctx.currentTime - offsetMs / 1000;
-      const goodWindow = hitWindows(mesra).good;
-      ballots.forEach((ballot, b) => {
-        if (judged.current.has(b) || clock.beatTime(ballotTarget(b)) + goodWindow >= now) return;
-        judged.current.add(b);
-        const t = tallyRef.current;
-        if (ballot === "rival") {
-          record({ rival: t.rival + 1, judged: t.judged + 1 });
-          callbacks.current.onJudge("good");
-        } else {
-          record({ mistakes: t.mistakes + 1, judged: t.judged + 1 });
-          callbacks.current.onJudge("miss");
-        }
-      });
-
-      const v = verdict(tallyRef.current, bars);
-      if (v !== "counting") return finish(v === "won");
+      const playPos = pos - BEATS_PER_BAR;
+      if (playPos >= 0 && !liveRef.current) {
+        liveRef.current = true;
+        setLive(true);
+      }
+      callbacks.current.onTimeLeft?.(1 - Math.max(0, playPos) / (timeBars * BEATS_PER_BAR));
+      if (playPos >= timeBars * BEATS_PER_BAR) {
+        finishRef.current(verdict(countRef.current, BALLOTS, allowed, true) === "won");
+        return;
+      }
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
@@ -111,88 +106,142 @@ export function Borang14({
       cancelAnimationFrame(raf);
       clock.halt();
     };
-  }, [clock, bars, ballots, mesra, offsetMs]);
+  }, [clock, timeBars, allowed]);
 
-  const tap = (eventTimeStamp: number) => {
-    if (done.current || !clock.running) return;
-    const corrected = clock.tapTime(eventTimeStamp) - offsetMs / 1000;
-    const k = nearestTarget(corrected, clock.start, BEATS_PER_BAR, HIT_BEAT_IN_BAR, clock.spb);
-    const b = (k - HIT_BEAT_IN_BAR) / BEATS_PER_BAR - 1;
-    if (b < 0 || b >= bars || judged.current.has(b)) return;
-    const t = tallyRef.current;
-
-    if (ballots[b] === "rival") {
-      // Tallying a rival's vote for yourself is a miscount, whenever in that bar it happens.
-      judged.current.add(b);
-      record({ rival: t.rival + 1, mistakes: t.mistakes + 1, judged: t.judged + 1 });
+  const throwTo = (pile: Pile) => {
+    if (!liveRef.current || done.current || busy.current) return;
+    const index = sorted(countRef.current);
+    const { count: next, correct } = sortBallot(countRef.current, ballots, index, pile);
+    countRef.current = next;
+    setCount(next);
+    const now = clock.ctx.currentTime;
+    if (!correct) {
+      gendangMiss(clock.ctx, clock.out, now);
       setWrong((n) => n + 1);
-      gendangMiss(clock.ctx, clock.out, clock.ctx.currentTime);
+      setDx(0);
       callbacks.current.onJudge("miss");
+      if (verdict(next, BALLOTS, allowed, false) === "lost") finish(false);
       return;
     }
-
-    const { grade } = judgeTap(corrected, clock.beatTime(k), hitWindows(mesra));
-    if (grade === "miss") {
-      gendangMiss(clock.ctx, clock.out, clock.ctx.currentTime);
-    } else {
-      judged.current.add(b);
-      record({ yours: t.yours + 1, judged: t.judged + 1 });
-      gendangHit(clock.ctx, clock.out, clock.ctx.currentTime, grade === "perfect");
-    }
-    callbacks.current.onJudge(grade);
+    gendangHit(clock.ctx, clock.out, now, true);
+    callbacks.current.onJudge("perfect");
+    busy.current = true;
+    setFlying(pile);
+    window.setTimeout(() => {
+      busy.current = false;
+      setFlying(null);
+      setDx(0);
+      if (verdict(countRef.current, BALLOTS, allowed, false) === "won") finishRef.current(true);
+    }, FLY_MS);
   };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.repeat || (e.code !== "Space" && e.code !== "Enter")) return;
+      if (e.key === "ArrowLeft") throwTo("yours");
+      else if (e.key === "ArrowRight") throwTo("rival");
+      else return;
       e.preventDefault();
-      tap(e.timeStamp);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    tap(e.timeStamp);
+  const onDown = (e: PointerEvent<HTMLDivElement>) => {
+    if (!live || busy.current || done.current) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { x: e.clientX, width: e.currentTarget.offsetWidth };
+    setDragging(true);
+  };
+  const onMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (drag.current) setDx(e.clientX - drag.current.x);
+  };
+  const onUp = (e: PointerEvent<HTMLDivElement>) => {
+    const start = drag.current;
+    drag.current = null;
+    setDragging(false);
+    if (!start) return;
+    const pile = pileForSwipe(e.clientX - start.x, start.width);
+    if (pile) throwTo(pile);
+    else setDx(0);
   };
 
-  const current = showing >= 0 ? ballots[showing] : undefined;
-  const finished = verdict(tally, bars) === "won";
+  const index = sorted(count);
+  const current = index < BALLOTS ? ballots[index] : undefined;
+  const helper = talent === "pakar_kira";
+  const flyX = flying === "yours" ? "-140%" : flying === "rival" ? "140%" : null;
 
   return (
-    <div
-      role="button"
-      tabIndex={-1}
-      aria-label={UI.tapPad[lang]}
-      onPointerDown={onPointerDown}
-      className="absolute inset-0 z-10 touch-manipulation select-none"
-    >
-      {current && (
-        <BallotPaper
-          key={showing}
-          marked={current}
-          lang={lang}
-          you={{ name: candidate.name, party: yourParty }}
-          rival={{ name: fill(T.rivalName[lang], { party: rivalParty.name }), party: rivalParty }}
-          helper={talent === "pakar_kira"}
-        />
+    <div className="absolute inset-0 z-10 select-none">
+      {live && current && !won && (
+        <div
+          key={index}
+          onPointerDown={onDown}
+          onPointerMove={onMove}
+          onPointerUp={onUp}
+          onPointerCancel={onUp}
+          className="absolute top-[37%] left-[15%] w-[70%] cursor-grab touch-none"
+          style={{
+            transform: flyX
+              ? `translateX(${flyX}) translateY(30%) rotate(${flying === "yours" ? -18 : 18}deg) scale(0.6)`
+              : `translateX(${dx}px) rotate(${dx / 14}deg)`,
+            opacity: flyX ? 0 : 1,
+            transition: dragging ? "none" : `transform ${FLY_MS}ms ease-out, opacity ${FLY_MS}ms`,
+          }}
+        >
+          <div className="ballot-show">
+            <BallotPaper
+              marked={current}
+              lang={lang}
+              you={{ name: candidate.name, party: yourParty }}
+              rival={{
+                name: fill(T.rivalName[lang], { party: rivalParty.name }),
+                party: rivalParty,
+              }}
+              helper={helper}
+            />
+          </div>
+        </div>
       )}
+
+      {live && !won && (
+        <p className="absolute top-[32.5%] left-1/2 -translate-x-1/2 font-tally text-[3.4cqw] text-[#6a4a32]">
+          {fill(T.left[lang], { n: BALLOTS - index })}
+        </p>
+      )}
+
       {wrong > 0 && (
         <span
           key={wrong}
-          className="stamp-pop absolute top-[47%] left-1/2 z-20 rounded-sm bg-[var(--sambal)] px-[3cqw] py-[1cqw] font-display text-[6cqw] font-bold text-[var(--cream)] italic"
+          className="stamp-pop absolute top-[50%] left-1/2 z-20 rounded-sm bg-[var(--sambal)] px-[3cqw] py-[1cqw] font-display text-[6cqw] font-bold whitespace-nowrap text-[var(--cream)] italic"
         >
           {T.wrong[lang]}
         </span>
       )}
-      <TallySheet
-        lang={lang}
-        tally={tally}
-        yourParty={yourParty}
-        rivalParty={rivalParty}
-        signed={finished}
+
+      <PileTray
+        side="left"
+        party={yourParty}
+        label={T.yours[lang]}
+        n={count.yours}
+        showCount={helper}
+        glow={flying === "yours"}
+        onTap={() => throwTo("yours")}
       />
+      <PileTray
+        side="right"
+        party={rivalParty}
+        label={T.rival[lang]}
+        n={count.rival}
+        showCount={helper}
+        glow={flying === "rival"}
+        onTap={() => throwTo("rival")}
+      />
+
+      {won && (
+        <p className="absolute bottom-[31%] left-[7%] w-[86%] rotate-[-2deg] rounded-sm bg-[#efe1c3] px-[3cqw] py-[1.6cqw] text-center text-[3.2cqw] font-semibold text-[var(--ink)] italic shadow-[0_4px_8px_rgba(40,14,6,0.3)]">
+          ✍️ {T.signed[lang]}
+        </p>
+      )}
     </div>
   );
 }
@@ -207,7 +256,7 @@ function BallotPaper({
   rival,
   helper,
 }: {
-  marked: Ballot;
+  marked: Pile;
   lang: Lang;
   you: Row;
   rival: Row;
@@ -218,9 +267,9 @@ function BallotPaper({
     { row: rival, x: marked === "rival" },
   ];
   return (
-    <div className="ballot-show absolute top-[37%] left-1/2 w-[72%] -translate-x-1/2 rounded-sm bg-[#fdfaf2] px-[3cqw] pt-[2cqw] pb-[2.4cqw] text-[var(--ink)] shadow-[0_8px_14px_rgba(40,14,6,0.4)]">
+    <div className="rounded-sm bg-[#fdfaf2] px-[3cqw] pt-[2cqw] pb-[2.4cqw] text-[var(--ink)] shadow-[0_10px_16px_rgba(40,14,6,0.4)]">
       <p className="text-center font-tally text-[2.8cqw] tracking-[0.18em] text-[#6a4a32] uppercase">
-        {GAME_TEXT.borang14.ballot[lang]}
+        {T.ballot[lang]}
       </p>
       {rows.map(({ row, x }) => (
         <div
@@ -228,18 +277,18 @@ function BallotPaper({
           className="mt-[1.4cqw] flex items-center gap-[2cqw] border-t border-dashed border-[#b9a07a] pt-[1.4cqw]"
         >
           <span
-            className="flex h-[8cqw] w-[8cqw] shrink-0 items-center justify-center rounded-sm text-[5cqw]"
+            className="flex h-[9cqw] w-[9cqw] shrink-0 items-center justify-center rounded-sm text-[5.4cqw]"
             style={{ backgroundColor: row.party.colour }}
             aria-hidden="true"
           >
             {row.party.icon}
           </span>
-          <span className="min-w-0 flex-1 truncate text-[3.8cqw] leading-tight font-bold">
+          <span className="min-w-0 flex-1 truncate text-[4cqw] leading-tight font-bold">
             {row.name}
           </span>
-          <span className="relative flex h-[8cqw] w-[8cqw] shrink-0 items-center justify-center border-2 border-[var(--ink)]">
+          <span className="flex h-[9cqw] w-[9cqw] shrink-0 items-center justify-center border-2 border-[var(--ink)]">
             {x && (
-              <span className="font-display text-[8cqw] leading-none font-bold text-[#1f3a8a]">
+              <span className="font-display text-[9cqw] leading-none font-bold text-[#1f3a8a]">
                 ✗
               </span>
             )}
@@ -252,7 +301,7 @@ function BallotPaper({
             marked === "yours" ? "text-[#2f6b2f]" : "text-[var(--sambal)]"
           }`}
         >
-          🧮 {marked === "yours" ? GAME_TEXT.borang14.yours[lang] : GAME_TEXT.borang14.rival[lang]}
+          🧮 {marked === "yours" ? `← ${T.yours[lang]}` : `${T.rival[lang]} →`}
         </p>
       )}
     </div>
@@ -263,8 +312,8 @@ function BallotPaper({
 function TallyMarks({ n }: { n: number }) {
   const groups = Array.from({ length: Math.ceil(n / 5) }, (_, g) => Math.min(5, n - g * 5));
   return (
-    <svg viewBox="0 0 60 22" className="h-[5.5cqw] w-auto" aria-label={String(n)}>
-      {groups.map((count, g) => (
+    <svg viewBox="0 0 60 22" className="h-[5cqw] w-auto" aria-hidden="true">
+      {groups.map((c, g) => (
         <g
           key={g}
           transform={`translate(${g * 30} 0)`}
@@ -272,55 +321,58 @@ function TallyMarks({ n }: { n: number }) {
           strokeWidth="2.2"
           strokeLinecap="round"
         >
-          {Array.from({ length: Math.min(4, count) }, (_, i) => (
+          {Array.from({ length: Math.min(4, c) }, (_, i) => (
             <line key={i} x1={3 + i * 5} x2={3 + i * 5} y1="3" y2="19" />
           ))}
-          {count === 5 && <line x1="0" x2="22" y1="17" y2="5" />}
+          {c === 5 && <line x1="0" x2="22" y1="17" y2="5" />}
         </g>
       ))}
     </svg>
   );
 }
 
-function TallySheet({
-  lang,
-  tally,
-  yourParty,
-  rivalParty,
-  signed,
+/** A tray the ballots land in: the player's party on the left, the rival on the right. */
+function PileTray({
+  side,
+  party,
+  label,
+  n,
+  showCount,
+  glow,
+  onTap,
 }: {
-  lang: Lang;
-  tally: Tally;
-  yourParty: Party;
-  rivalParty: Party;
-  signed: boolean;
+  side: "left" | "right";
+  party: Party;
+  label: string;
+  n: number;
+  showCount: boolean;
+  glow: boolean;
+  onTap: () => void;
 }) {
   return (
-    <div className="absolute right-[4%] bottom-[4%] w-[50%] rotate-[2deg] rounded-sm bg-[#efe1c3] px-[2.6cqw] py-[2cqw] text-[var(--ink)] shadow-[0_6px_10px_rgba(40,14,6,0.35)]">
-      <p className="font-tally text-[2.8cqw] tracking-[0.12em] text-[var(--sambal)] uppercase">
-        {GAME_TEXT.borang14.sheet[lang]}
-      </p>
-      {[
-        { party: yourParty, n: tally.yours },
-        { party: rivalParty, n: tally.rival },
-      ].map(({ party, n }) => (
-        <div key={party.id} className="mt-[1cqw] flex items-center gap-[1.5cqw]">
-          <span className="text-[4cqw]" aria-hidden="true">
-            {party.icon}
-          </span>
-          <span className="flex-1">
-            <TallyMarks n={n} />
-          </span>
-          <span className="font-tally text-[4.4cqw]">{n}</span>
-        </div>
-      ))}
-      <p
-        className={`mt-[1cqw] border-t border-[#9b896a] pt-[0.8cqw] text-[2.6cqw] italic transition-opacity duration-300 ${
-          signed ? "opacity-100" : "opacity-0"
-        }`}
+    <button
+      type="button"
+      onClick={onTap}
+      aria-label={label}
+      className={`absolute bottom-[4%] flex h-[22%] w-[44%] flex-col items-center justify-end gap-[1cqw] rounded-sm border-[0.8cqw] bg-[#efe1c3]/90 pb-[2cqw] text-[var(--ink)] shadow-[0_6px_10px_rgba(40,14,6,0.35)] transition-transform duration-150 ${
+        side === "left" ? "left-[4%]" : "right-[4%]"
+      } ${glow ? "scale-105" : ""}`}
+      style={{ borderColor: party.colour }}
+    >
+      <span
+        className="mb-auto -mt-[5cqw] flex h-[12cqw] w-[12cqw] items-center justify-center rounded-full text-[7cqw] shadow-[0_3px_6px_rgba(40,14,6,0.35)]"
+        style={{ backgroundColor: party.colour }}
+        aria-hidden="true"
       >
-        ✍️ {GAME_TEXT.borang14.signed[lang]}
-      </p>
-    </div>
+        {party.icon}
+      </span>
+      <span className="font-tally text-[3.2cqw] tracking-[0.1em] uppercase">
+        {side === "left" ? `← ${label}` : `${label} →`}
+      </span>
+      <span className="flex h-[6cqw] items-center gap-[1.5cqw]">
+        <TallyMarks n={n} />
+        {showCount && <span className="font-tally text-[4.4cqw]">{n}</span>}
+      </span>
+    </button>
   );
 }

@@ -349,6 +349,7 @@ function RoundStage({
   const [face, setFace] = useState<ExpressionId | null>(null);
   const [moment, setMoment] = useState<Moment | null>(null);
   const [sweep, setSweep] = useState(0);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
 
@@ -359,6 +360,7 @@ function RoundStage({
     setFace(null);
     setMoment(null);
     setAnim("idle");
+    setTimeLeft(null);
   }, [roundKey]);
 
   // When the reducer records the result, stamp it, then sweep the gunungan into the next round.
@@ -381,7 +383,9 @@ function RoundStage({
   };
 
   const words = ROUNDS[round];
-  const { Game, layout, tapHint } = microgameFor(round);
+  const { Game, layout, howTo } = microgameFor(round);
+  // A full-stage game takes the puppet off until the result is in.
+  const showPuppet = layout !== "full" || moment !== null;
   const party = PARTIES.find((p) => p.id === candidate.party);
 
   return (
@@ -391,12 +395,14 @@ function RoundStage({
       <div className="absolute top-[15%] left-1/2 z-20 flex w-[90%] -translate-x-1/2 flex-col items-center gap-[1.6cqw]">
         <DalangBanner call={words.call[lang]} hint={words.hint[lang]} />
         <BeatPins beat={beat} />
+        {timeLeft !== null && !moment && <Fuse left={timeLeft} />}
         <span className="font-tally text-[3.2cqw] tracking-[0.12em] text-[var(--ink)] uppercase">
-          {beat === 0 && !moment ? UI.ready[lang] : (tapHint ?? UI.tapHint)[lang]}
+          {beat === 0 && !moment ? UI.ready[lang] : howTo[lang]}
         </span>
       </div>
 
       <div
+        hidden={!showPuppet}
         className={`pointer-events-none absolute inset-x-0 bottom-0 flex h-[58%] items-end ${
           layout === "side" ? "justify-start pl-[1%]" : "justify-center"
         }`}
@@ -429,6 +435,7 @@ function RoundStage({
         bars={roundBars(candidate.talent)}
         offsetMs={offsetMs}
         onBeat={setBeat}
+        onTimeLeft={setTimeLeft}
         onJudge={onJudge}
         onFinish={onDone}
       />
@@ -457,6 +464,23 @@ function RoundStage({
         </div>
       )}
     </>
+  );
+}
+
+/** A burning wick: the time left in the round. */
+function Fuse({ left }: { left: number }) {
+  const pct = Math.max(0, Math.min(1, left)) * 100;
+  return (
+    <div className="relative h-[1.6cqw] w-[56%] rounded-full bg-[#5a3a1c]/25" aria-hidden="true">
+      <div
+        className="absolute inset-y-0 left-0 rounded-full bg-[linear-gradient(90deg,#8a1c19,#c9963f)]"
+        style={{ width: `${pct}%` }}
+      />
+      <span
+        className="pelita-flame absolute top-1/2 h-[3.4cqw] w-[2.4cqw] -translate-x-1/2 -translate-y-[70%] rounded-[50%_50%_45%_45%] bg-[radial-gradient(circle_at_50%_70%,#fff1c4,#ffb347_55%,#e4572e)]"
+        style={{ left: `${pct}%` }}
+      />
+    </div>
   );
 }
 

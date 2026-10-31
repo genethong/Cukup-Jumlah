@@ -1,48 +1,65 @@
-import { BEATS_PER_BAR, HIT_BEAT_IN_BAR } from "../../beat/timing";
+// Borang 14 (ASINGKAN!): the player is a counting agent at one polling stream. Ballots
+// come up one at a time; swipe each onto the right pile, the player's own or the rival's,
+// before the fuse burns out. A wrong pile is a mistake and the ballot stays to be sorted
+// again. Pure rules here; the screen is Borang14.tsx.
 
-// Borang 14: the player is a counting agent at one polling stream. Each bar the presiding
-// officer holds up a ballot. A vote for the player: tap on beat 4 to tally it. A vote for
-// the rival: leave it. Pure rules here; the screen is Borang14.tsx.
+export type Pile = "yours" | "rival";
 
-export type Ballot = "yours" | "rival";
+export const BALLOTS = 6;
 
-/** Mistakes allowed before the count is lost. */
-export const MISTAKES_ALLOWED = 1;
+/** Swipe distance, as a share of the card's width, that counts as a throw. */
+export const THROW_AT = 0.28;
 
 /**
- * The ballots for a round. The first is always the player's, so the first tap teaches the
- * rule, and there is always at least one rival ballot to leave alone.
+ * The ballots for a round. The first is always the player's, so the first swipe teaches
+ * the rule, and both piles always get at least one.
  */
-export function ballotSequence(bars: number, random: () => number = Math.random): Ballot[] {
-  const seq: Ballot[] = Array.from({ length: bars }, (_, i) =>
+export function ballotSequence(count = BALLOTS, random: () => number = Math.random): Pile[] {
+  const seq: Pile[] = Array.from({ length: count }, (_, i) =>
     i === 0 ? "yours" : random() < 0.5 ? "yours" : "rival",
   );
-  if (bars > 1 && !seq.includes("rival")) seq[1 + Math.floor(random() * (bars - 1))] = "rival";
+  if (count > 1 && !seq.includes("rival")) seq[1 + Math.floor(random() * (count - 1))] = "rival";
   return seq;
 }
 
-/** Beat index (0-based, counted from the lead-in) where ballot `b` is shown. */
-export function ballotShownAt(b: number): number {
-  return (b + 1) * BEATS_PER_BAR;
+/** Which pile a swipe throws to (yours on the left), or null if it should snap back. */
+export function pileForSwipe(dx: number, cardWidth: number): Pile | null {
+  if (cardWidth <= 0 || Math.abs(dx) < cardWidth * THROW_AT) return null;
+  return dx < 0 ? "yours" : "rival";
 }
 
-/** Beat index of the tap target for ballot `b`. */
-export function ballotTarget(b: number): number {
-  return ballotShownAt(b) + HIT_BEAT_IN_BAR;
+export type Count = { yours: number; rival: number; mistakes: number };
+
+export const EMPTY_COUNT: Count = { yours: 0, rival: 0, mistakes: 0 };
+
+/** Sorting the ballot at `index` onto `pile`. Returns the new count and whether it was right. */
+export function sortBallot(
+  count: Count,
+  ballots: readonly Pile[],
+  index: number,
+  pile: Pile,
+): { count: Count; correct: boolean } {
+  const correct = ballots[index] === pile;
+  return {
+    correct,
+    count: correct
+      ? { ...count, [pile]: count[pile] + 1 }
+      : { ...count, mistakes: count.mistakes + 1 },
+  };
 }
 
-/** Which ballot a beat position belongs to, or -1 during the lead-in or after the last one. */
-export function ballotAt(beatPos: number, bars: number): number {
-  const b = Math.floor(beatPos / BEATS_PER_BAR) - 1;
-  return b >= 0 && b < bars ? b : -1;
+export function sorted(count: Count): number {
+  return count.yours + count.rival;
 }
 
-export type Tally = { yours: number; rival: number; mistakes: number; judged: number };
-
-export const EMPTY_TALLY: Tally = { yours: 0, rival: 0, mistakes: 0, judged: 0 };
-
-/** Won, lost, or still counting. */
-export function verdict(tally: Tally, bars: number): "won" | "lost" | "counting" {
-  if (tally.mistakes > MISTAKES_ALLOWED) return "lost";
-  return tally.judged >= bars ? "won" : "counting";
+/** Won once every ballot is sorted; lost past the mistakes allowed or when time runs out. */
+export function verdict(
+  count: Count,
+  total: number,
+  allowed: number,
+  timeUp: boolean,
+): "won" | "lost" | "sorting" {
+  if (count.mistakes > allowed) return "lost";
+  if (sorted(count) >= total) return "won";
+  return timeUp ? "lost" : "sorting";
 }

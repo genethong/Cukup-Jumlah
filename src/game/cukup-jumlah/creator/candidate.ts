@@ -70,7 +70,7 @@ export const TALENTS: readonly Talent[] = [
     id: "mesra_rakyat",
     name: "Mesra Rakyat",
     icon: "🤝",
-    effect: "Tepukan rentak lebih memaafkan",
+    effect: "Satu kesilapan tambahan setiap cabaran",
   },
   { id: "pakar_kira", name: "Pakar Kira", icon: "🧮", effect: "Bantuan kira deposit dan undi" },
   {
