@@ -179,7 +179,7 @@ export function Borang14({
           onPointerMove={onMove}
           onPointerUp={onUp}
           onPointerCancel={onUp}
-          className="absolute top-[37%] left-[15%] w-[70%] cursor-grab touch-none"
+          className="absolute top-[45%] left-[15%] w-[70%] cursor-grab touch-none"
           style={{
             transform: flyX
               ? `translateX(${flyX}) translateY(30%) rotate(${flying === "yours" ? -18 : 18}deg) scale(0.6)`
@@ -204,7 +204,7 @@ export function Borang14({
       )}
 
       {live && !won && (
-        <p className="absolute top-[32.5%] left-1/2 -translate-x-1/2 font-tally text-[3.4cqw] text-[#6a4a32]">
+        <p className="absolute top-[40.5%] left-1/2 -translate-x-1/2 font-tally text-[3.4cqw] text-[#6a4a32]">
           {fill(T.left[lang], { n: BALLOTS - index })}
         </p>
       )}
