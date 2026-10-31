@@ -1,59 +1,64 @@
 import { describe, expect, it } from "vitest";
 import {
-  BURN_SECONDS,
-  COOK_SECONDS,
   FRESH_WOK,
-  FULL_RPS,
-  SPEED_WINDOW_S,
-  StirMeter,
-  angleDelta,
-  stepWok,
+  RECIPE,
+  SCORCH_SECONDS,
+  TOSSES_NEEDED,
+  TOSS_FROM,
+  WOK_HEI_FROM,
+  addIngredient,
+  doneShare,
+  heatUp,
+  shuffledBowls,
+  toss,
   wokVerdict,
   type Wok,
 } from "./gorengRules";
 
-const run = (seconds: number, rps: number, forgiving = false, from: Wok = FRESH_WOK) => {
-  let w = from;
-  for (let t = 0; t < seconds; t += 0.05) w = stepWok(w, 0.05, rps, forgiving);
-  return w;
-};
+const allIn = (): Wok => RECIPE.reduce((w, ing) => addIngredient(w, ing).wok, FRESH_WOK);
+const hot = (w: Wok, heat: number): Wok => ({ ...w, heat });
 
 describe("Goreng Kuey Teow rules", () => {
-  it("measures the shortest turn across the ±π seam", () => {
-    expect(angleDelta(3, -3)).toBeCloseTo(2 * Math.PI - 6);
-    expect(angleDelta(-3, 3)).toBeCloseTo(6 - 2 * Math.PI);
-    expect(angleDelta(0, 1)).toBeCloseTo(1);
+  it("only takes the ingredients in recipe order", () => {
+    const wrong = addIngredient(FRESH_WOK, "telur");
+    expect(wrong.correct).toBe(false);
+    expect(wrong.wok).toEqual({ ...FRESH_WOK, mistakes: 1 });
+    const right = addIngredient(FRESH_WOK, "minyak");
+    expect(right.correct).toBe(true);
+    expect(right.wok.added).toBe(1);
   });
 
-  it("turns circling into turns per second, and wiggling cancels out", () => {
-    const m = new StirMeter();
-    for (let i = 0; i < 20; i += 1) m.add(i * 0.02, (2 * Math.PI) / 20); // one turn in 0.4 s
-    expect(m.rps(0.4)).toBeCloseTo(1 / SPEED_WINDOW_S, 0);
-    const w = new StirMeter();
-    for (let i = 0; i < 20; i += 1) w.add(i * 0.02, i % 2 ? 0.3 : -0.3);
-    expect(w.rps(0.4)).toBeLessThan(0.1);
+  it("heats only once there's food in the wok, and burns if never tossed", () => {
+    expect(heatUp(FRESH_WOK, 5)).toEqual(FRESH_WOK);
+    const w = addIngredient(FRESH_WOK, "minyak").wok;
+    expect(wokVerdict(heatUp(w, SCORCH_SECONDS), false)).toBe("lost");
+    expect(heatUp(w, SCORCH_SECONDS, true).heat).toBeLessThan(1);
   });
 
-  it("cooks through with steady full-speed stirring, without burning", () => {
-    const w = run(COOK_SECONDS + 0.1, FULL_RPS);
-    expect(w.cooked).toBe(1);
-    expect(w.burnt).toBe(0);
+  it("ignores tosses that are empty or too early, counts hot ones, doubles WOK HEI", () => {
+    expect(toss(FRESH_WOK).result).toBe("empty");
+    const w = addIngredient(FRESH_WOK, "minyak").wok;
+    expect(toss(hot(w, TOSS_FROM / 2))).toEqual({ wok: hot(w, TOSS_FROM / 2), result: "early" });
+    const good = toss(hot(w, TOSS_FROM));
+    expect(good.result).toBe("good");
+    expect(good.wok).toMatchObject({ tosses: 1, heat: 0 });
+    const hei = toss(hot(w, WOK_HEI_FROM));
+    expect(hei.result).toBe("wokHei");
+    expect(hei.wok.tosses).toBe(2);
+  });
+
+  it("is done with every ingredient in and enough tosses", () => {
+    const w = { ...allIn(), tosses: TOSSES_NEEDED };
+    expect(doneShare(w)).toBe(1);
     expect(wokVerdict(w, false)).toBe("won");
+    expect(wokVerdict({ ...allIn(), tosses: TOSSES_NEEDED - 1 }, false)).toBe("cooking");
+    expect(wokVerdict({ ...allIn(), tosses: TOSSES_NEEDED - 1 }, true)).toBe("lost");
   });
 
-  it("burns when left alone, and Mesra Rakyat burns slower", () => {
-    const idle = run(BURN_SECONDS + 0.1, 0);
-    expect(wokVerdict(idle, false)).toBe("lost");
-    expect(run(BURN_SECONDS + 0.1, 0, true).burnt).toBeLessThan(1);
-  });
-
-  it("recovers from a little scorch once stirring picks up", () => {
-    const scorched = run(1, 0);
-    expect(scorched.burnt).toBeGreaterThan(0.3);
-    expect(run(1, FULL_RPS, false, scorched).burnt).toBeLessThan(scorched.burnt);
-  });
-
-  it("loses when time runs out half-cooked", () => {
-    expect(wokVerdict({ cooked: 0.5, burnt: 0 }, true)).toBe("lost");
+  it("shuffles the bowls but keeps every ingredient", () => {
+    let x = 7;
+    const random = () => (x = (x * 9301 + 49297) % 233280) / 233280;
+    const bowls = shuffledBowls(random);
+    expect([...bowls].sort()).toEqual([...RECIPE].sort());
   });
 });

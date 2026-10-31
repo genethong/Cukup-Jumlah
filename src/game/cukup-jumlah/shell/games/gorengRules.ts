@@ -1,84 +1,98 @@
-// Goreng Kuey Teow (KACAU!): fry kuey teow for the cameras by stirring the wok in circles.
-// Stirring fast enough cooks the noodles; stirring too slowly lets them burn. Cook them
-// through before the fuse burns out. Pure rules here; the screen is GorengKueyTeow.tsx.
+// Goreng Kuey Teow (KACAU!): cook a plate of char kuey teow for the cameras, the way a
+// hawker does. Add the ingredients in order, and toss the wok as it heats: toss too early
+// and it doesn't count, toss as it starts to smoke for WOK HEI!, leave it and it burns.
+// Pure rules here; the screen is GorengKueyTeow.tsx.
 
-/** Seconds of full-speed stirring to cook the noodles through. */
-export const COOK_SECONDS = 4.2;
-/** Stirring at or above this many turns a second cooks at full rate. */
-export const FULL_RPS = 1.4;
-/** Below this many turns a second the noodles start to catch. */
-export const SAFE_RPS = 0.6;
-/** Seconds of no stirring at all from clean to burnt. */
-export const BURN_SECONDS = 2.4;
-/** How fast scorch fades (per second) while stirring properly. */
-export const RECOVER_PER_S = 0.35;
-/** Turns a second that flare the flame: WOK HEI! */
-export const WOK_HEI_RPS = 2.6;
-/** Seconds of stir history used to measure speed. */
-export const SPEED_WINDOW_S = 0.4;
+export const RECIPE = ["minyak", "udang", "kueyteow", "kicap", "telur", "taugeh"] as const;
+export type Ingredient = (typeof RECIPE)[number];
 
-export type Wok = { cooked: number; burnt: number };
+/** Good tosses needed, on top of every ingredient going in. */
+export const TOSSES_NEEDED = 4;
+/** Seconds from a fresh toss to burnt, once there's food in the wok. */
+export const SCORCH_SECONDS = 2.4;
+/** Heat (share of the way to burnt) before a toss counts. Earlier is "too early". */
+export const TOSS_FROM = 0.3;
+/** Heat from which a toss is WOK HEI! and counts double. */
+export const WOK_HEI_FROM = 0.65;
+/** Seconds a wrong ingredient burns off the fuse. */
+export const PENALTY_S = 1;
 
-export const FRESH_WOK: Wok = { cooked: 0, burnt: 0 };
+export type Wok = { added: number; tosses: number; heat: number; mistakes: number };
 
-/** Shortest signed turn (radians) from angle `a` to angle `b`. */
-export function angleDelta(a: number, b: number): number {
-  let d = b - a;
-  while (d > Math.PI) d -= 2 * Math.PI;
-  while (d < -Math.PI) d += 2 * Math.PI;
-  return d;
+export const FRESH_WOK: Wok = { added: 0, tosses: 0, heat: 0, mistakes: 0 };
+
+export function nextIngredient(wok: Wok): Ingredient | null {
+  return RECIPE[wok.added] ?? null;
 }
 
-/** Measures stirring speed in turns per second from recent finger movement. */
-export class StirMeter {
-  private samples: { t: number; d: number }[] = [];
-
-  add(t: number, delta: number): void {
-    this.samples.push({ t, d: delta });
-    this.trim(t);
-  }
-
-  /** Turns per second over the last window. Direction doesn't matter, steadiness does:
-   *  wiggling back and forth cancels out. */
-  rps(t: number): number {
-    this.trim(t);
-    const sum = this.samples.reduce((n, s) => n + s.d, 0);
-    return Math.abs(sum) / (2 * Math.PI) / SPEED_WINDOW_S;
-  }
-
-  private trim(t: number): void {
-    while (this.samples.length && t - this.samples[0]!.t > SPEED_WINDOW_S) this.samples.shift();
-  }
+/** Puts `ing` in the wok. Only the next one in the recipe goes in; anything else is a mistake. */
+export function addIngredient(wok: Wok, ing: Ingredient): { wok: Wok; correct: boolean } {
+  const correct = nextIngredient(wok) === ing;
+  return {
+    correct,
+    wok: correct ? { ...wok, added: wok.added + 1 } : { ...wok, mistakes: wok.mistakes + 1 },
+  };
 }
 
-/**
- * Advances the wok by `dt` seconds at stirring speed `rps`. `forgiving` (Mesra Rakyat)
- * makes the noodles slower to burn.
- */
-export function stepWok(wok: Wok, dt: number, rps: number, forgiving = false): Wok {
-  const pace = Math.min(1, rps / FULL_RPS);
-  const cooked = Math.min(1, wok.cooked + (dt / COOK_SECONDS) * pace);
-  const burnSeconds = forgiving ? BURN_SECONDS * 1.4 : BURN_SECONDS;
-  const burnt =
-    rps < SAFE_RPS
-      ? Math.min(1, wok.burnt + (dt / burnSeconds) * (1 - rps / SAFE_RPS))
-      : Math.max(0, wok.burnt - dt * RECOVER_PER_S);
-  return { cooked, burnt };
+export type TossResult = "empty" | "early" | "good" | "wokHei";
+
+/** Tossing the wok. Counts once it's hot; resets the heat when it does. */
+export function toss(wok: Wok): { wok: Wok; result: TossResult } {
+  if (wok.added === 0) return { wok, result: "empty" };
+  if (wok.heat < TOSS_FROM) return { wok, result: "early" };
+  const wokHei = wok.heat >= WOK_HEI_FROM;
+  return {
+    result: wokHei ? "wokHei" : "good",
+    wok: { ...wok, heat: 0, tosses: wok.tosses + (wokHei ? 2 : 1) },
+  };
 }
 
-/** Won when cooked through; lost when burnt or out of time. */
+/** The wok heats once there's food in it. `forgiving` (Mesra Rakyat) heats slower. */
+export function heatUp(wok: Wok, dt: number, forgiving = false): Wok {
+  if (wok.added === 0) return wok;
+  const seconds = forgiving ? SCORCH_SECONDS * 1.4 : SCORCH_SECONDS;
+  return { ...wok, heat: Math.min(1, wok.heat + dt / seconds) };
+}
+
+/** Seconds burnt off the fuse so far. `freeMistakes` (Mesra Rakyat) cost nothing. */
+export function penaltySeconds(mistakes: number, freeMistakes = 0): number {
+  return Math.max(0, mistakes - freeMistakes) * PENALTY_S;
+}
+
+/** Share of the dish done, for the cooked meter: ingredients first, then the tossing. */
+export function doneShare(wok: Wok): number {
+  return (wok.added / RECIPE.length) * 0.6 + Math.min(1, wok.tosses / TOSSES_NEEDED) * 0.4;
+}
+
+/** Won with every ingredient in and enough tosses; lost if it burns or time runs out. */
 export function wokVerdict(wok: Wok, timeUp: boolean): "won" | "lost" | "cooking" {
-  if (wok.burnt >= 1) return "lost";
-  if (wok.cooked >= 1) return "won";
+  if (wok.heat >= 1) return "lost";
+  if (wok.added >= RECIPE.length && wok.tosses >= TOSSES_NEEDED) return "won";
   return timeUp ? "lost" : "cooking";
 }
 
-/** The noodles' colour: pale raw, golden when cooked, charcoal when burnt. */
+/** The bowls in a fresh random order each round, so the player has to read them. */
+export function shuffledBowls(random: () => number = Math.random): Ingredient[] {
+  const bowls = [...RECIPE];
+  for (let i = bowls.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(random() * (i + 1));
+    [bowls[i], bowls[j]] = [bowls[j]!, bowls[i]!];
+  }
+  return bowls;
+}
+
+/** The noodles' colour: pale, darker once the kicap is in, browner with tossing, black near burning. */
 export function noodleColour(wok: Wok): string {
-  const raw = [226, 205, 160];
-  const done = [176, 110, 46];
+  const raw = [238, 228, 205];
+  const sauced = [176, 120, 64];
   const char = [52, 38, 28];
+  const kicapIn = wok.added > RECIPE.indexOf("kicap") ? 1 : 0;
+  const browned = Math.min(1, wok.tosses / TOSSES_NEEDED) * 0.4;
   const mix = (a: number[], b: number[], k: number) => a.map((v, i) => v + (b[i]! - v) * k);
-  const c = mix(mix(raw, done, wok.cooked), char, wok.burnt * 0.9);
+  const c = mix(
+    mix(raw, sauced, Math.min(1, kicapIn * 0.7 + browned)),
+    char,
+    Math.max(0, wok.heat - 0.6) * 1.6,
+  );
   return `rgb(${c.map((v) => Math.round(v)).join(",")})`;
 }
