@@ -343,7 +343,7 @@ export function GorengKueyTeow({
             >
               {ICON[ing]}
             </span>
-            <span className="mt-[0.4cqw] w-full truncate text-center font-tally text-[2.4cqw] leading-tight text-[var(--ink)] uppercase">
+            <span className="mt-[0.4cqw] line-clamp-2 w-full text-center font-tally text-[2.4cqw] leading-tight text-[var(--ink)] uppercase">
               {T[ing][lang]}
             </span>
           </button>
@@ -352,7 +352,7 @@ export function GorengKueyTeow({
 
       {/* Smoke once the wok gets hot: the cue to toss. */}
       {wok.heat > 0.4 && !outcome && (
-        <div className="pointer-events-none absolute top-[52%] left-1/2 h-[16%] w-[44%] -translate-x-1/2">
+        <div className="pointer-events-none absolute top-[58%] left-1/2 h-[12%] w-[44%] -translate-x-1/2">
           {[0, 1, 2].map((i) => (
             <span
               key={i}
@@ -367,7 +367,7 @@ export function GorengKueyTeow({
         </div>
       )}
       {wok.heat >= TOSS_FROM + 0.25 && !outcome && (
-        <span className="combo-pop absolute top-[57%] left-1/2 z-20 -translate-x-1/2 rounded-sm bg-[var(--sambal)] px-[2.4cqw] py-[0.6cqw] font-display text-[5cqw] font-bold whitespace-nowrap text-[var(--cream)] italic">
+        <span className="combo-pop absolute top-[86%] left-1/2 z-20 -translate-x-1/2 rounded-sm bg-[var(--sambal)] px-[2.4cqw] py-[0.6cqw] font-display text-[5cqw] font-bold whitespace-nowrap text-[var(--cream)] italic">
           ⬆ {T.toss[lang]}
         </span>
       )}
@@ -399,7 +399,7 @@ export function GorengKueyTeow({
       {pop && !outcome && (
         <span
           key={`pop-${pop.n}`}
-          className={`stamp-pop absolute top-[66%] left-1/2 z-20 font-display font-bold whitespace-nowrap italic ${
+          className={`stamp-pop absolute top-[71%] left-1/2 z-20 font-display font-bold whitespace-nowrap italic ${
             pop.tone === "hei"
               ? "text-[11cqw] text-[#e4572e] drop-shadow-[0_3px_0_#fff1c4]"
               : "rounded-sm bg-[var(--sambal)] px-[2.4cqw] py-[0.6cqw] text-[5cqw] text-[var(--cream)]"
