@@ -26,7 +26,7 @@ const STAND_IN: MicrogameEntry = {
 
 const BUILT: Partial<Record<RoundId, MicrogameEntry>> = {
   borang_14: { Game: Borang14, layout: "between", howTo: GAME_TEXT.borang14.tapHint },
-  goreng_kueyteow: { Game: GorengKueyTeow, layout: "center", howTo: GAME_TEXT.goreng.howTo },
+  goreng_kueyteow: { Game: GorengKueyTeow, layout: "side", howTo: GAME_TEXT.goreng.howTo },
 };
 
 export function microgameFor(round: RoundId): MicrogameEntry {

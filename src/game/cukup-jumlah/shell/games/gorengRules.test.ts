@@ -1,64 +1,45 @@
 import { describe, expect, it } from "vitest";
 import {
-  FRESH_WOK,
-  RECIPE,
-  SCORCH_SECONDS,
-  TOSSES_NEEDED,
-  TOSS_FROM,
-  WOK_HEI_FROM,
-  addIngredient,
-  doneShare,
-  heatUp,
-  shuffledBowls,
-  toss,
-  wokVerdict,
-  type Wok,
+  COOK_SECONDS,
+  FIRST_FLASH_S,
+  FRESH_SHOOT,
+  POSE_SECONDS,
+  flashTimes,
+  judgeFlash,
+  photosNeeded,
+  shootVerdict,
+  stepCook,
 } from "./gorengRules";
 
-const allIn = (): Wok => RECIPE.reduce((w, ing) => addIngredient(w, ing).wok, FRESH_WOK);
-const hot = (w: Wok, heat: number): Wok => ({ ...w, heat });
-
-describe("Goreng Kuey Teow rules", () => {
-  it("only takes the ingredients in recipe order", () => {
-    const wrong = addIngredient(FRESH_WOK, "telur");
-    expect(wrong.correct).toBe(false);
-    expect(wrong.wok).toEqual({ ...FRESH_WOK, mistakes: 1 });
-    const right = addIngredient(FRESH_WOK, "minyak");
-    expect(right.correct).toBe(true);
-    expect(right.wok.added).toBe(1);
+describe("Goreng Kuey Teow photo-op rules", () => {
+  it("spaces the flashes through the round and stops before the fuse runs out", () => {
+    const times = flashTimes(9.6, () => 0.5);
+    expect(times[0]).toBe(FIRST_FLASH_S);
+    expect(times.length).toBe(4);
+    expect(times.at(-1)!).toBeLessThanOrEqual(9.6 - 0.5);
   });
 
-  it("heats only once there's food in the wok, and burns if never tossed", () => {
-    expect(heatUp(FRESH_WOK, 5)).toEqual(FRESH_WOK);
-    const w = addIngredient(FRESH_WOK, "minyak").wok;
-    expect(wokVerdict(heatUp(w, SCORCH_SECONDS), false)).toBe("lost");
-    expect(heatUp(w, SCORCH_SECONDS, true).heat).toBeLessThan(1);
+  it("lets the hawker cook only while the YB keeps off the senduk", () => {
+    expect(stepCook(FRESH_SHOOT, 1, true).cooked).toBe(0);
+    expect(stepCook(FRESH_SHOOT, COOK_SECONDS, false).cooked).toBe(1);
   });
 
-  it("ignores tosses that are empty or too early, counts hot ones, doubles WOK HEI", () => {
-    expect(toss(FRESH_WOK).result).toBe("empty");
-    const w = addIngredient(FRESH_WOK, "minyak").wok;
-    expect(toss(hot(w, TOSS_FROM / 2))).toEqual({ wok: hot(w, TOSS_FROM / 2), result: "early" });
-    const good = toss(hot(w, TOSS_FROM));
-    expect(good.result).toBe("good");
-    expect(good.wok).toMatchObject({ tosses: 1, heat: 0 });
-    const hei = toss(hot(w, WOK_HEI_FROM));
-    expect(hei.result).toBe("wokHei");
-    expect(hei.wok.tosses).toBe(2);
+  it("counts a photo only if the YB was already posing", () => {
+    expect(judgeFlash(FRESH_SHOOT, POSE_SECONDS).good).toBe(true);
+    expect(judgeFlash(FRESH_SHOOT, POSE_SECONDS / 2).good).toBe(false);
+    expect(judgeFlash(FRESH_SHOOT, null).shoot.missed).toBe(1);
   });
 
-  it("is done with every ingredient in and enough tosses", () => {
-    const w = { ...allIn(), tosses: TOSSES_NEEDED };
-    expect(doneShare(w)).toBe(1);
-    expect(wokVerdict(w, false)).toBe("won");
-    expect(wokVerdict({ ...allIn(), tosses: TOSSES_NEEDED - 1 }, false)).toBe("cooking");
-    expect(wokVerdict({ ...allIn(), tosses: TOSSES_NEEDED - 1 }, true)).toBe("lost");
+  it("needs the photos and the dish; Mesra Rakyat needs one photo fewer", () => {
+    expect(photosNeeded(false, 4)).toBe(3);
+    expect(photosNeeded(true, 4)).toBe(2);
+    expect(shootVerdict({ cooked: 1, photos: 3, missed: 1 }, 4, 3, false)).toBe("won");
+    expect(shootVerdict({ cooked: 0.8, photos: 3, missed: 0 }, 4, 3, false)).toBe("shooting");
+    expect(shootVerdict({ cooked: 0.8, photos: 3, missed: 0 }, 4, 3, true)).toBe("lost");
   });
 
-  it("shuffles the bowls but keeps every ingredient", () => {
-    let x = 7;
-    const random = () => (x = (x * 9301 + 49297) % 233280) / 233280;
-    const bowls = shuffledBowls(random);
-    expect([...bowls].sort()).toEqual([...RECIPE].sort());
+  it("ends early once too many photos are missed to make the count", () => {
+    expect(shootVerdict({ cooked: 0.5, photos: 0, missed: 2 }, 4, 3, false)).toBe("lost");
+    expect(shootVerdict({ cooked: 0.5, photos: 1, missed: 1 }, 4, 3, false)).toBe("shooting");
   });
 });

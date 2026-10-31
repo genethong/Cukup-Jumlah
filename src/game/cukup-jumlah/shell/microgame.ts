@@ -1,6 +1,8 @@
 import type { BeatClock } from "../beat/beatClock";
 import type { Grade } from "../beat/timing";
 import type { Candidate, TalentId } from "../creator/candidate";
+import type { ExpressionId } from "../puppet/loadRig";
+import type { PuppetAnim } from "../puppet/motion";
 import type { RoundId } from "./flow";
 import type { Lang } from "./strings";
 
@@ -30,6 +32,9 @@ export type MicrogameProps = {
   onTimeLeft?: (fraction: number, seconds: number) => void;
   /** Each good or bad move; the shell can react (sound, puppet). */
   onJudge: (grade: Grade) => void;
+  /** Holds the player's puppet in an action of the game's own (e.g. posing at the wok);
+   *  null hands it back to the shell's reactions. */
+  onPuppet?: (act: { anim: PuppetAnim; face: ExpressionId | null } | null) => void;
   /** Call once, when the round is decided. */
   onFinish: (success: boolean) => void;
 };

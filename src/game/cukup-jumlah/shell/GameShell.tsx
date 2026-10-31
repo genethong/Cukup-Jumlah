@@ -351,6 +351,7 @@ function RoundStage({
   const [sweep, setSweep] = useState(0);
   const [timeLeft, setTimeLeft] = useState<{ share: number; seconds: number } | null>(null);
   const [leadIn, setLeadIn] = useState(0);
+  const [held, setHeld] = useState<{ anim: PuppetAnim; face: ExpressionId | null } | null>(null);
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
 
@@ -363,6 +364,7 @@ function RoundStage({
     setAnim("idle");
     setTimeLeft(null);
     setLeadIn(0);
+    setHeld(null);
   }, [roundKey]);
 
   // When the reducer records the result, stamp it, then sweep the gunungan into the next round.
@@ -399,6 +401,9 @@ function RoundStage({
   // A full-stage game keeps the whole kelir for itself, result stamp included.
   const showPuppet = layout !== "full";
   const party = PARTIES.find((p) => p.id === candidate.party);
+  // A game holding the puppet in its own action wins over the shell's quick reactions,
+  // until the result stamp.
+  const shownFace = held && !moment ? held.face : face;
 
   return (
     <>
@@ -429,8 +434,8 @@ function RoundStage({
           }
         >
           <PuppetAvatar
-            config={face ? { ...candidate.puppet, expression: face } : candidate.puppet}
-            anim={anim}
+            config={shownFace ? { ...candidate.puppet, expression: shownFace } : candidate.puppet}
+            anim={held && !moment ? held.anim : anim}
             label={candidate.name}
           />
         </div>
@@ -457,6 +462,7 @@ function RoundStage({
         offsetMs={offsetMs}
         onBeat={setBeat}
         onLeadIn={setLeadIn}
+        onPuppet={setHeld}
         onTimeLeft={(share, seconds) => setTimeLeft({ share, seconds })}
         onJudge={onJudge}
         onFinish={onDone}

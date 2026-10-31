@@ -100,13 +100,9 @@
   animation: camera-flash 380ms ease-out forwards;
 }
 
-/* Tossing the wok: the pan kicks up and tilts, the food flies higher and lands. */
-.wok-toss {
-  animation: wok-toss 360ms cubic-bezier(0.3, 0, 0.4, 1);
-}
-
-.food-toss {
-  animation: food-toss 420ms cubic-bezier(0.3, 0, 0.4, 1);
+/* A senduk working the wok. */
+.senduk-stir {
+  animation: senduk-stir 360ms ease-in-out infinite alternate;
 }
 
 .gunungan-sweep {
@@ -213,16 +209,9 @@
   100% { opacity: 0; }
 }
 
-@keyframes wok-toss {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  35% { transform: translateY(-14px) rotate(-6deg); }
-  70% { transform: translateY(3px) rotate(2deg); }
-}
-
-@keyframes food-toss {
-  0%, 100% { transform: translateY(0) scale(1); }
-  40% { transform: translateY(-70px) scale(1.06) rotate(-4deg); }
-  75% { transform: translateY(4px) scale(0.98); }
+@keyframes senduk-stir {
+  from { transform: rotate(-9deg); }
+  to { transform: rotate(9deg); }
 }
 
 @keyframes gunungan-sweep {
@@ -245,8 +234,7 @@
     opacity: 1;
     transform: translate(-50%, -50%) rotate(-8deg);
   }
-  .wok-toss,
-  .food-toss {
+  .senduk-stir {
     animation: none;
   }
   .smoke-rise {
