@@ -58,7 +58,12 @@ export function Gunungan({ className = "" }: { className?: string }) {
         <circle cx="100" cy="70" r="6" />
       </g>
 
-      <path d="M78 292 L78 266 Q100 246 122 266 L122 292 Z" fill="#2a160b" stroke="#c9963f" strokeWidth="3" />
+      <path
+        d="M78 292 L78 266 Q100 246 122 266 L122 292 Z"
+        fill="#2a160b"
+        stroke="#c9963f"
+        strokeWidth="3"
+      />
       <path d="M100 292 L100 262" stroke="#c9963f" strokeWidth="2" />
       <rect x="96" y="292" width="8" height="8" fill="#5a3a1c" />
     </svg>
