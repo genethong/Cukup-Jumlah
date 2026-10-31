@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { BEATS_PER_BAR } from "../../beat/timing";
 import { gendangHit, gendangMiss, shutter, sizzle, tick, wokClang } from "../../beat/wayangSounds";
+import type { Candidate } from "../../creator/candidate";
 import type { PuppetConfig } from "../../puppet/loadRig";
 import { PuppetAvatar } from "../../puppet/PuppetAvatar";
 import type { MicrogameProps } from "../microgame";
@@ -23,7 +24,7 @@ const T = GAME_TEXT.goreng;
 const EXTRA_BARS = 2;
 const TICK_FROM_S = 2.5;
 
-/** The stall's real cook, cast as a shadow on the kelir. */
+/** The stall's real cook: red cap, T-shirt, selipar. */
 const HAWKER: PuppetConfig = {
   gender: "m",
   tone: "tone_5",
@@ -35,12 +36,13 @@ const HAWKER: PuppetConfig = {
   footwear: "selipar",
 };
 
-/** Cameras pop up facing the YB: from the left wing, or from the middle of the crowd. */
-type Camera = { index: number; side: "left" | "middle"; count: number };
+/** Press photographers push in from the front corners of the stall. */
+type Camera = { index: number; side: "left" | "right"; count: number };
 type Shot = { good: boolean; n: number };
 
 export function GorengKueyTeow({
   clock,
+  candidate,
   lang,
   talent,
   bars,
@@ -137,11 +139,11 @@ export function GorengKueyTeow({
           nextSizzle = t + 0.45;
         }
 
-        // The next camera: up and counting down for AIM_SECONDS, then the flash.
+        // The next camera: raised and counting down for AIM_SECONDS, then the flash.
         const flashAt = flashes[fired];
         if (flashAt !== undefined) {
           const until = flashAt - playS;
-          const side = fired % 2 ? "middle" : "left";
+          const side = fired % 2 ? "right" : "left";
           if (until <= AIM_SECONDS && until > 0) {
             const count = Math.min(3, Math.ceil((until / AIM_SECONDS) * 3));
             if (count !== lastCount) {
@@ -212,7 +214,8 @@ export function GorengKueyTeow({
     };
   });
 
-  const onDown = (e: PointerEvent<HTMLDivElement>) => {
+  const onDown = (e: PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -222,16 +225,12 @@ export function GorengKueyTeow({
   };
 
   const cooking = live && !holding && !outcome && shoot.cooked < 1;
+  const cameraReady = camera !== null && camera.count > 0 && !outcome;
 
   return (
-    <div
-      className="absolute inset-0 z-10 touch-none select-none"
-      onPointerDown={onDown}
-      onPointerUp={release}
-      onPointerCancel={release}
-    >
+    <div className="absolute inset-0 z-10 select-none">
       {/* Scoreboard: the hawker's cooking and the photos so far. */}
-      <div className="absolute top-[39%] left-1/2 flex w-[86%] -translate-x-1/2 items-center gap-[2cqw] rounded-full bg-[#fbf3e4]/90 text-[var(--ink)] px-[2.6cqw] py-[1cqw] shadow-[0_3px_6px_rgba(40,14,6,0.25)]">
+      <div className="absolute top-[39%] left-1/2 flex w-[86%] -translate-x-1/2 items-center gap-[2cqw] rounded-full bg-[#fbf3e4]/90 px-[2.6cqw] py-[1cqw] text-[var(--ink)] shadow-[0_3px_6px_rgba(40,14,6,0.25)]">
         <span className="font-tally text-[3cqw] tracking-[0.08em] uppercase">{T.cook[lang]}</span>
         <div className="relative h-[2.8cqw] flex-1 overflow-hidden rounded-full bg-[#5a3a1c]/25">
           <div
@@ -249,53 +248,63 @@ export function GorengKueyTeow({
         </span>
       </div>
 
-      {/* The camera that's about to go off, with its countdown. */}
-      {camera && !outcome && (
-        <PressCamera key={camera.index} side={camera.side} count={camera.count} lang={lang} />
-      )}
+      <StallBack lang={lang} />
 
-      {/* The real cook, in shadow: stirs whenever the YB lets go of the wok. */}
-      <div className="pointer-events-none absolute right-0 bottom-[3%] h-[36%] w-[40%]">
-        <div className="bayang relative h-full w-full">
-          <PuppetAvatar config={HAWKER} anim={cooking ? "rod-wiggle" : "idle"} />
-        </div>
-        <span className="absolute -top-[1cqw] right-[10%] rounded-sm bg-[#2b2522]/80 px-[1.4cqw] py-[0.3cqw] font-tally text-[2.6cqw] text-[var(--cream)] uppercase">
-          {T.hawker[lang]}
-        </span>
+      {/* The real cook, working the wok whenever the YB lets go of it. */}
+      <div className="pointer-events-none absolute right-[1%] bottom-[9%] h-[36%] w-[38%]">
+        <PuppetAvatar
+          config={HAWKER}
+          anim={cooking ? "rod-wiggle" : "idle"}
+          label={T.hawker[lang]}
+        />
       </div>
 
-      <div className="pointer-events-none absolute bottom-[2%] left-[22%] aspect-[3/2] w-[56%]">
+      <div className="pointer-events-none absolute bottom-[19%] left-[27%] aspect-[3/2] w-[46%]">
         <Wok holding={holding} cooking={cooking} cooked={shoot.cooked} />
       </div>
 
+      <StallFront />
+
+      {/* The big senduk handle: press and hold to grab it and pose. */}
+      <button
+        type="button"
+        onPointerDown={onDown}
+        onPointerUp={release}
+        onPointerCancel={release}
+        onContextMenu={(e) => e.preventDefault()}
+        disabled={!live || outcome !== null}
+        aria-pressed={holding}
+        className={`absolute bottom-[3%] left-1/2 z-20 flex h-[13%] w-[54%] -translate-x-1/2 touch-none items-center justify-center gap-[2cqw] rounded-full border-[1cqw] font-display text-[6cqw] font-bold italic shadow-[0_6px_0_rgba(40,14,6,0.5)] transition-transform ${
+          holding
+            ? "translate-y-[0.8cqw] border-[var(--brass)] bg-[var(--sambal)] text-[var(--cream)] shadow-[0_2px_0_rgba(40,14,6,0.5)]"
+            : cameraReady
+              ? "hold-glow border-[var(--sambal)] bg-[#fff1c4] text-[var(--sambal)]"
+              : "border-[#8a6a3a] bg-[#efe1c3] text-[#6a4a32]"
+        }`}
+      >
+        <SendukIcon />
+        {cameraReady || holding ? T.holdNow[lang] : T.hold[lang]}
+      </button>
+
+      {/* The press scrum: a photographer pushes in, camera up, counting down to the flash. */}
+      {camera && !outcome && (
+        <Photographer key={camera.index} side={camera.side} count={camera.count} lang={lang} />
+      )}
+
       {hogging && !outcome && (
-        <span className="combo-pop absolute top-[56%] left-1/2 z-20 -translate-x-1/2 rounded-sm bg-[var(--sambal)] px-[2.4cqw] py-[0.6cqw] font-display text-[4.8cqw] font-bold whitespace-nowrap text-[var(--cream)] italic">
+        <span className="combo-pop absolute top-[49%] left-1/2 z-20 -translate-x-1/2 rounded-sm bg-[var(--sambal)] px-[2.4cqw] py-[0.6cqw] font-display text-[4.8cqw] font-bold whitespace-nowrap text-[var(--cream)] italic">
           {T.hogging[lang]}
         </span>
       )}
 
       {shot && !outcome && (
-        <div
-          key={`shot-${shot.n}`}
-          className="stamp-pop absolute top-[53%] left-1/2 z-20 w-[46%] rounded-[2px] bg-white p-[1.6cqw] pb-[3cqw] text-center shadow-[0_8px_14px_rgba(40,14,6,0.45)]"
-        >
-          <div
-            className={`flex aspect-[4/3] items-center justify-center text-[12cqw] ${
-              shot.good ? "bg-[#f6e3b4]" : "bg-[#cfc6b8]"
-            }`}
-          >
-            {shot.good ? "😁🥢" : "🥱📱"}
-          </div>
-          <p className="mt-[1cqw] font-display text-[3.6cqw] font-bold text-[var(--ink)] italic">
-            {shot.good ? T.good[lang] : T.bad[lang]}
-          </p>
-        </div>
+        <FrontPage key={`shot-${shot.n}`} good={shot.good} candidate={candidate} lang={lang} />
       )}
 
       {outcome === "won" && (
         <>
           <div className="camera-flash pointer-events-none absolute inset-0 z-30 bg-white" />
-          <p className="absolute top-[56%] left-1/2 z-20 -translate-x-1/2 rounded-sm bg-[#efe1c3] px-[3cqw] py-[1.2cqw] text-center font-display text-[4cqw] font-bold whitespace-nowrap text-[var(--ink)] italic shadow-[0_4px_8px_rgba(40,14,6,0.3)]">
+          <p className="absolute top-[50%] left-1/2 z-20 -translate-x-1/2 rounded-sm bg-[#efe1c3] px-[3cqw] py-[1.2cqw] text-center font-display text-[4cqw] font-bold whitespace-nowrap text-[var(--ink)] italic shadow-[0_4px_8px_rgba(40,14,6,0.3)]">
             📸 {T.done[lang]}
           </p>
         </>
@@ -304,42 +313,141 @@ export function GorengKueyTeow({
   );
 }
 
-/** A reporter in the wings with a camera up, counting down to the flash. */
-function PressCamera({ side, count, lang }: { side: Camera["side"]; count: number; lang: Lang }) {
+/** The back of the stall: a striped awning and the signboard. */
+function StallBack({ lang }: { lang: Lang }) {
   return (
-    <div
-      className={`pointer-events-none absolute top-[45%] h-[21%] w-[25%] ${
-        side === "left" ? "left-[1%]" : "left-[34%]"
-      }`}
-    >
-      <svg viewBox="0 0 60 100" className="bayang h-full w-full -scale-x-100" aria-hidden="true">
-        <circle cx="22" cy="18" r="11" fill="#000" />
-        <path d="M8 34 Q22 26 36 34 L40 96 L4 96 Z" fill="#000" />
-        <path d="M32 40 L48 30" stroke="#000" strokeWidth="7" strokeLinecap="round" />
-        <rect x="42" y="18" width="17" height="14" rx="2" fill="#000" />
-      </svg>
-      {count > 0 ? (
-        <span
-          key={count}
-          className="count-pop absolute top-[18%] left-1/2 flex h-[13cqw] w-[13cqw] items-center justify-center rounded-full border-[0.8cqw] border-[var(--sambal)] bg-[#fbf3e4] font-display text-[8cqw] font-bold text-[var(--sambal)]"
-        >
-          {count}
+    <div className="pointer-events-none absolute top-[45%] left-[3%] w-[94%]">
+      <div className="relative rounded-t-sm bg-[#7a3b1e] px-[3cqw] pt-[1.2cqw] pb-[1.4cqw] text-center shadow-[0_4px_6px_rgba(40,14,6,0.35)]">
+        <span className="font-display text-[6.4cqw] leading-none font-bold tracking-wide text-[#fbf3e4]">
+          {T.sign[lang]}
         </span>
-      ) : (
-        <span className="camera-flash absolute top-[5%] left-[20%] h-[50%] w-[80%] rounded-full bg-[radial-gradient(circle,#ffffff,#fff6cf_35%,transparent_70%)]" />
-      )}
-      <span
-        className={`absolute -bottom-[2cqw] left-1/2 -translate-x-1/2 font-display text-[4cqw] font-bold whitespace-nowrap text-[var(--sambal)] italic ${
-          count > 0 ? "" : "opacity-0"
-        }`}
+      </div>
+      {/* Awning scallops in red and cream. */}
+      <svg
+        viewBox="0 0 100 6"
+        preserveAspectRatio="none"
+        className="block h-[4cqw] w-full"
+        aria-hidden="true"
       >
-        {T.pose[lang]}
-      </span>
+        {Array.from({ length: 10 }, (_, i) => (
+          <path
+            key={i}
+            d={`M${i * 10} 0 h10 v3 a5 3 0 0 1 -10 0 z`}
+            fill={i % 2 ? "#fbf3e4" : "#b2332a"}
+          />
+        ))}
+      </svg>
     </div>
   );
 }
 
-/** The wok, with the senduk on whichever side is stirring it. */
+/** The front of the stall: a wooden counter hiding the cooks' legs, with plates waiting. */
+function StallFront() {
+  return (
+    <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-[21%]">
+      <div className="absolute inset-x-0 top-0 h-[12%] bg-[#c4a27a] shadow-[0_-2px_0_#e2c9a2]" />
+      <div className="absolute inset-x-0 top-[12%] bottom-0 bg-[repeating-linear-gradient(90deg,#8a5a34_0_9%,#7b4e2c_9%_10%)]" />
+      {/* Plates of finished noodles stacked at the corner. */}
+      <div className="absolute -top-[22%] right-[6%] flex gap-[1cqw]">
+        {[0, 1].map((i) => (
+          <span
+            key={i}
+            className="block h-[4cqw] w-[11cqw] rounded-[50%] border-[0.6cqw] border-[#e9eef2] bg-[#b06e2e]"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** A press photographer seen from behind, camera raised at the YB. */
+function Photographer({ side, count, lang }: { side: Camera["side"]; count: number; lang: Lang }) {
+  return (
+    <div
+      className={`press-in pointer-events-none absolute bottom-[10%] z-20 h-[30%] w-[32%] ${
+        side === "left" ? "left-[-3%]" : "right-[-3%]"
+      }`}
+    >
+      <svg
+        viewBox="0 0 80 100"
+        className={`h-full w-full drop-shadow-[0_6px_8px_rgba(20,10,4,0.45)] ${
+          side === "right" ? "-scale-x-100" : ""
+        }`}
+        aria-hidden="true"
+      >
+        {/* Shoulders and the back of the head. */}
+        <path d="M2 100 Q4 70 26 64 L52 64 Q74 70 76 100 Z" fill="#24324a" />
+        <circle cx="38" cy="50" r="15" fill="#1c140f" />
+        {/* Arms up, holding the camera. */}
+        <path d="M18 70 L34 30" stroke="#24324a" strokeWidth="10" strokeLinecap="round" />
+        <path d="M58 70 L56 34" stroke="#24324a" strokeWidth="10" strokeLinecap="round" />
+        {/* Camera body, lens and flash. */}
+        <rect x="28" y="16" width="34" height="22" rx="3" fill="#2a2a2e" />
+        <rect x="36" y="10" width="12" height="7" rx="1.5" fill="#3a3a40" />
+        <circle cx="54" cy="27" r="9" fill="#111" stroke="#55555c" strokeWidth="2" />
+        <circle cx="54" cy="27" r="4" fill="#3d5a80" />
+        <rect x="30" y="4" width="10" height="7" rx="1" fill="#e9eef2" />
+        <circle cx="66" cy="18" r="2.4" fill={count > 0 ? "#e4572e" : "#555"} />
+      </svg>
+      {count > 0 ? (
+        <span
+          key={count}
+          className="count-pop absolute top-[-6%] left-1/2 flex h-[12cqw] w-[12cqw] items-center justify-center rounded-full border-[0.8cqw] border-[var(--sambal)] bg-[#fbf3e4] font-display text-[7cqw] font-bold text-[var(--sambal)]"
+        >
+          {count}
+        </span>
+      ) : (
+        <span className="camera-flash absolute -top-[20%] left-[10%] h-[70%] w-[90%] rounded-full bg-[radial-gradient(circle,#ffffff,#fff6cf_35%,transparent_70%)]" />
+      )}
+      {count > 0 && (
+        <span
+          className={`absolute -top-[22%] font-display text-[4.4cqw] font-bold whitespace-nowrap text-[var(--sambal)] italic drop-shadow-[0_2px_0_#fbf3e4] ${
+            side === "left" ? "left-[30%]" : "right-[30%]"
+          }`}
+        >
+          {T.pose[lang]}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/** The photo as it runs in the paper: a proud headline, or an embarrassing one. */
+function FrontPage({ good, candidate, lang }: { good: boolean; candidate: Candidate; lang: Lang }) {
+  const face: PuppetConfig = {
+    ...candidate.puppet,
+    expression: good ? "big_laugh" : "nervous_smile",
+  };
+  return (
+    <div className="stamp-pop absolute top-[57%] left-1/2 z-30 w-[64%] bg-[#f4efe4] p-[2cqw] text-[var(--ink)] shadow-[0_10px_18px_rgba(40,14,6,0.5)]">
+      <div className="border-b-[0.6cqw] border-[var(--ink)] pb-[0.6cqw] text-center">
+        <span className="font-display text-[4.6cqw] leading-none font-bold">{T.paper[lang]}</span>
+      </div>
+      <p className="mt-[1cqw] font-display text-[4.4cqw] leading-[1.05] font-bold">
+        {good ? T.headlineGood[lang] : T.headlineBad[lang]}
+      </p>
+      <div
+        className={`relative mt-[1.2cqw] h-[24cqw] overflow-hidden ${good ? "bg-[#e8d9b8]" : "bg-[#cfc8bc] grayscale-[0.4]"}`}
+      >
+        <div className="absolute top-[4%] left-[18%] h-[190%] w-[64%]">
+          <PuppetAvatar config={face} anim="idle" />
+        </div>
+        <span className="absolute right-[4%] bottom-[4%] text-[9cqw]">{good ? "🥢" : "📱"}</span>
+      </div>
+    </div>
+  );
+}
+
+function SendukIcon() {
+  return (
+    <svg viewBox="0 0 40 24" className="h-[6cqw] w-auto" aria-hidden="true">
+      <path d="M2 20 L26 8" stroke="#8a6a3a" strokeWidth="4" strokeLinecap="round" />
+      <ellipse cx="31" cy="7" rx="8" ry="5" fill="#9aa0a6" stroke="#5f656b" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+/** The wok on the burner, with the senduk on whichever side is stirring it. */
 function Wok({ holding, cooking, cooked }: { holding: boolean; cooking: boolean; cooked: number }) {
   const noodle = `rgb(${Math.round(232 - cooked * 70)},${Math.round(214 - cooked * 100)},${Math.round(170 - cooked * 120)})`;
   return (
