@@ -143,8 +143,8 @@ export const ROUNDS: Record<RoundId, { call: Text; hint: Text }> = {
   celup_dakwat: {
     call: { ms: "CELUP!", en: "DIP!" },
     hint: {
-      ms: "Undi dulu: dakwat pada jari telunjuk kiri",
-      en: "Vote first: ink on your left index finger",
+      ms: "Dakwat kekal pada jari telunjuk kiri, sebelum mengundi",
+      en: "Indelible ink on the left index finger, before voting",
     },
   },
   tapis_undi_rosak: {
@@ -303,5 +303,12 @@ export const GAME_TEXT = {
       ms: "Siap! Rakyat kenyang, YB dapat gambar",
       en: "Done! Fed the people, got the photos",
     },
+  },
+  celup: {
+    howTo: { ms: "Tekan jari telunjuk kiri YB", en: "Tap the YB's left index finger" },
+    clerk: { ms: "Kerani", en: "Clerk" },
+    wrong: { ms: "Bukan jari itu!", en: "Not that finger!" },
+    tip: { ms: "Kiri YB = kanan anda", en: "YB's left = your right" },
+    voted: { ms: "Dah mengundi!", en: "Voted!" },
   },
 } satisfies Record<string, Record<string, Text>>;
