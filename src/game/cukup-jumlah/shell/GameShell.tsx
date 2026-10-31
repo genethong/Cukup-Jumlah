@@ -384,6 +384,8 @@ function RoundStage({
 
   const words = ROUNDS[round];
   const { Game, layout, howTo, beatPins } = microgameFor(round);
+  // Play has begun once the beat starts (stand-ins) or the fuse starts burning (games).
+  const started = beat > 0 || (timeLeft !== null && timeLeft.share < 0.999);
   // A full-stage game takes the puppet off until the result is in.
   const showPuppet = layout !== "full" || moment !== null;
   const party = PARTIES.find((p) => p.id === candidate.party);
@@ -397,7 +399,7 @@ function RoundStage({
         {beatPins && <BeatPins beat={beat} />}
         {timeLeft !== null && !moment && <Fuse share={timeLeft.share} seconds={timeLeft.seconds} />}
         <span className="font-tally text-[3.2cqw] tracking-[0.12em] text-[var(--ink)] uppercase">
-          {beat === 0 && !moment ? UI.ready[lang] : howTo[lang]}
+          {!started && !moment ? UI.ready[lang] : howTo[lang]}
         </span>
       </div>
 
