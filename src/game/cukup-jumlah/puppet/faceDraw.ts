@@ -543,6 +543,69 @@ function chinFromBase(base: ImageData): number {
   return 420;
 }
 
+/**
+ * Skin edge on one side with the ear removed, as an x per row (NaN = keep).
+ * The ear is a bump between the temple and a sharp step back in at the jaw;
+ * the edge there is replaced by a straight line from temple to jaw.
+ */
+function earlessEdge(base: ImageData, chin: number, side: -1 | 1): Float32Array {
+  const a = base.data;
+  const edge = new Float32Array(SIZE).fill(Number.NaN);
+  const out = new Float32Array(SIZE).fill(Number.NaN);
+  // Distance from the outside of the canvas to the first skin pixel.
+  for (let y = 180; y < chin; y += 1) {
+    for (let i = 0; i < SIZE / 2; i += 1) {
+      const x = side < 0 ? i : SIZE - 1 - i;
+      if (a[(y * SIZE + x) * 4 + 3] > 40) {
+        edge[y] = i;
+        break;
+      }
+    }
+  }
+  let widest = -1;
+  for (let y = 200; y < chin - 20; y += 1) {
+    if (!Number.isNaN(edge[y]) && (widest < 0 || edge[y] < edge[widest])) widest = y;
+  }
+  if (widest < 0) return out;
+  let top = -1;
+  for (let y = 200; y <= widest; y += 1) {
+    if (!Number.isNaN(edge[y]) && (top < 0 || edge[y] >= edge[top])) top = y;
+  }
+  let bottom = -1;
+  let step = 3;
+  for (let y = widest + 2; y < chin - 10; y += 1) {
+    const jump = edge[y] - edge[y - 2];
+    if (jump > step) {
+      step = jump;
+      bottom = y;
+    }
+  }
+  if (top < 0 || bottom < 0) return out;
+  for (let y = top; y <= bottom; y += 1) {
+    const t = (y - top) / Math.max(1, bottom - top);
+    out[y] = edge[top] + (edge[bottom] - edge[top]) * t;
+  }
+  return out;
+}
+
+/** A tudung covers the ears, so cut them off the skin. */
+function hideEars(skin: ImageData, base: ImageData, chin: number): void {
+  const px = skin.data;
+  for (const side of [-1, 1] as const) {
+    const edge = earlessEdge(base, chin, side);
+    for (let y = 0; y < SIZE; y += 1) {
+      if (Number.isNaN(edge[y])) continue;
+      for (let i = 0; i < SIZE / 2; i += 1) {
+        const x = side < 0 ? i : SIZE - 1 - i;
+        // 2px feather so the cut edge is not jagged.
+        const keep = Math.min(1, Math.max(0, (i - edge[y]) / 2));
+        if (keep >= 1) break;
+        px[(y * SIZE + x) * 4 + 3] *= keep;
+      }
+    }
+  }
+}
+
 /** Mean colour of solid cloth in a thin band just outside the opening. */
 function clothColour(hat: ImageData, hole: Uint8Array): [number, number, number] {
   const ring = dilateBinary(hole, 14);
@@ -658,7 +721,9 @@ async function compose(req: FaceDrawRequest): Promise<HTMLCanvasElement> {
     if (req.hat.maskSkinToHole) {
       const hole = faceHoleMask(hat);
       over(out.data, underscarf(hat, hole).data);
-      maskSkinToHole(skin, hole, chinFromBase(base));
+      const chin = chinFromBase(base);
+      maskSkinToHole(skin, hole, chin);
+      hideEars(skin, base, chin);
     }
     if (hairBack) clipToHat(hairBack, hat, req.hat);
     if (hairFront) clipToHat(hairFront, hat, req.hat);
