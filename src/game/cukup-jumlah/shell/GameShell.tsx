@@ -342,7 +342,8 @@ function RoundStage({
   onNext: () => void;
 }) {
   const round = currentRound(state.phase)!;
-  const roundKey = String(state.attempt);
+  // Prefixed keys: these share one parent, and bare numbers from two counters can collide.
+  const roundKey = `round-${state.attempt}`;
   const [beat, setBeat] = useState(0);
   const [anim, setAnim] = useState<PuppetAnim>("idle");
   const [face, setFace] = useState<ExpressionId | null>(null);
@@ -434,7 +435,7 @@ function RoundStage({
 
       {moment && (
         <CutStamp
-          key={moment.token}
+          key={`stamp-${moment.token}`}
           lines={
             moment.success
               ? moment.seatsGained > 0
@@ -448,7 +449,7 @@ function RoundStage({
       )}
       {sweep > 0 && (
         <div
-          key={sweep}
+          key={`sweep-${sweep}`}
           className="gunungan-sweep pointer-events-none absolute top-1/2 left-1/2 z-30 h-[96%] drop-shadow-[0_18px_18px_rgba(30,12,4,0.55)]"
           style={{ animationDuration: `${SWEEP_MS}ms` }}
         >
