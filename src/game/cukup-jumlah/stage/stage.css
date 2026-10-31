@@ -43,6 +43,53 @@
   animation: stamp-stay 600ms cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
 }
 
+/* A ballot held up to the agents: slides up and settles at a slight tilt. Tailwind's
+   translate utilities use the separate translate property, so this stays on transform. */
+.ballot-show {
+  animation: ballot-show 220ms cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+
+/* A ballot thrown on the wrong pile shakes its head and settles back. */
+.ballot-shake {
+  animation: ballot-shake 320ms ease-out both;
+}
+
+/* Combo callout: pops in big and settles. */
+.combo-pop {
+  animation: combo-pop 420ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+/* The last seconds of the fuse. */
+.fuse-hot {
+  animation: fuse-hot 480ms ease-in-out infinite;
+}
+
+/* Lead-in: the gunungan rises into place, then lifts away on MULA!. The count number pops. */
+.gunungan-stand {
+  animation: gunungan-stand 380ms cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+
+.gunungan-lift {
+  animation: gunungan-lift 520ms cubic-bezier(0.5, 0, 0.8, 0.4) forwards;
+}
+
+.count-pop {
+  animation: count-pop 420ms cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+/* A thrown ballot flying down into its pile. */
+.ballot-fly-left {
+  animation: ballot-fly-left 260ms cubic-bezier(0.4, 0, 0.9, 0.6) forwards;
+}
+
+.ballot-fly-right {
+  animation: ballot-fly-right 260ms cubic-bezier(0.4, 0, 0.9, 0.6) forwards;
+}
+
+.fade-away {
+  animation: fade-away 420ms ease-in forwards;
+}
+
 .gunungan-sweep {
   animation: gunungan-sweep 1300ms cubic-bezier(0.55, 0, 0.35, 1) forwards;
 }
@@ -83,6 +130,59 @@
   100% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
 }
 
+@keyframes ballot-show {
+  0% { transform: translateY(18%) rotate(-7deg); opacity: 0; }
+  100% { transform: translateY(0) rotate(-2deg); opacity: 1; }
+}
+
+@keyframes ballot-shake {
+  0%, 100% { transform: translateX(0) rotate(-2deg); }
+  20% { transform: translateX(-6%) rotate(-5deg); }
+  40% { transform: translateX(5%) rotate(2deg); }
+  60% { transform: translateX(-3%) rotate(-3deg); }
+  80% { transform: translateX(2%) rotate(-1deg); }
+}
+
+@keyframes combo-pop {
+  0% { transform: scale(2.2) rotate(-12deg); opacity: 0; }
+  60% { transform: scale(0.95) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(3deg); opacity: 1; }
+}
+
+@keyframes fuse-hot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes gunungan-stand {
+  0% { transform: translate(-50%, 30%) scale(0.7); opacity: 0; }
+  100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+}
+
+@keyframes gunungan-lift {
+  0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -90%) rotate(-14deg) scale(0.8); opacity: 0; }
+}
+
+@keyframes count-pop {
+  0% { transform: translate(-50%, -50%) scale(1.9) rotate(-10deg); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(-4deg); opacity: 1; }
+}
+
+@keyframes ballot-fly-left {
+  0% { transform: rotate(-6deg); opacity: 1; }
+  100% { transform: translate(-48%, 150%) rotate(-24deg) scale(0.3); opacity: 0.2; }
+}
+
+@keyframes ballot-fly-right {
+  0% { transform: rotate(6deg); opacity: 1; }
+  100% { transform: translate(48%, 150%) rotate(24deg) scale(0.3); opacity: 0.2; }
+}
+
+@keyframes fade-away {
+  to { opacity: 0; }
+}
+
 @keyframes gunungan-sweep {
   0% { transform: translate(-50%, -50%) translateX(75%) rotate(10deg) scale(0.5); opacity: 0; }
   12% { opacity: 1; }
@@ -102,6 +202,32 @@
     animation-fill-mode: none;
     opacity: 1;
     transform: translate(-50%, -50%) rotate(-8deg);
+  }
+  .ballot-fly-left,
+  .ballot-fly-right {
+    animation: none;
+    opacity: 0;
+  }
+  .ballot-shake,
+  .combo-pop,
+  .fuse-hot {
+    animation: none;
+  }
+  .ballot-show {
+    animation: none;
+    transform: rotate(-2deg);
+  }
+  .gunungan-stand {
+    animation: none;
+    transform: translate(-50%, 0);
+  }
+  .gunungan-lift {
+    animation: none;
+    opacity: 0;
+  }
+  .count-pop {
+    animation: none;
+    transform: translate(-50%, -50%) rotate(-4deg);
   }
   .gunungan-sweep {
     animation: gunungan-fade 900ms linear forwards;

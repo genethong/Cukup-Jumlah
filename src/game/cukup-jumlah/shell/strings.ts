@@ -53,6 +53,11 @@ export const UI = {
   tapHint: { ms: "Tepuk pada ketukan ke-4", en: "Tap on beat 4" },
   tapPad: { ms: "Pad tepuk", en: "Tap pad" },
   ready: { ms: "SEDIA...", en: "READY..." },
+  go: { ms: "MULA!", en: "GO!" },
+  comingSoon: {
+    ms: "Permainan sebenar akan datang · tepuk pada ketukan ke-4",
+    en: "Real game coming soon · tap on beat 4",
+  },
   playAgain: { ms: "Main lagi", en: "Play again" },
   toTitle: { ms: "← Tajuk", en: "← Title" },
   noAudio: {
@@ -89,7 +94,7 @@ export const ROUNDS: Record<RoundId, { call: Text; hint: Text }> = {
     },
   },
   bayar_deposit: {
-    call: { ms: "BAYAR!", en: "PAY!" },
+    call: { ms: "KIRA!", en: "COUNT!" },
     hint: { ms: "Deposit calon Parlimen: RM10,000", en: "Parliamentary deposit: RM10,000" },
   },
   cop_watikah: {
@@ -150,7 +155,7 @@ export const ROUNDS: Record<RoundId, { call: Text; hint: Text }> = {
     },
   },
   borang_14: {
-    call: { ms: "KIRA!", en: "COUNT!" },
+    call: { ms: "ASINGKAN!", en: "SORT!" },
     hint: { ms: "Borang 14: kiraan bagi satu saluran", en: "Form 14: the count for one stream" },
   },
   rundingan_gabungan: {
@@ -255,3 +260,22 @@ export const ENDINGS: Record<EndingId, { stamp: Text; line: Text; fact: FactId }
     fact: "deposit",
   },
 };
+
+/** Words used inside individual microgames. */
+export const GAME_TEXT = {
+  borang14: {
+    tapHint: { ms: "Leret ke longgokan yang betul", en: "Swipe to the right pile" },
+    ballot: { ms: "Kertas undi", en: "Ballot paper" },
+    yours: { ms: "Undi anda", en: "Your vote" },
+    rival: { ms: "Undi lawan", en: "Rival's vote" },
+    rivalName: { ms: "Calon {party}", en: "{party} candidate" },
+    wrong: { ms: "Salah longgok!", en: "Wrong pile!" },
+    penalty: { ms: "−1 saat", en: "−1 sec" },
+    combo: { ms: "LAJU! ×{n}", en: "FAST! ×{n}" },
+    left: { ms: "{n} lagi", en: "{n} left" },
+    signed: {
+      ms: "Borang 14 ditandatangani Ketua Tempat Mengundi",
+      en: "Form 14 signed by the presiding officer",
+    },
+  },
+} satisfies Record<string, Record<string, Text>>;

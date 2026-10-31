@@ -11,15 +11,16 @@ import { Gunungan } from "../stage/Gunungan";
 import { BallotBox, DepositEnvelope } from "../stage/Hud";
 import { BeatPins, CutStamp, DalangBanner, Kelir, StageBox } from "../stage/Panggung";
 import {
-  INITIAL_STATE,
   SEAT_GOAL,
   TOTAL_SEATS,
   currentRound,
   gameReducer,
+  practiceState,
   roundBars,
   type ActNo,
   type EndingId,
   type GameState,
+  type RoundId,
 } from "./flow";
 import {
   ACT_FACTS,
@@ -34,11 +35,11 @@ import {
   type FactId,
   type Lang,
 } from "./strings";
-import { TepukRentak } from "./TepukRentak";
+import { microgameFor } from "./microgames";
 
 // The new game shell (docs/GAME_PLAN.md §6, step 3): title → backstage → three acts →
 // coalition talks if short → ending, all on the 9:16 kelir. Every round runs the
-// TepukRentak stand-in until its real microgame is built.
+// tap-on-beat-4 stand-in until its real microgame is in microgames.ts.
 
 const STAMP_MS = 1300;
 const SWEEP_SWAP_MS = 650;
@@ -51,8 +52,9 @@ const ENDING_FACE: Record<EndingId, ExpressionId> = {
   depositLebur: "crying_pout",
 };
 
-export function GameShell() {
-  const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE);
+/** `practice` (dev only) skips straight to one round and replays it. */
+export function GameShell({ practice = null }: { practice?: RoundId | null } = {}) {
+  const [state, dispatch] = useReducer(gameReducer, practice, practiceState);
   const [lang, setLang] = useState<Lang>("ms");
   const [saved, setSaved] = useState<Candidate | null>(null);
   const [offsetMs, setOffsetMs] = useState(0);
@@ -340,13 +342,15 @@ function RoundStage({
   onNext: () => void;
 }) {
   const round = currentRound(state.phase)!;
-  const roundKey =
-    state.phase.kind === "round" ? `${state.phase.act}-${state.phase.index}` : "coalition";
+  // Prefixed keys: these share one parent, and bare numbers from two counters can collide.
+  const roundKey = `round-${state.attempt}`;
   const [beat, setBeat] = useState(0);
   const [anim, setAnim] = useState<PuppetAnim>("idle");
   const [face, setFace] = useState<ExpressionId | null>(null);
   const [moment, setMoment] = useState<Moment | null>(null);
   const [sweep, setSweep] = useState(0);
+  const [timeLeft, setTimeLeft] = useState<{ share: number; seconds: number } | null>(null);
+  const [leadIn, setLeadIn] = useState(0);
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
 
@@ -357,6 +361,8 @@ function RoundStage({
     setFace(null);
     setMoment(null);
     setAnim("idle");
+    setTimeLeft(null);
+    setLeadIn(0);
   }, [roundKey]);
 
   // When the reducer records the result, stamp it, then sweep the gunungan into the next round.
@@ -373,12 +379,25 @@ function RoundStage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
 
+  // The puppet plays along: a hop and a grin for a good move, a wobble and a gasp for a bad one.
+  const reaction = useRef(0);
   const onJudge = (grade: Grade) => {
+    const mine = ++reaction.current;
     setAnim(grade === "miss" ? "rod-wiggle" : "hop");
-    later(() => setAnim("idle"), 600);
+    setFace(grade === "miss" ? "shocked_o" : grade === "perfect" ? "smug_grin" : null);
+    later(() => {
+      if (reaction.current !== mine) return;
+      setAnim("idle");
+      setFace((f) => (state.lastResult ? f : null));
+    }, 600);
   };
 
   const words = ROUNDS[round];
+  const { Game, layout, howTo, beatPins } = microgameFor(round);
+  // Play has begun once the beat starts (stand-ins) or the fuse starts burning (games).
+  const started = beat > 0 || (timeLeft !== null && timeLeft.share < 0.999);
+  // A full-stage game keeps the whole kelir for itself, result stamp included.
+  const showPuppet = layout !== "full";
   const party = PARTIES.find((p) => p.id === candidate.party);
 
   return (
@@ -387,21 +406,35 @@ function RoundStage({
 
       <div className="absolute top-[15%] left-1/2 z-20 flex w-[90%] -translate-x-1/2 flex-col items-center gap-[1.6cqw]">
         <DalangBanner call={words.call[lang]} hint={words.hint[lang]} />
-        <BeatPins beat={beat} />
+        {beatPins && <BeatPins beat={beat} />}
+        {timeLeft !== null && !moment && <Fuse share={timeLeft.share} seconds={timeLeft.seconds} />}
         <span className="font-tally text-[3.2cqw] tracking-[0.12em] text-[var(--ink)] uppercase">
-          {beat === 0 && !moment ? UI.ready[lang] : UI.tapHint[lang]}
+          {!started && !moment ? UI.ready[lang] : howTo[lang]}
         </span>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-[58%] items-end justify-center">
-        <div className="relative h-full w-[60%]">
+      <div
+        hidden={!showPuppet}
+        className={`pointer-events-none absolute inset-x-0 bottom-0 flex h-[58%] items-end ${
+          layout === "side" ? "justify-start pl-[1%]" : "justify-center"
+        }`}
+      >
+        <div
+          className={
+            layout === "side"
+              ? "relative h-[66%] w-[42%]"
+              : layout === "between"
+                ? "relative mb-[1%] h-[56%] w-[28%]"
+                : "relative h-full w-[60%]"
+          }
+        >
           <PuppetAvatar
             config={face ? { ...candidate.puppet, expression: face } : candidate.puppet}
             anim={anim}
             label={candidate.name}
           />
         </div>
-        {party && (
+        {party && layout !== "between" && (
           <span
             className="absolute bottom-[3%] left-[4%] px-[2cqw] py-[0.6cqw] text-[3cqw] font-bold text-[var(--cream)]"
             style={{ backgroundColor: party.colour }}
@@ -411,24 +444,28 @@ function RoundStage({
         )}
       </div>
 
-      {!result && (
-        <TepukRentak
-          key={roundKey}
-          round={round}
-          clock={clock}
-          lang={lang}
-          talent={candidate.talent}
-          bars={roundBars(candidate.talent)}
-          offsetMs={offsetMs}
-          onBeat={setBeat}
-          onJudge={onJudge}
-          onFinish={onDone}
-        />
-      )}
+      {/* Stays up under the result stamp so its final state (e.g. a signed form) shows. */}
+      <Game
+        key={roundKey}
+        round={round}
+        clock={clock}
+        candidate={candidate}
+        lang={lang}
+        talent={candidate.talent}
+        bars={roundBars(candidate.talent)}
+        offsetMs={offsetMs}
+        onBeat={setBeat}
+        onLeadIn={setLeadIn}
+        onTimeLeft={(share, seconds) => setTimeLeft({ share, seconds })}
+        onJudge={onJudge}
+        onFinish={onDone}
+      />
+
+      <ReadyGo step={leadIn} lang={lang} />
 
       {moment && (
         <CutStamp
-          key={moment.token}
+          key={`stamp-${moment.token}`}
           lines={
             moment.success
               ? moment.seatsGained > 0
@@ -442,7 +479,7 @@ function RoundStage({
       )}
       {sweep > 0 && (
         <div
-          key={sweep}
+          key={`sweep-${sweep}`}
           className="gunungan-sweep pointer-events-none absolute top-1/2 left-1/2 z-30 h-[96%] drop-shadow-[0_18px_18px_rgba(30,12,4,0.55)]"
           style={{ animationDuration: `${SWEEP_MS}ms` }}
         >
@@ -450,6 +487,95 @@ function RoundStage({
         </div>
       )}
     </>
+  );
+}
+
+/**
+ * The dalang's start signal, drawn on the kelir: the gunungan stands centre stage through
+ * three cempala knocks (3 · 2 · 1), then MULA! and the gunungan lifts away.
+ */
+function ReadyGo({ step, lang }: { step: number; lang: Lang }) {
+  // Leaving is decided during render, the moment MULA! (4) hands over to play (0), so the
+  // overlay never blinks out for a frame and pops MULA! a second time.
+  const [prevStep, setPrevStep] = useState(step);
+  const [leaving, setLeaving] = useState(false);
+  if (step !== prevStep) {
+    setPrevStep(step);
+    setLeaving(prevStep === 4 && step === 0);
+  }
+  useEffect(() => {
+    if (!leaving) return;
+    const t = window.setTimeout(() => setLeaving(false), 520);
+    return () => window.clearTimeout(t);
+  }, [leaving]);
+
+  if (step === 0 && !leaving) return null;
+  const go = step === 4 || leaving;
+  return (
+    <div className="pointer-events-none absolute inset-0 z-30" aria-live="polite">
+      <div
+        className={`absolute top-[30%] left-1/2 h-[62%] drop-shadow-[0_18px_18px_rgba(30,12,4,0.5)] ${
+          leaving ? "gunungan-lift" : "gunungan-stand"
+        }`}
+      >
+        <Gunungan className="h-full w-auto" />
+      </div>
+      {go ? (
+        // One pop when MULA! lands; it then only fades as the gunungan lifts away.
+        <div className={leaving ? "fade-away" : undefined}>
+          <CutStamp
+            key="go"
+            lines={[UI.go[lang]]}
+            tone="gold"
+            className="top-[56%] w-[62%]"
+            stay
+          />
+        </div>
+      ) : (
+        <span
+          key={step}
+          className="count-pop absolute top-[56%] left-1/2 flex h-[30cqw] w-[30cqw] items-center justify-center rounded-full border-[1.4cqw] border-[var(--brass)] bg-[var(--sambal)] font-display text-[20cqw] leading-none font-bold text-[var(--cream)] italic shadow-[0_8px_14px_rgba(40,14,6,0.5)]"
+        >
+          {4 - step}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/** A burning fuse running down to a firecracker: the time left in the round. */
+function Fuse({ share, seconds }: { share: number; seconds: number }) {
+  const pct = Math.max(0, Math.min(1, share)) * 100;
+  const hot = share < 0.3;
+  return (
+    <div
+      className="flex w-[84%] items-center gap-[2cqw]"
+      role="timer"
+      aria-label={`${seconds.toFixed(1)} s`}
+    >
+      <span className="text-[7cqw] leading-none" aria-hidden="true">
+        🧨
+      </span>
+      <div className="relative h-[3cqw] flex-1 rounded-full bg-[#5a3a1c]/25" aria-hidden="true">
+        <div
+          className={`absolute inset-y-0 left-0 rounded-full ${
+            hot ? "fuse-hot bg-[var(--sambal)]" : "bg-[linear-gradient(90deg,#8a5a2b,#c9963f)]"
+          }`}
+          style={{ width: `${pct}%` }}
+        />
+        <span
+          className="pelita-flame absolute top-1/2 h-[6cqw] w-[4cqw] -translate-x-1/2 -translate-y-[75%] rounded-[50%_50%_45%_45%] bg-[radial-gradient(circle_at_50%_70%,#fff1c4,#ffb347_55%,#e4572e)]"
+          style={{ left: `${pct}%` }}
+        />
+      </div>
+      <span
+        className={`w-[11cqw] text-right font-tally text-[5.4cqw] leading-none tabular-nums ${
+          hot ? "text-[var(--sambal)]" : "text-[var(--ink)]"
+        }`}
+      >
+        {seconds.toFixed(1)}
+      </span>
+    </div>
   );
 }
 

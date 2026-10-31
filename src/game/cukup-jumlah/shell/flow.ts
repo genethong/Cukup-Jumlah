@@ -72,6 +72,10 @@ export type GameState = {
   seats: number;
   /** Result of the round just played, shown until `next`. Null while a round is live. */
   lastResult: { success: boolean; seatsGained: number } | null;
+  /** Counts round starts, so replaying the same round still remounts its game. */
+  attempt: number;
+  /** Practice mode (dev): play only this round, over and over. */
+  practice: RoundId | null;
 };
 
 export type Action =
@@ -89,7 +93,22 @@ export const INITIAL_STATE: GameState = {
   maxDeposits: START_DEPOSITS,
   seats: START_SEATS,
   lastResult: null,
+  attempt: 0,
+  practice: null,
 };
+
+export function practiceState(round: RoundId | null): GameState {
+  return { ...INITIAL_STATE, practice: round };
+}
+
+/** Where a round sits in the acts. */
+export function phaseFor(round: RoundId): Phase {
+  for (const act of [1, 2, 3] as const) {
+    const index = ACTS[act].rounds.indexOf(round);
+    if (index >= 0) return { kind: "round", act, index };
+  }
+  return { kind: "coalition" };
+}
 
 export function depositsFor(talent: TalentId): number {
   return talent === "muka_tembok" ? START_DEPOSITS + 1 : START_DEPOSITS;
@@ -115,16 +134,21 @@ export const MAX_SEATS =
 export function gameReducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case "play":
-      return { ...INITIAL_STATE, candidate: state.candidate, phase: { kind: "backstage" } };
+      return {
+        ...practiceState(state.practice),
+        candidate: state.candidate,
+        phase: { kind: "backstage" },
+      };
 
     case "cast": {
       const deposits = depositsFor(action.candidate.talent);
       return {
-        ...INITIAL_STATE,
+        ...practiceState(state.practice),
         candidate: action.candidate,
         deposits,
         maxDeposits: deposits,
-        phase: { kind: "actIntro", act: 1 },
+        attempt: state.attempt + 1,
+        phase: state.practice ? phaseFor(state.practice) : { kind: "actIntro", act: 1 },
       };
     }
 
@@ -133,6 +157,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
       return {
         ...state,
         lastResult: null,
+        attempt: state.attempt + 1,
         phase: { kind: "round", act: state.phase.act, index: 0 },
       };
 
@@ -159,7 +184,8 @@ export function gameReducer(state: GameState, action: Action): GameState {
     case "next": {
       const { phase, lastResult } = state;
       if (!lastResult) return state;
-      const cleared = { ...state, lastResult: null };
+      const cleared = { ...state, lastResult: null, attempt: state.attempt + 1 };
+      if (state.practice) return { ...cleared, deposits: state.maxDeposits, seats: START_SEATS };
       if (phase.kind === "coalition") {
         return {
           ...cleared,
@@ -180,6 +206,6 @@ export function gameReducer(state: GameState, action: Action): GameState {
     }
 
     case "toTitle":
-      return { ...INITIAL_STATE, candidate: state.candidate };
+      return { ...practiceState(state.practice), candidate: state.candidate };
   }
 }
