@@ -86,7 +86,7 @@ export function ActShareCardModal({
     ctx.textAlign = "center";
     ctx.fillStyle = "#F59E0B";
     ctx.font = "bold 13px sans-serif";
-    ctx.fillText("SURUHANJAYA PILIHAN RAYA (PARODI) MALAYSIA", W / 2, 65);
+    ctx.fillText("CUKUP JUMLAH! · PERMAINAN PARODI", W / 2, 65);
 
     ctx.fillStyle = "#FFFFFF";
     ctx.font = "900 26px sans-serif";
@@ -120,6 +120,7 @@ export function ActShareCardModal({
     ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
     ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
     ctx.lineWidth = 1;
+    ctx.beginPath();
     ctx.roundRect(45, 150, W - 90, 520, 20);
     ctx.fill();
     ctx.stroke();
@@ -141,6 +142,7 @@ export function ActShareCardModal({
     // Party pill badge
     const pColor = party.themeColor === "#F8FAFC" ? "#475569" : party.themeColor;
     ctx.fillStyle = pColor;
+    ctx.beginPath();
     ctx.roundRect(W / 2 - 110, 442, 220, 32, 16);
     ctx.fill();
 
@@ -154,6 +156,7 @@ export function ActShareCardModal({
 
     // Stats Grid inside Certificate
     ctx.fillStyle = "rgba(2, 6, 23, 0.7)";
+    ctx.beginPath();
     ctx.roundRect(65, 495, W - 130, 155, 14);
     ctx.fill();
 
