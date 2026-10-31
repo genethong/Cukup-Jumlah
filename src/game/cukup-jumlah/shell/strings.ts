@@ -278,4 +278,13 @@ export const GAME_TEXT = {
       en: "Form 14 signed by the presiding officer",
     },
   },
+  goreng: {
+    howTo: { ms: "Putar jari dalam kuali", en: "Circle your finger in the wok" },
+    cooked: { ms: "Masak", en: "Cooked" },
+    faster: { ms: "Kacau laju!", en: "Stir faster!" },
+    burning: { ms: "Hampir hangus!", en: "Burning!" },
+    wokHei: { ms: "WOK HEI!", en: "WOK HEI!" },
+    done: { ms: "Siap! Senyum untuk kamera", en: "Done! Smile for the cameras" },
+    burnt: { ms: "HANGUS!", en: "BURNT!" },
+  },
 } satisfies Record<string, Record<string, Text>>;

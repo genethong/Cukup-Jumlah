@@ -523,13 +523,7 @@ function ReadyGo({ step, lang }: { step: number; lang: Lang }) {
       {go ? (
         // One pop when MULA! lands; it then only fades as the gunungan lifts away.
         <div className={leaving ? "fade-away" : undefined}>
-          <CutStamp
-            key="go"
-            lines={[UI.go[lang]]}
-            tone="gold"
-            className="top-[56%] w-[62%]"
-            stay
-          />
+          <CutStamp key="go" lines={[UI.go[lang]]} tone="gold" className="top-[56%] w-[62%]" stay />
         </div>
       ) : (
         <span

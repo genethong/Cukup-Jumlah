@@ -90,6 +90,16 @@
   animation: fade-away 420ms ease-in forwards;
 }
 
+/* Smoke curling up off a scorching wok. */
+.smoke-rise {
+  animation: smoke-rise 1.4s ease-out infinite;
+}
+
+/* A camera flash: a white burst that fades at once. */
+.camera-flash {
+  animation: camera-flash 380ms ease-out forwards;
+}
+
 .gunungan-sweep {
   animation: gunungan-sweep 1300ms cubic-bezier(0.55, 0, 0.35, 1) forwards;
 }
@@ -183,6 +193,17 @@
   to { opacity: 0; }
 }
 
+@keyframes smoke-rise {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translateY(-260%) scale(1.8); opacity: 0; }
+}
+
+@keyframes camera-flash {
+  0% { opacity: 0.95; }
+  100% { opacity: 0; }
+}
+
 @keyframes gunungan-sweep {
   0% { transform: translate(-50%, -50%) translateX(75%) rotate(10deg) scale(0.5); opacity: 0; }
   12% { opacity: 1; }
@@ -202,6 +223,14 @@
     animation-fill-mode: none;
     opacity: 1;
     transform: translate(-50%, -50%) rotate(-8deg);
+  }
+  .smoke-rise {
+    animation: none;
+    opacity: 0.5;
+  }
+  .camera-flash {
+    animation: none;
+    opacity: 0;
   }
   .ballot-fly-left,
   .ballot-fly-right {
