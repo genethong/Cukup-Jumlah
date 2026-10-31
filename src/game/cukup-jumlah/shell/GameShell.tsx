@@ -519,13 +519,16 @@ function ReadyGo({ step, lang }: { step: number; lang: Lang }) {
         <Gunungan className="h-full w-auto" />
       </div>
       {go ? (
-        <CutStamp
-          key="go"
-          lines={[UI.go[lang]]}
-          tone="gold"
-          className="top-[56%] w-[62%]"
-          stay={!leaving}
-        />
+        // One pop when MULA! lands; it then only fades as the gunungan lifts away.
+        <div className={leaving ? "fade-away" : undefined}>
+          <CutStamp
+            key="go"
+            lines={[UI.go[lang]]}
+            tone="gold"
+            className="top-[56%] w-[62%]"
+            stay
+          />
+        </div>
       ) : (
         <span
           key={step}
