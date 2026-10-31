@@ -417,21 +417,20 @@ function RoundStage({
         )}
       </div>
 
-      {!result && (
-        <Game
-          key={roundKey}
-          round={round}
-          clock={clock}
-          candidate={candidate}
-          lang={lang}
-          talent={candidate.talent}
-          bars={roundBars(candidate.talent)}
-          offsetMs={offsetMs}
-          onBeat={setBeat}
-          onJudge={onJudge}
-          onFinish={onDone}
-        />
-      )}
+      {/* Stays up under the result stamp so its final state (e.g. a signed form) shows. */}
+      <Game
+        key={roundKey}
+        round={round}
+        clock={clock}
+        candidate={candidate}
+        lang={lang}
+        talent={candidate.talent}
+        bars={roundBars(candidate.talent)}
+        offsetMs={offsetMs}
+        onBeat={setBeat}
+        onJudge={onJudge}
+        onFinish={onDone}
+      />
 
       {moment && (
         <CutStamp

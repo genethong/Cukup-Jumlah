@@ -218,7 +218,7 @@ function BallotPaper({
     { row: rival, x: marked === "rival" },
   ];
   return (
-    <div className="ballot-show absolute top-[33%] left-1/2 w-[66%] -translate-x-1/2 rounded-sm bg-[#fdfaf2] px-[3cqw] pt-[2cqw] pb-[2.4cqw] text-[var(--ink)] shadow-[0_8px_14px_rgba(40,14,6,0.4)]">
+    <div className="ballot-show absolute top-[37%] left-1/2 w-[72%] -translate-x-1/2 rounded-sm bg-[#fdfaf2] px-[3cqw] pt-[2cqw] pb-[2.4cqw] text-[var(--ink)] shadow-[0_8px_14px_rgba(40,14,6,0.4)]">
       <p className="text-center font-tally text-[2.8cqw] tracking-[0.18em] text-[#6a4a32] uppercase">
         {GAME_TEXT.borang14.ballot[lang]}
       </p>
