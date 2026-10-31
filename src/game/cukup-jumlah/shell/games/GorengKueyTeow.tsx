@@ -35,7 +35,8 @@ const HAWKER: PuppetConfig = {
   footwear: "selipar",
 };
 
-type Camera = { index: number; side: "left" | "right"; count: number };
+/** Cameras pop up facing the YB: from the left wing, or from the middle of the crowd. */
+type Camera = { index: number; side: "left" | "middle"; count: number };
 type Shot = { good: boolean; n: number };
 
 export function GorengKueyTeow({
@@ -140,7 +141,7 @@ export function GorengKueyTeow({
         const flashAt = flashes[fired];
         if (flashAt !== undefined) {
           const until = flashAt - playS;
-          const side = fired % 2 ? "right" : "left";
+          const side = fired % 2 ? "middle" : "left";
           if (until <= AIM_SECONDS && until > 0) {
             const count = Math.min(3, Math.ceil((until / AIM_SECONDS) * 3));
             if (count !== lastCount) {
@@ -230,7 +231,7 @@ export function GorengKueyTeow({
       onPointerCancel={release}
     >
       {/* Scoreboard: the hawker's cooking and the photos so far. */}
-      <div className="absolute top-[39%] left-1/2 flex w-[86%] -translate-x-1/2 items-center gap-[2cqw] rounded-full bg-[#fbf3e4]/90 px-[2.6cqw] py-[1cqw] shadow-[0_3px_6px_rgba(40,14,6,0.25)]">
+      <div className="absolute top-[39%] left-1/2 flex w-[86%] -translate-x-1/2 items-center gap-[2cqw] rounded-full bg-[#fbf3e4]/90 text-[var(--ink)] px-[2.6cqw] py-[1cqw] shadow-[0_3px_6px_rgba(40,14,6,0.25)]">
         <span className="font-tally text-[3cqw] tracking-[0.08em] uppercase">{T.cook[lang]}</span>
         <div className="relative h-[2.8cqw] flex-1 overflow-hidden rounded-full bg-[#5a3a1c]/25">
           <div
@@ -304,18 +305,14 @@ export function GorengKueyTeow({
 }
 
 /** A reporter in the wings with a camera up, counting down to the flash. */
-function PressCamera({ side, count, lang }: { side: "left" | "right"; count: number; lang: Lang }) {
+function PressCamera({ side, count, lang }: { side: Camera["side"]; count: number; lang: Lang }) {
   return (
     <div
-      className={`pointer-events-none absolute top-[46%] h-[22%] w-[26%] ${
-        side === "left" ? "left-[1%]" : "right-[1%]"
+      className={`pointer-events-none absolute top-[45%] h-[21%] w-[25%] ${
+        side === "left" ? "left-[1%]" : "left-[34%]"
       }`}
     >
-      <svg
-        viewBox="0 0 60 100"
-        className={`bayang h-full w-full ${side === "right" ? "-scale-x-100" : ""}`}
-        aria-hidden="true"
-      >
+      <svg viewBox="0 0 60 100" className="bayang h-full w-full -scale-x-100" aria-hidden="true">
         <circle cx="22" cy="18" r="11" fill="#000" />
         <path d="M8 34 Q22 26 36 34 L40 96 L4 96 Z" fill="#000" />
         <path d="M32 40 L48 30" stroke="#000" strokeWidth="7" strokeLinecap="round" />
