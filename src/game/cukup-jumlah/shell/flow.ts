@@ -185,7 +185,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
       const { phase, lastResult } = state;
       if (!lastResult) return state;
       const cleared = { ...state, lastResult: null, attempt: state.attempt + 1 };
-      if (state.practice) return { ...cleared, deposits: state.maxDeposits };
+      if (state.practice) return { ...cleared, deposits: state.maxDeposits, seats: START_SEATS };
       if (phase.kind === "coalition") {
         return {
           ...cleared,

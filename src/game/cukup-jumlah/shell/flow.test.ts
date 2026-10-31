@@ -103,6 +103,7 @@ describe("practice mode", () => {
     s = run(s, { type: "roundDone", success: false }, { type: "next" });
     expect(s.phase).toEqual(phaseFor("borang_14"));
     expect(s.deposits).toBe(s.maxDeposits);
+    expect(s.seats).toBe(START_SEATS);
     expect(s.attempt).toBeGreaterThan(first);
   });
 });
