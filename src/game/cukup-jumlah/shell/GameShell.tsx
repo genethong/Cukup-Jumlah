@@ -434,7 +434,8 @@ function RoundStage({
             label={candidate.name}
           />
         </div>
-        {party && layout !== "between" && (
+        {/* Name tag only on stand-in rounds; real games use the bottom of the stage. */}
+        {party && beatPins && (
           <span
             className="absolute bottom-[3%] left-[4%] px-[2cqw] py-[0.6cqw] text-[3cqw] font-bold text-[var(--cream)]"
             style={{ backgroundColor: party.colour }}

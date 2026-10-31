@@ -81,7 +81,8 @@ export function GorengKueyTeow({
 
   const [live, setLive] = useState(false);
   const [wok, setWok] = useState<Wok>(FRESH_WOK);
-  const [rps, setRps] = useState(0);
+  const [slow, setSlow] = useState(false);
+  const [heat, setHeat] = useState(0);
   const [wokHei, setWokHei] = useState(0);
   const [flash, setFlash] = useState<{ side: "left" | "right"; n: number } | null>(null);
   const [outcome, setOutcome] = useState<"won" | "lost" | null>(null);
@@ -137,6 +138,7 @@ export function GorengKueyTeow({
     let lastHei = -10;
     let lastFlash = 0;
     let warned = false;
+    let slowSince: number | null = null;
     const frame = () => {
       if (done.current) return;
       if (!clock.running) {
@@ -166,7 +168,10 @@ export function GorengKueyTeow({
         const w = stepWok(wokRef.current, dt, speed, forgiving);
         wokRef.current = w;
         setWok(w);
-        setRps(speed);
+        setHeat(Math.min(1, speed / WOK_HEI_RPS));
+        // Only nag after half a second of slow stirring, so a brief pause doesn't flicker it.
+        slowSince = speed < SAFE_RPS ? (slowSince ?? now) : null;
+        setSlow(slowSince !== null && now - slowSince > 0.5);
 
         if (speed >= WOK_HEI_RPS && now - lastHei > 1.4) {
           lastHei = now;
@@ -242,15 +247,8 @@ export function GorengKueyTeow({
     lastAngle.current = null;
   };
 
-  const heat = Math.min(1, rps / WOK_HEI_RPS);
   const nudge =
-    live && !outcome
-      ? wok.burnt > 0.45
-        ? T.burning[lang]
-        : rps < SAFE_RPS
-          ? T.faster[lang]
-          : null
-      : null;
+    live && !outcome ? (wok.burnt > 0.45 ? T.burning[lang] : slow ? T.faster[lang] : null) : null;
 
   return (
     <div
@@ -291,7 +289,7 @@ export function GorengKueyTeow({
       {wokHei > 0 && !outcome && (
         <span
           key={`hei-${wokHei}`}
-          className="stamp-pop absolute top-[57%] left-1/2 z-20 font-display text-[11cqw] font-bold whitespace-nowrap text-[#e4572e] italic drop-shadow-[0_3px_0_#fff1c4]"
+          className="stamp-pop absolute top-[72%] left-1/2 z-20 font-display text-[11cqw] font-bold whitespace-nowrap text-[#e4572e] italic drop-shadow-[0_3px_0_#fff1c4]"
         >
           {T.wokHei[lang]}
         </span>

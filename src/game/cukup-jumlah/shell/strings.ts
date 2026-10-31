@@ -33,8 +33,8 @@ export function fill(text: string, slots: Record<string, string | number>): stri
 export const UI = {
   title: { ms: "Cukup Jumlah!", en: "Cukup Jumlah!" },
   tagline: {
-    ms: "Permainan rentak pilihan raya dalam pentas wayang",
-    en: "An election rhythm game on the shadow-puppet stage",
+    ms: "Permainan arked pilihan raya di pentas wayang",
+    en: "An election arcade game on the shadow-puppet stage",
   },
   play: { ms: "Main", en: "Play" },
   continueAs: { ms: "Teruskan sebagai {name}", en: "Continue as {name}" },
