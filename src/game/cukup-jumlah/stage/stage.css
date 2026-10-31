@@ -1,0 +1,104 @@
+.panggung {
+  --wood-dark: #2b170c;
+  --wood: #4a2a17;
+  --wood-light: #6e4426;
+  --brass: #c9963f;
+  --kelir: #f2e2bf;
+  --kelir-edge: #c9a874;
+  --ink: #24170f;
+  --sambal: #8a1c19;
+  --cream: #f6ead8;
+}
+
+.kelir {
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 18%, rgba(255, 214, 140, 0.75), transparent 70%),
+    repeating-linear-gradient(0deg, rgba(110, 68, 38, 0.05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(110, 68, 38, 0.05) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 120% 100% at 50% 30%, var(--kelir) 45%, var(--kelir-edge) 100%);
+}
+
+.kelir-glow {
+  background: radial-gradient(ellipse 45% 40% at 50% 14%, rgba(255, 190, 90, 0.45), transparent 70%);
+  animation: pelita-flicker 2.6s ease-in-out infinite;
+}
+
+.pelita-flame {
+  transform-origin: 50% 100%;
+  animation: flame-sway 1.4s ease-in-out infinite;
+}
+
+/* Background figures read as shadows cast on the kelir: dark, warm, slightly soft. */
+.bayang {
+  filter: brightness(0) blur(1.2px);
+  opacity: 0.6;
+  mix-blend-mode: multiply;
+}
+
+.stamp-pop {
+  animation: stamp-pop 1100ms cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+}
+
+.gunungan-sweep {
+  animation: gunungan-sweep 1300ms cubic-bezier(0.55, 0, 0.35, 1) forwards;
+}
+
+.beat-pin {
+  background: radial-gradient(circle at 35% 30%, #fef8cb, #9d7a2f 60%, #5d4415);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.beat-pin[data-on="true"] {
+  box-shadow:
+    0 0 0 2px rgba(255, 220, 140, 0.6),
+    0 0 14px rgba(255, 200, 90, 0.9);
+  transform: scale(1.25);
+}
+
+@keyframes pelita-flicker {
+  0%, 100% { opacity: 0.85; }
+  30% { opacity: 1; }
+  55% { opacity: 0.75; }
+  80% { opacity: 0.95; }
+}
+
+@keyframes flame-sway {
+  0%, 100% { transform: rotate(-3deg) scaleY(1); }
+  50% { transform: rotate(3deg) scaleY(1.08); }
+}
+
+@keyframes stamp-pop {
+  0% { transform: translate(-50%, -50%) scale(1.8) rotate(-14deg); opacity: 0; }
+  18% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
+  75% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.96) rotate(-8deg); opacity: 0; }
+}
+
+@keyframes gunungan-sweep {
+  0% { transform: translate(-50%, -50%) translateX(75%) rotate(10deg) scale(0.5); opacity: 0; }
+  12% { opacity: 1; }
+  45%, 55% { transform: translate(-50%, -50%) translateX(0) rotate(0deg) scale(1.15); opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) translateX(-75%) rotate(-10deg) scale(0.5); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kelir-glow,
+  .pelita-flame {
+    animation: none;
+  }
+  .stamp-pop {
+    animation-duration: 1ms;
+    animation-fill-mode: none;
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-8deg);
+  }
+  .gunungan-sweep {
+    animation: gunungan-fade 900ms linear forwards;
+  }
+}
+
+@keyframes gunungan-fade {
+  0%, 100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0; }
+  40%, 60% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
