@@ -334,10 +334,10 @@ export function GorengKueyTeow({
             className={`absolute flex w-[17%] flex-col items-center pt-[1cqw] transition-opacity ${
               i < 3 ? "left-[1.5%]" : "right-[1.5%]"
             } ${used ? "opacity-25" : ""} ${isNext ? "animate-pulse" : ""}`}
-            style={{ top: `${45 + row * 9}%` }}
+            style={{ top: `${43.5 + row * 10.5}%` }}
           >
             <span
-              className={`flex h-[14cqw] w-[14cqw] items-center justify-center rounded-full border-[0.8cqw] bg-[#fdfaf2] text-[8cqw] shadow-[0_4px_6px_rgba(40,14,6,0.35)] ${
+              className={`flex h-[13cqw] w-[13cqw] items-center justify-center rounded-full border-[0.8cqw] bg-[#fdfaf2] text-[7.4cqw] shadow-[0_4px_6px_rgba(40,14,6,0.35)] ${
                 isNext ? "border-[var(--sambal)]" : "border-[#c9a874]"
               }`}
             >
