@@ -43,6 +43,12 @@
   animation: stamp-stay 600ms cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
 }
 
+/* A ballot held up to the agents: slides up and settles at a slight tilt. Tailwind's
+   translate utilities use the separate translate property, so this stays on transform. */
+.ballot-show {
+  animation: ballot-show 220ms cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+
 .gunungan-sweep {
   animation: gunungan-sweep 1300ms cubic-bezier(0.55, 0, 0.35, 1) forwards;
 }
@@ -83,6 +89,11 @@
   100% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
 }
 
+@keyframes ballot-show {
+  0% { transform: translateY(18%) rotate(-7deg); opacity: 0; }
+  100% { transform: translateY(0) rotate(-2deg); opacity: 1; }
+}
+
 @keyframes gunungan-sweep {
   0% { transform: translate(-50%, -50%) translateX(75%) rotate(10deg) scale(0.5); opacity: 0; }
   12% { opacity: 1; }
@@ -102,6 +113,10 @@
     animation-fill-mode: none;
     opacity: 1;
     transform: translate(-50%, -50%) rotate(-8deg);
+  }
+  .ballot-show {
+    animation: none;
+    transform: rotate(-2deg);
   }
   .gunungan-sweep {
     animation: gunungan-fade 900ms linear forwards;

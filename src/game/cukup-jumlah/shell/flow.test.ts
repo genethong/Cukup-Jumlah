@@ -7,6 +7,8 @@ import {
   SEAT_GOAL,
   START_SEATS,
   gameReducer,
+  phaseFor,
+  practiceState,
   roundBars,
   type Action,
   type GameState,
@@ -86,6 +88,22 @@ describe("game flow", () => {
     const s = run(cast(), { type: "toTitle" });
     expect(s.phase).toEqual({ kind: "title" });
     expect(s.candidate).toEqual(DEFAULT_CANDIDATE);
+  });
+});
+
+describe("practice mode", () => {
+  it("goes straight to the chosen round and replays it with full deposits", () => {
+    let s = run(
+      practiceState("borang_14"),
+      { type: "play" },
+      { type: "cast", candidate: DEFAULT_CANDIDATE },
+    );
+    expect(s.phase).toEqual(phaseFor("borang_14"));
+    const first = s.attempt;
+    s = run(s, { type: "roundDone", success: false }, { type: "next" });
+    expect(s.phase).toEqual(phaseFor("borang_14"));
+    expect(s.deposits).toBe(s.maxDeposits);
+    expect(s.attempt).toBeGreaterThan(first);
   });
 });
 

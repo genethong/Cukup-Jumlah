@@ -1,6 +1,6 @@
 import type { BeatClock } from "../beat/beatClock";
 import type { Grade } from "../beat/timing";
-import type { TalentId } from "../creator/candidate";
+import type { Candidate, TalentId } from "../creator/candidate";
 import type { RoundId } from "./flow";
 import type { Lang } from "./strings";
 
@@ -12,6 +12,7 @@ import type { Lang } from "./strings";
 export type MicrogameProps = {
   round: RoundId;
   clock: BeatClock;
+  candidate: Candidate;
   lang: Lang;
   talent: TalentId;
   /** Bars of play after the lead-in (Lidah Manis adds one). */
@@ -25,3 +26,9 @@ export type MicrogameProps = {
   /** Call once, when the round is decided. */
   onFinish: (success: boolean) => void;
 };
+
+/**
+ * How the shell lays out the stage around a game. `center` keeps the puppet big in the
+ * middle; `side` tucks it into the bottom-left so the game has the middle of the kelir.
+ */
+export type StageLayout = "center" | "side";

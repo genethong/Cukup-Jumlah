@@ -255,3 +255,20 @@ export const ENDINGS: Record<EndingId, { stamp: Text; line: Text; fact: FactId }
     fact: "deposit",
   },
 };
+
+/** Words used inside individual microgames. */
+export const GAME_TEXT = {
+  borang14: {
+    tapHint: { ms: "Undi anda? Tepuk pada ketukan ke-4", en: "Your vote? Tap on beat 4" },
+    ballot: { ms: "Kertas undi", en: "Ballot paper" },
+    yours: { ms: "Undi anda: tepuk!", en: "Your vote: tap!" },
+    rival: { ms: "Undi lawan: biar", en: "Rival's vote: leave it" },
+    sheet: { ms: "Borang 14 · Saluran 1", en: "Form 14 · Stream 1" },
+    rivalName: { ms: "Calon {party}", en: "{party} candidate" },
+    wrong: { ms: "Salah kira!", en: "Miscount!" },
+    signed: {
+      ms: "Ditandatangani oleh Ketua Tempat Mengundi",
+      en: "Signed by the presiding officer",
+    },
+  },
+} satisfies Record<string, Record<string, Text>>;

@@ -11,15 +11,16 @@ import { Gunungan } from "../stage/Gunungan";
 import { BallotBox, DepositEnvelope } from "../stage/Hud";
 import { BeatPins, CutStamp, DalangBanner, Kelir, StageBox } from "../stage/Panggung";
 import {
-  INITIAL_STATE,
   SEAT_GOAL,
   TOTAL_SEATS,
   currentRound,
   gameReducer,
+  practiceState,
   roundBars,
   type ActNo,
   type EndingId,
   type GameState,
+  type RoundId,
 } from "./flow";
 import {
   ACT_FACTS,
@@ -34,11 +35,11 @@ import {
   type FactId,
   type Lang,
 } from "./strings";
-import { TepukRentak } from "./TepukRentak";
+import { microgameFor } from "./microgames";
 
 // The new game shell (docs/GAME_PLAN.md §6, step 3): title → backstage → three acts →
 // coalition talks if short → ending, all on the 9:16 kelir. Every round runs the
-// TepukRentak stand-in until its real microgame is built.
+// tap-on-beat-4 stand-in until its real microgame is in microgames.ts.
 
 const STAMP_MS = 1300;
 const SWEEP_SWAP_MS = 650;
@@ -51,8 +52,9 @@ const ENDING_FACE: Record<EndingId, ExpressionId> = {
   depositLebur: "crying_pout",
 };
 
-export function GameShell() {
-  const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE);
+/** `practice` (dev only) skips straight to one round and replays it. */
+export function GameShell({ practice = null }: { practice?: RoundId | null } = {}) {
+  const [state, dispatch] = useReducer(gameReducer, practice, practiceState);
   const [lang, setLang] = useState<Lang>("ms");
   const [saved, setSaved] = useState<Candidate | null>(null);
   const [offsetMs, setOffsetMs] = useState(0);
@@ -340,8 +342,7 @@ function RoundStage({
   onNext: () => void;
 }) {
   const round = currentRound(state.phase)!;
-  const roundKey =
-    state.phase.kind === "round" ? `${state.phase.act}-${state.phase.index}` : "coalition";
+  const roundKey = String(state.attempt);
   const [beat, setBeat] = useState(0);
   const [anim, setAnim] = useState<PuppetAnim>("idle");
   const [face, setFace] = useState<ExpressionId | null>(null);
@@ -379,6 +380,7 @@ function RoundStage({
   };
 
   const words = ROUNDS[round];
+  const { Game, layout, tapHint } = microgameFor(round);
   const party = PARTIES.find((p) => p.id === candidate.party);
 
   return (
@@ -389,12 +391,16 @@ function RoundStage({
         <DalangBanner call={words.call[lang]} hint={words.hint[lang]} />
         <BeatPins beat={beat} />
         <span className="font-tally text-[3.2cqw] tracking-[0.12em] text-[var(--ink)] uppercase">
-          {beat === 0 && !moment ? UI.ready[lang] : UI.tapHint[lang]}
+          {beat === 0 && !moment ? UI.ready[lang] : (tapHint ?? UI.tapHint)[lang]}
         </span>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-[58%] items-end justify-center">
-        <div className="relative h-full w-[60%]">
+      <div
+        className={`pointer-events-none absolute inset-x-0 bottom-0 flex h-[58%] items-end ${
+          layout === "side" ? "justify-start pl-[1%]" : "justify-center"
+        }`}
+      >
+        <div className={layout === "side" ? "relative h-[66%] w-[42%]" : "relative h-full w-[60%]"}>
           <PuppetAvatar
             config={face ? { ...candidate.puppet, expression: face } : candidate.puppet}
             anim={anim}
@@ -412,10 +418,11 @@ function RoundStage({
       </div>
 
       {!result && (
-        <TepukRentak
+        <Game
           key={roundKey}
           round={round}
           clock={clock}
+          candidate={candidate}
           lang={lang}
           talent={candidate.talent}
           bars={roundBars(candidate.talent)}
