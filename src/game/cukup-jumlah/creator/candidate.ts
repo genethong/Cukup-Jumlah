@@ -64,7 +64,7 @@ export const TALENTS: readonly Talent[] = [
     id: "lidah_manis",
     name: "Lidah Manis",
     icon: "🍯",
-    effect: "Lebih 1.5 saat untuk setiap cabaran",
+    effect: "Satu bar rentak tambahan (≈2 saat) setiap cabaran",
   },
   {
     id: "mesra_rakyat",
