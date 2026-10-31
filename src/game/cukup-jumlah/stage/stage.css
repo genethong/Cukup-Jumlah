@@ -110,6 +110,21 @@
   animation: hold-glow 480ms ease-in-out infinite alternate;
 }
 
+/* The wrong finger offered to the clerk: a quick shake. */
+.finger-wrong {
+  animation: finger-wrong 300ms ease-out;
+}
+
+/* The clerk's brush dabbing ink. */
+.brush-dab {
+  animation: brush-dab 450ms ease-out both;
+}
+
+/* A folded ballot dropping through the slot. */
+.ballot-drop {
+  animation: ballot-drop 420ms cubic-bezier(0.5, 0, 0.8, 0.5) forwards;
+}
+
 /* A senduk working the wok. */
 .senduk-stir {
   animation: senduk-stir 360ms ease-in-out infinite alternate;
@@ -229,6 +244,24 @@
   to { box-shadow: 0 6px 0 rgba(40, 14, 6, 0.5), 0 0 0 3cqw rgba(228, 87, 46, 0); }
 }
 
+@keyframes finger-wrong {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px) rotate(-4deg); }
+  60% { transform: translateX(4px) rotate(3deg); }
+}
+
+@keyframes brush-dab {
+  0% { transform: translate(40%, 60%) rotate(30deg); opacity: 0; }
+  40% { transform: translate(-30%, -70%) rotate(-10deg); opacity: 1; }
+  70% { transform: translate(-30%, -50%) rotate(-20deg); opacity: 1; }
+  100% { transform: translate(-10%, -90%) rotate(0deg); opacity: 0; }
+}
+
+@keyframes ballot-drop {
+  0% { transform: translateY(-60%) rotate(-8deg); opacity: 1; }
+  100% { transform: translateY(160%) rotate(0deg); opacity: 0; }
+}
+
 @keyframes senduk-stir {
   from { transform: rotate(-9deg); }
   to { transform: rotate(9deg); }
@@ -254,6 +287,9 @@
     opacity: 1;
     transform: translate(-50%, -50%) rotate(-8deg);
   }
+  .finger-wrong,
+  .brush-dab,
+  .ballot-drop,
   .senduk-stir,
   .press-in,
   .hold-glow {
