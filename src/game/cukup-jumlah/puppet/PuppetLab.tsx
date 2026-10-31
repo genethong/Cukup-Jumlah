@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import { PuppetAvatar } from "./PuppetAvatar";
 import type { PuppetConfig } from "./loadRig";
 import {
-  BROWS,
   EXPRESSIONS,
   EXTRAS,
   EYES,
@@ -12,10 +11,11 @@ import {
   GENDERS,
   LOWERS,
   NOSES,
-  OUTFITS,
+  browsFor,
   TONES,
   hairFor,
   hatsFor,
+  outfitsFor,
   randomConfig,
   shapesFor,
   withPatch,
@@ -238,19 +238,21 @@ export function PuppetLab() {
               onChange={(eyes) => update({ eyes })}
             />
 
-            {/* Kening */}
-            <Picker
-              legend="Kening"
-              options={BROWS}
-              value={active.brows ?? (activeGender === "m" ? "thick_arched" : "natural")}
-              onChange={(brows) => update({ brows })}
-            />
+            {/* Kening (perempuan sahaja) */}
+            {activeGender === "f" ? (
+              <Picker
+                legend="Kening"
+                options={browsFor(activeGender)}
+                value={active.brows ?? "natural"}
+                onChange={(brows) => update({ brows })}
+              />
+            ) : null}
 
             {/* Hidung */}
             <Picker
               legend="Hidung"
               options={NOSES}
-              value={active.nose ?? (activeGender === "m" ? "medium" : "soft")}
+              value={active.nose ?? "soft"}
               onChange={(nose) => update({ nose })}
             />
 
@@ -299,7 +301,7 @@ export function PuppetLab() {
             {/* Baju */}
             <Picker
               legend="Baju"
-              options={OUTFITS}
+              options={outfitsFor(activeGender)}
               value={active.outfit}
               onChange={(outfit) => update({ outfit })}
             />

@@ -51,6 +51,33 @@ describe("candidate", () => {
     expect(c.puppet.hair).toBe("sidepart");
   });
 
+  it("drops options removed in the audit and cross-gender religious dress", () => {
+    const old = sanitizePuppet({
+      gender: "f",
+      eyes: "round",
+      nose: "medium",
+      brows: "bushy",
+      expression: "big_laugh",
+      headwear: "ketayap",
+      outfit: "baju_melayu",
+    });
+    expect(old).toMatchObject({
+      eyes: "normal",
+      nose: "soft",
+      brows: "natural",
+      expression: "neutral",
+      headwear: null,
+      outfit: "baju_kurung",
+    });
+    const man = sanitizePuppet({
+      gender: "m",
+      headwear: "tudung",
+      outfit: "baju_kurung",
+      brows: "thin",
+    });
+    expect(man).toMatchObject({ headwear: null, outfit: "baju_melayu", brows: "thick_arched" });
+  });
+
   it("trims names and caps their length", () => {
     const c = sanitizeCandidate({ name: "  Tan   Sri   " + "x".repeat(40) });
     expect(c.name.startsWith("Tan Sri x")).toBe(true);

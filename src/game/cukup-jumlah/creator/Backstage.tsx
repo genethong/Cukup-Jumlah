@@ -4,8 +4,7 @@ import { PuppetAvatar } from "../puppet/PuppetAvatar";
 import type { PuppetConfig } from "../puppet/loadRig";
 import type { PuppetAnim } from "../puppet/motion";
 import {
-  BROWS,
-  EXPRESSIONS,
+  CREATOR_EXPRESSIONS,
   EXTRAS,
   EYES,
   FACIAL_HAIR,
@@ -13,10 +12,12 @@ import {
   GENDERS,
   LOWERS,
   NOSES,
-  OUTFITS,
   TONES,
+  browsFor,
   hairFor,
   hatsFor,
+  hidesHair,
+  outfitsFor,
   randomConfig,
   shapesFor,
   withPatch,
@@ -217,12 +218,14 @@ export function Backstage() {
                   value={puppet.eyes ?? "normal"}
                   onChange={(eyes) => dress({ eyes })}
                 />
-                <Chips
-                  legend="Kening"
-                  options={BROWS}
-                  value={puppet.brows ?? "natural"}
-                  onChange={(brows) => dress({ brows })}
-                />
+                {gender === "f" && (
+                  <Chips
+                    legend="Kening"
+                    options={browsFor(gender)}
+                    value={puppet.brows ?? "natural"}
+                    onChange={(brows) => dress({ brows })}
+                  />
+                )}
                 <Chips
                   legend="Hidung"
                   options={NOSES}
@@ -231,7 +234,7 @@ export function Backstage() {
                 />
                 <Chips
                   legend="Ekspresi"
-                  options={EXPRESSIONS}
+                  options={CREATOR_EXPRESSIONS}
                   value={puppet.expression ?? "neutral"}
                   onChange={(expression) => dress({ expression })}
                 />
@@ -254,6 +257,11 @@ export function Backstage() {
 
             {tab === "rambut" && (
               <Stack>
+                {hidesHair(puppet.headwear) && (
+                  <p className="rounded-[1.6cqw] bg-[#fbf3e4] px-[3cqw] py-[2cqw] text-[3.4cqw] text-[#6a4a32]">
+                    Rambut tersembunyi di bawah hiasan kepala ini.
+                  </p>
+                )}
                 <Chips
                   legend="Rambut"
                   options={hairFor(gender)}
@@ -273,7 +281,7 @@ export function Backstage() {
               <Stack>
                 <Chips
                   legend="Baju"
-                  options={OUTFITS}
+                  options={outfitsFor(gender)}
                   value={puppet.outfit}
                   onChange={(outfit) => dress({ outfit })}
                 />

@@ -1,17 +1,18 @@
 import type { PuppetConfig } from "../puppet/loadRig";
 import {
-  BROWS,
-  EXPRESSIONS,
+  BROWS_F,
+  CREATOR_EXPRESSIONS,
   EXTRAS,
   EYES,
   FACIAL_HAIR,
   FOOTWEAR,
   LOWERS,
+  MALE_BROWS,
   NOSES,
-  OUTFITS,
   TONES,
   hairFor,
   hatsFor,
+  outfitsFor,
   shapesFor,
 } from "../puppet/options";
 
@@ -94,10 +95,17 @@ export const DEFAULT_PUPPET: PuppetConfig = {
   gender: "m",
   tone: "tone_5",
   faceShape: "oval",
+  eyes: "normal",
+  brows: MALE_BROWS,
+  nose: "soft",
+  expression: "neutral",
   hair: "sidepart",
+  facialHair: "none",
+  extra: "none",
   headwear: "songkok",
   outfit: "baju_melayu",
   lower: "songket_samping",
+  footwear: "default",
 };
 
 export const DEFAULT_CANDIDATE: Candidate = {
@@ -119,20 +127,19 @@ function oneOf<T>(value: unknown, options: readonly { id: T }[], fallback: T): T
 export function sanitizePuppet(raw: unknown): PuppetConfig {
   const r = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const gender: "m" | "f" = r.gender === "f" ? "f" : "m";
-  const d = DEFAULT_PUPPET;
   return {
     gender,
-    tone: oneOf(r.tone, TONES, d.tone),
+    tone: oneOf(r.tone, TONES, DEFAULT_PUPPET.tone),
     faceShape: oneOf(r.faceShape, shapesFor(gender), "oval"),
     eyes: oneOf(r.eyes, EYES, "normal"),
-    brows: oneOf(r.brows, BROWS, gender === "m" ? "thick_arched" : "natural"),
-    nose: oneOf(r.nose, NOSES, gender === "m" ? "medium" : "soft"),
-    expression: oneOf(r.expression, EXPRESSIONS, "neutral"),
+    brows: gender === "f" ? oneOf(r.brows, BROWS_F, "natural") : MALE_BROWS,
+    nose: oneOf(r.nose, NOSES, "soft"),
+    expression: oneOf(r.expression, CREATOR_EXPRESSIONS, "neutral"),
     hair: oneOf(r.hair, hairFor(gender), gender === "m" ? "sidepart" : "bun"),
     facialHair: gender === "m" ? oneOf(r.facialHair, FACIAL_HAIR, "none") : "none",
     extra: oneOf(r.extra, EXTRAS, "none"),
     headwear: oneOf(r.headwear, hatsFor(gender), null),
-    outfit: oneOf(r.outfit, OUTFITS, d.outfit),
+    outfit: oneOf(r.outfit, outfitsFor(gender), gender === "m" ? "baju_melayu" : "baju_kurung"),
     lower: oneOf(r.lower, LOWERS, null),
     footwear: oneOf(r.footwear, FOOTWEAR, "default"),
   };

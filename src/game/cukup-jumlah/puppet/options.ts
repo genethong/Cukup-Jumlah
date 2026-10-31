@@ -49,22 +49,21 @@ export const SHAPES_F: { id: FaceShapeId; label: string }[] = [
   { id: "long", label: "Panjang" },
 ];
 
+// Eyes, brows, noses and moustaches with near-identical art were dropped (audit, PR #11).
 export const EYES: { id: EyeId; label: string }[] = [
   { id: "normal", label: "Normal" },
   { id: "sleepy", label: "Mengantuk" },
-  { id: "round", label: "Bulat" },
 ];
 
-export const BROWS: { id: BrowId; label: string }[] = [
+/** Only women choose brows; the male brow files are all near-identical, so men get one. */
+export const BROWS_F: { id: BrowId; label: string }[] = [
   { id: "natural", label: "Semula Jadi" },
-  { id: "thick_arched", label: "Tebal" },
-  { id: "bushy", label: "Lebat" },
-  { id: "thin", label: "Nipis" },
+  { id: "thin", label: "Tajam" },
 ];
+export const MALE_BROWS: BrowId = "thick_arched";
 
 export const NOSES: { id: NoseId; label: string }[] = [
   { id: "soft", label: "Lembut" },
-  { id: "medium", label: "Sederhana" },
   { id: "prominent", label: "Menonjol" },
 ];
 
@@ -77,6 +76,14 @@ export const EXPRESSIONS: { id: ExpressionId; label: string }[] = [
   { id: "shocked_o", label: "Terkejut" },
   { id: "sly_smirk", label: "Senyum Senget" },
   { id: "crying_pout", label: "Menangis" },
+];
+
+/** The creator only offers calm faces that keep the chosen eyes and brows; the game
+ *  switches to the big expressions (laugh, shout, cry) itself. */
+export const CREATOR_EXPRESSIONS: { id: ExpressionId; label: string }[] = [
+  { id: "neutral", label: "Biasa" },
+  { id: "smug_grin", label: "Senyum Sinis" },
+  { id: "sly_smirk", label: "Senyum Senget" },
 ];
 
 export const HAIR_M: { id: string; label: string }[] = [
@@ -101,8 +108,7 @@ export const HAIR_F: { id: string; label: string }[] = [
 
 export const FACIAL_HAIR: { id: FacialHairId; label: string }[] = [
   { id: "none", label: "Tiada" },
-  { id: "handlebar", label: "Handlebar" },
-  { id: "thin", label: "Nipis" },
+  { id: "handlebar", label: "Misai" },
   { id: "full_beard", label: "Janggut Penuh" },
   { id: "stubble", label: "Renjis" },
 ];
@@ -156,9 +162,28 @@ export function hairFor(gender: "m" | "f") {
   return gender === "m" ? HAIR_M : HAIR_F;
 }
 
-/** The tudung is only offered for female puppets. */
+// Headwear and traditional dress follow the puppet's gender, so religious or
+// traditional clothing is never worn as a gag (GAME_PLAN §4).
+const MENS_HEADWEAR: readonly HeadwearId[] = ["songkok", "ketayap", "turban"];
+const WOMENS_HEADWEAR: readonly HeadwearId[] = ["tudung"];
+
 export function hatsFor(gender: "m" | "f") {
-  return gender === "f" ? HATS : HATS.filter((hat) => hat.id !== "tudung");
+  const other = gender === "m" ? WOMENS_HEADWEAR : MENS_HEADWEAR;
+  return HATS.filter((hat) => !hat.id || !other.includes(hat.id));
+}
+
+/** Headwear that hides all the hair, so the hair picker has no visible effect. */
+export function hidesHair(headwear: HeadwearId | null): boolean {
+  return headwear === "tudung" || headwear === "turban";
+}
+
+export function outfitsFor(gender: "m" | "f") {
+  const other: OutfitId = gender === "m" ? "baju_kurung" : "baju_melayu";
+  return OUTFITS.filter((o) => o.id !== other);
+}
+
+export function browsFor(gender: "m" | "f") {
+  return gender === "f" ? BROWS_F : [];
 }
 
 function pick<T>(items: readonly T[]): T {
@@ -172,20 +197,18 @@ export function randomConfig(): PuppetConfig {
     tone: pick(TONES).id,
     faceShape: pick(shapesFor(gender)).id,
     eyes: pick(EYES).id,
-    brows: pick(BROWS).id,
+    brows: gender === "f" ? pick(BROWS_F).id : MALE_BROWS,
     nose: pick(NOSES).id,
-    expression: pick(EXPRESSIONS).id,
+    expression: pick(CREATOR_EXPRESSIONS).id,
     hair: pick(hairFor(gender)).id,
     facialHair: gender === "m" ? pick(FACIAL_HAIR).id : "none",
     extra: pick(EXTRAS).id,
     headwear: pick(hatsFor(gender)).id,
-    outfit: pick(OUTFITS).id,
+    outfit: pick(outfitsFor(gender)).id,
     lower: pick(LOWERS).id,
     footwear: pick(FOOTWEAR).id,
   };
 }
-
-const MENS_HEADWEAR: readonly HeadwearId[] = ["songkok", "ketayap", "turban"];
 
 /** Applies a change; switching gender also swaps the parts and clothes that only fit the other one. */
 export function withPatch(cfg: PuppetConfig, patch: Partial<PuppetConfig>): PuppetConfig {
@@ -194,15 +217,13 @@ export function withPatch(cfg: PuppetConfig, patch: Partial<PuppetConfig>): Pupp
     if (patch.gender === "m") {
       if (next.faceShape === "heart") next.faceShape = "oval";
       next.hair = "sidepart";
-      next.brows = "thick_arched";
-      next.nose = "medium";
+      next.brows = MALE_BROWS;
       if (next.headwear === "tudung") next.headwear = null;
       if (next.outfit === "baju_kurung") next.outfit = "baju_melayu";
     } else {
       if (next.faceShape === "square") next.faceShape = "oval";
       next.hair = "bun";
       next.brows = "natural";
-      next.nose = "soft";
       next.facialHair = "none";
       if (next.headwear && MENS_HEADWEAR.includes(next.headwear)) next.headwear = null;
       if (next.outfit === "baju_melayu") next.outfit = "baju_kurung";
