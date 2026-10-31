@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Trophy, RotateCcw, BookOpen, Share2 } from "lucide-react";
 import type { CandidateProfile, GameScreen, MicrogameId, TalentType, QuirkType } from "./types";
 import { PARTIES } from "./types";
-import { YbCustomizer } from "./YbCustomizer";
+import { Backstage } from "./creator/Backstage";
+import { DEFAULT_PUPPET, type Candidate } from "./creator/candidate";
+import { PuppetAvatar } from "./puppet/PuppetAvatar";
 import { SemakBorangGame } from "./minigames/SemakBorang";
 import { BayarDepositGame } from "./minigames/BayarDeposit";
 import { CopWatikahGame } from "./minigames/CopWatikah";
@@ -18,14 +20,11 @@ import { BalingBajuKempenGame } from "./minigames/BalingBajuKempen";
 import { CuciLongkangGame } from "./minigames/CuciLongkang";
 import { CelupDakwatKekalGame } from "./minigames/CelupDakwatKekal";
 import { TapisUndiRosakGame } from "./minigames/TapisUndiRosak";
-import { BlackoutPetiUndiGame } from "./minigames/BlackoutPetiUndi";
 import { Borang14Game } from "./minigames/Borang14";
 import { RundingPerpaduanGame } from "./minigames/RundingPerpaduan";
 import { EndgameScreen } from "./EndgameScreen";
 import { LevelSelectModal } from "./LevelSelectModal";
 import { CONSTITUTION_FACTS } from "./facts";
-import { drawPixelCandidate } from "./pixelAvatar";
-import { VoxelSinglePreview } from "./voxel/VoxelSinglePreview";
 import { ActShareCardModal } from "./ActShareCardModal";
 import { SekolahFrame } from "./SekolahFrame";
 import { rhythmAudio } from "./rhythm";
@@ -91,10 +90,6 @@ const RHYTHMIC_CALLS: Record<MicrogameId, { call: string[]; hit: string }> = {
   tapis_undi_rosak: {
     call: ["SEMAK...", "...KERTAS...", "...CONTENG SAMBAL?!"],
     hit: "TAPIS UNDI SAH! 🔍",
-  },
-  blackout_peti: {
-    call: ["LAMPU...", "...PADAM...", "...DEWAN GELAP?!"],
-    hit: "SULUH PETI UNDI! 🔦",
   },
   borang_14: {
     call: ["KIRA...", "...UNDI...", "...BORANG 14?!"],
@@ -285,17 +280,6 @@ const MICROGAMES_ACT3: MicrogameMeta[] = [
     },
   },
   {
-    id: "blackout_peti",
-    prompt: {
-      ms: "PERTAHANKAN PETI DARI BLACKOUT! 🔦",
-      en: "BALLOT BOX BLACKOUT DEFENSE! 🔦",
-    },
-    subtext: {
-      ms: "Suluh lampu suluh ke peti undi lutsinar SPR & halang tangan bayang ghaib!",
-      en: "Shine the flashlight beam on the transparent ballot box & ward off shadowy hands!",
-    },
-  },
-  {
     id: "borang_14",
     prompt: {
       ms: "METERAI BORANG 14 RASMI! 📜",
@@ -361,12 +345,9 @@ function CukupJumlahGameContent() {
     overrideQuirk?: QuirkType
   ) => {
     const currentOrTestProfile: CandidateProfile = profile || {
-      name: "YB Test Daud",
-      gender: "male",
-      party: "PNL",
-      headwear: "songkok_senget",
-      outfit: "baju_melayu",
-      prop: "briefcase",
+      name: "YB Ujian",
+      party: "nasi_lemak",
+      puppet: DEFAULT_PUPPET,
       talent: overrideTalent || "mesra_rakyat",
       quirk: overrideQuirk || "kaki_zzz",
     };
@@ -385,12 +366,9 @@ function CukupJumlahGameContent() {
   const handleSelectScreen = (targetScreen: GameScreen, customSeats?: number) => {
     if (!profile) {
       setProfile({
-        name: "YB Test Daud",
-        gender: "male",
-        party: "PNL",
-        headwear: "songkok_senget",
-        outfit: "baju_melayu",
-        prop: "briefcase",
+        name: "YB Ujian",
+        party: "nasi_lemak",
+        puppet: DEFAULT_PUPPET,
         talent: "mesra_rakyat",
         quirk: "kaki_zzz",
       });
@@ -425,18 +403,6 @@ function CukupJumlahGameContent() {
   }, [screen]);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const miniCanvasRef = useRef<HTMLCanvasElement>(null);
-
-  // Draw small avatar preview in HUD
-  useEffect(() => {
-    if (!profile) return;
-    const canvas = miniCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawPixelCandidate(ctx, profile, canvas.width / 2, canvas.height - 8, 2.0);
-  }, [profile, screen]);
 
   // Handle timer countdown during active microgame with a "GET READY" pause
   useEffect(() => {
@@ -458,7 +424,6 @@ function CukupJumlahGameContent() {
       "cuci_longkang",
       "celup_dakwat",
       "tapis_undi_rosak",
-      "blackout_peti",
       "runding_perpaduan",
     ];
     const activeId =
@@ -554,7 +519,8 @@ function CukupJumlahGameContent() {
     }
   };
 
-  const handleStartGame = (createdProfile: CandidateProfile) => {
+  const handleStartGame = (candidate: Candidate) => {
+    const createdProfile: CandidateProfile = { ...candidate, quirk: "kaki_zzz" };
     setProfile(createdProfile);
     // Buff: Muka Tembok gets 4 lives
     setLives(createdProfile.talent === "muka_tembok" ? 4 : 3);
@@ -588,8 +554,9 @@ function CukupJumlahGameContent() {
     setLastGameSuccess(success);
 
     if (success) {
-      // Act 1 certifies candidacy (0 seats won on Nomination Day); Act 2 swings +4 marginal seats; Act 3 confirms +5 official seats
-      const seatsGain = currentAct === 1 ? 0 : currentAct === 2 ? 4 : 5;
+      // Act 1 certifies candidacy (0 seats won on Nomination Day); Act 2 swings +4 marginal seats; Act 3 confirms +7 seats.
+      // Best run: 64 + 8 × 4 + 3 × 7 = 117, so 112 stays reachable.
+      const seatsGain = currentAct === 1 ? 0 : currentAct === 2 ? 4 : 7;
       setSeatsWon((prev) => Math.min(222, prev + seatsGain));
       rhythmAudio.playPaduSuccess();
     } else {
@@ -631,16 +598,20 @@ function CukupJumlahGameContent() {
   const currentMicrogame = activeMicrogameList[currentGameIndex];
   const partyInfo = profile ? PARTIES[profile.party] : null;
 
+  if (screen === "customizer") return <Backstage onStart={handleStartGame} />;
+
   return (
-    <div className={`min-h-screen ${screen === "customizer" ? "bg-[#f5f0e1] text-slate-950" : "bg-slate-950 text-slate-100"} flex flex-col justify-between select-none`}>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between select-none">
       {/* Top Header / HUD Bar (Hidden during customizer and microgame so stage takes full focus) */}
-      {screen !== "customizer" && screen !== "microgame" && screen !== "unity_negotiation" && (
+      {screen !== "microgame" && screen !== "unity_negotiation" && (
         <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-4 py-2.5">
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
               {profile && (
                 <div className="flex-shrink-0">
-                  <VoxelSinglePreview profile={profile} size={42} className="rounded-lg" />
+                  <div className="relative h-[52px] w-[30px]">
+                    <PuppetAvatar config={profile.puppet} label={profile.name} />
+                  </div>
                 </div>
               )}
               <div>
@@ -698,10 +669,7 @@ function CukupJumlahGameContent() {
       )}
 
       {/* Main Screen Content */}
-      <main className={`flex-1 w-full mx-auto flex flex-col justify-center ${screen === "customizer" ? "max-w-2xl p-0 md:py-2" : "max-w-3xl p-4"}`}>
-        {screen === "customizer" && (
-          <YbCustomizer onStartGame={handleStartGame} />
-        )}
+      <main className="flex-1 w-full mx-auto flex flex-col justify-center max-w-3xl p-4">
 
         {screen === "act1_intro" && profile && (
           <div className="max-w-md mx-auto text-center bg-slate-900 p-6 md:p-8 rounded-3xl border-4 border-slate-950 shadow-2xl comic-shadow-lg space-y-4">
@@ -848,12 +816,6 @@ function CukupJumlahGameContent() {
               {currentMicrogame.id === "tapis_undi_rosak" && (
                 <TapisUndiRosakGame
                   isPakarKira={profile?.talent === "pakar_kira"}
-                  onComplete={handleMicrogameComplete}
-                />
-              )}
-              {currentMicrogame.id === "blackout_peti" && (
-                <BlackoutPetiUndiGame
-                  isMesraRakyat={profile?.talent === "mesra_rakyat"}
                   onComplete={handleMicrogameComplete}
                 />
               )}
@@ -1092,15 +1054,15 @@ function CukupJumlahGameContent() {
         {screen === "act3_intro" && profile && (
           <div className="max-w-md mx-auto text-center bg-slate-900 p-6 md:p-8 rounded-3xl border-4 border-slate-950 shadow-2xl comic-shadow-lg space-y-4">
             <div className="inline-block px-3.5 py-1 bg-amber-400 text-slate-950 border-2 border-slate-950 rounded-full text-xs font-black uppercase tracking-wider comic-shadow-sm">
-              {t("FASA 3: HARI MENGUNDI & PENGIRAAN UNDI (4 TUGASAN)", "ACT 3: POLLING DAY & VOTE COUNTING (4 TASKS)")}
+              {t("FASA 3: HARI MENGUNDI & PENGIRAAN UNDI (3 TUGASAN)", "ACT 3: POLLING DAY & VOTE COUNTING (3 TASKS)")}
             </div>
             <h2 className="text-2xl font-black text-white uppercase">
               {t("Pusat Mengundi & Dewan Kiraan Undi!", "Polling Stations & Counting Halls!")}
             </h2>
             <p className="text-xs text-slate-300 leading-relaxed font-medium">
               {t(
-                "Saat penentuan telah tiba! Awasi stesen dakwat kekal, semak kertas undi rosak bersama PACA, pertahankan peti undi dari blackout dewan, dan meterai Borang 14 bersejarah!",
-                "The decisive hour has arrived! Supervise the indelible ink station, verify spoiled ballots with polling agents (PACA), defend the transparent ballot box during a counting hall blackout, and seal the decisive Form 14!"
+                "Saat penentuan telah tiba! Awasi stesen dakwat kekal, semak kertas undi rosak bersama PACA, dan meterai Borang 14 bersejarah!",
+                "The decisive hour has arrived! Supervise the indelible ink station, verify spoiled ballots with polling agents (PACA), and seal the decisive Form 14!"
               )}
             </p>
 
@@ -1110,8 +1072,7 @@ function CukupJumlahGameContent() {
               </div>
               <div className="text-slate-300">{t("1. Celup Dakwat Kekal (Saluran Mengundi • Peraturan 19)", "1. Dip Indelible Ink (Polling Stream • Reg. 19)")}</div>
               <div className="text-slate-300">{t("2. Tapis Undi Rosak vs Undi Sah (Meja PACA • Peraturan 25)", "2. Sort Spoiled vs Valid Ballots (PACA Table • Reg. 25)")}</div>
-              <div className="text-slate-300">{t("3. Pertahankan Peti Undi Waktu Blackout (Suluh Lampu Suluh)", "3. Ballot Box Blackout Defense (Guard the Acrylic Box)")}</div>
-              <div className="text-slate-300">{t("4. Tally & Meterai Borang 14 Rasmi (Seksyen 16 Akta 19)", "4. Tally & Sign Official Form 14 (Sec. 16 Act 19)")}</div>
+              <div className="text-slate-300">{t("3. Tally & Meterai Borang 14 Rasmi (Seksyen 16 Akta 19)", "4. Tally & Sign Official Form 14 (Sec. 16 Act 19)")}</div>
             </div>
 
             <button
@@ -1168,7 +1129,7 @@ function CukupJumlahGameContent() {
                 }}
                 className="py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl border-2 border-slate-950 shadow transition cursor-pointer flex items-center justify-center gap-1.5 uppercase tracking-wider"
               >
-                <span>👑</span>
+                <span>🏛️</span>
                 <span>{t("Semak Mandat Parlimen ➔", "Check Parliament Mandate ➔")}</span>
               </button>
             </div>
@@ -1301,7 +1262,7 @@ function CukupJumlahGameContent() {
       {/* Floating Level Select Button (Dev / Testing Only) */}
       {isDebugMode && (
         <>
-          <div className={`fixed z-40 ${screen === "customizer" ? "bottom-2 left-2" : "bottom-3 right-3"}`}>
+          <div className="fixed z-40 bottom-3 right-3">
             <button
               onClick={() => setShowLevelSelect(true)}
               className="px-2 py-1 sm:px-3 sm:py-1.5 bg-slate-900/90 hover:bg-slate-800 text-amber-400 border border-amber-500/80 rounded-xl shadow-xl backdrop-blur font-black text-[9px] sm:text-xs uppercase flex items-center gap-1 transition cursor-pointer hover:scale-105 active:scale-95 font-mono"
@@ -1323,17 +1284,15 @@ function CukupJumlahGameContent() {
         </>
       )}
 
-      {/* Footer Disclaimer (Legal & Parody Shield - Hidden during customizer) */}
-      {screen !== "customizer" && (
-        <footer className="border-t border-slate-900 px-4 py-3 text-center text-[11px] text-slate-400 bg-slate-950 pb-12 sm:pb-3">
-          <p>
-            ⚖️ <span className="font-semibold text-slate-300">Cukup Jumlah!</span> {t(
-              "adalah karya satira fiksyen & pendidikan sivik. Tiada kaitan dengan parti atau individu sebenar. Semua fakta undang-undang adalah berpandukan teks rasmi Perlembagaan Persekutuan Malaysia.",
-              "is a work of satirical fiction and civic education. Unaffiliated with real parties or figures. All legal facts reference the Federal Constitution of Malaysia."
-            )}
-          </p>
-        </footer>
-      )}
+      {/* Footer Disclaimer (Legal & Parody Shield) */}
+      <footer className="border-t border-slate-900 px-4 py-3 text-center text-[11px] text-slate-400 bg-slate-950 pb-12 sm:pb-3">
+        <p>
+          ⚖️ <span className="font-semibold text-slate-300">Cukup Jumlah!</span> {t(
+            "adalah karya satira fiksyen & pendidikan sivik. Tiada kaitan dengan parti atau individu sebenar. Semua fakta undang-undang adalah berpandukan teks rasmi Perlembagaan Persekutuan Malaysia.",
+            "is a work of satirical fiction and civic education. Unaffiliated with real parties or figures. All legal facts reference the Federal Constitution of Malaysia."
+          )}
+        </p>
+      </footer>
     </div>
   );
 }

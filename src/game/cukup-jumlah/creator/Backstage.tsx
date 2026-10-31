@@ -49,7 +49,8 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "bakat", label: "Bakat" },
 ];
 
-export function Backstage() {
+/** With `onStart`, Mula hands the candidate to the game; without it, it opens the beat lab. */
+export function Backstage({ onStart }: { onStart?: (candidate: Candidate) => void } = {}) {
   const navigate = useNavigate();
   const [candidate, setCandidate] = useState<Candidate>(DEFAULT_CANDIDATE);
   const [loaded, setLoaded] = useState(false);
@@ -102,16 +103,21 @@ export function Backstage() {
     saveCandidate(ready);
     setStarting(true);
     play("hop");
-    window.setTimeout(() => void navigate({ to: "/dev", search: { lab: "rentak" } }), 900);
+    window.setTimeout(
+      () => (onStart ? onStart(ready) : void navigate({ to: "/dev", search: { lab: "rentak" } })),
+      900,
+    );
   };
 
   return (
     <div className="panggung flex h-dvh flex-col items-center overflow-y-auto bg-[#1a0f08] px-4 py-3 text-[var(--cream)]">
       <header className="flex w-full max-w-[440px] items-baseline justify-between gap-2 pb-2">
         <h1 className="font-display text-xl font-bold">Belakang Tabir</h1>
-        <Link to="/dev" search={{ lab: "puppet" }} className="text-sm font-bold underline">
-          Makmal boneka →
-        </Link>
+        {!onStart && (
+          <Link to="/dev" search={{ lab: "puppet" }} className="text-sm font-bold underline">
+            Makmal boneka →
+          </Link>
+        )}
       </header>
 
       <StageBox>

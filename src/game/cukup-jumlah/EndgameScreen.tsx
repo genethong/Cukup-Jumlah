@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Share2, RotateCcw, BookOpen } from "lucide-react";
 import type { CandidateProfile } from "./types";
 import { PARTIES } from "./types";
-import { ComicAvatar } from "./comicAvatar";
+import { PuppetAvatar } from "./puppet/PuppetAvatar";
 import { CONSTITUTION_FACTS } from "./facts";
 import { rhythmAudio } from "./rhythm";
 import { useLanguage } from "./languageContext";
@@ -74,7 +74,7 @@ export function EndgameScreen({
         {isVictory ? (
           <div className="space-y-1.5">
             <div className="inline-block border-4 border-amber-400 bg-amber-400 text-slate-950 px-6 py-2 rounded-2xl rotate-[-2deg] font-black text-xl md:text-2xl uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              👑 {isUnityGovernment ? t("KERAJAAN PERPADUAN PM! 👑", "UNITY GOVERNMENT PM! 👑") : t("CUKUP JUMLAH! 112 KERUSI! 👑", "CUKUP JUMLAH! 112 SEATS WON! 👑")}
+              🏛️ {isUnityGovernment ? t("KERAJAAN PERPADUAN PM! 🏛️", "UNITY GOVERNMENT PM! 🏛️") : t("CUKUP JUMLAH! 112 KERUSI! 🏛️", "CUKUP JUMLAH! 112 SEATS WON! 🏛️")}
             </div>
             <p className="text-xs font-mono font-bold text-amber-300 uppercase tracking-widest block">
               {t("PARLIMEN MALAYSIA • SIDANG KHAS DEWAN RAKYAT", "PARLIAMENT OF MALAYSIA • SPECIAL SESSION OF THE DEWAN RAKYAT")}
@@ -132,11 +132,13 @@ export function EndgameScreen({
               hasBowed ? "scale-95 translate-y-3" : hasShoutedOpposition ? "scale-110 rotate-[-3deg]" : ""
             }`}
           >
-            <ComicAvatar
-              profile={profile}
-              size={185}
-              mood={isVictory ? "happy" : isHung ? "normal" : hasShoutedOpposition ? "shout" : "sweat"}
-            />
+            <div className="relative h-[230px] w-[130px]">
+              <PuppetAvatar
+                config={profile.puppet}
+                anim={isVictory || hasShoutedOpposition ? "hop" : "idle"}
+                label={profile.name}
+              />
+            </div>
           </div>
 
           {/* Action button beneath avatar */}

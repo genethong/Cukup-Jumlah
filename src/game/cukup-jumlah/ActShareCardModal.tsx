@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Download, Share2, Check, Sparkles } from "lucide-react";
 import type { CandidateProfile } from "./types";
 import { PARTIES } from "./types";
-import { drawPixelCandidate } from "./pixelAvatar";
+import { renderPortrait } from "./puppet/PuppetAvatar";
 
 interface ShareCardProps {
   profile: CandidateProfile;
@@ -86,7 +86,7 @@ export function ActShareCardModal({
     ctx.textAlign = "center";
     ctx.fillStyle = "#F59E0B";
     ctx.font = "bold 13px sans-serif";
-    ctx.fillText("SURUHANJAYA PILIHAN RAYA (PARODI) MALAYSIA", W / 2, 65);
+    ctx.fillText("CUKUP JUMLAH! · PERMAINAN PARODI", W / 2, 65);
 
     ctx.fillStyle = "#FFFFFF";
     ctx.font = "900 26px sans-serif";
@@ -110,7 +110,7 @@ export function ActShareCardModal({
         : actNumber === 3
           ? seatsWon >= 112
             ? "MAJORITI DEWAN RAKYAT · CUKUP 112 JUMLAH!"
-            : "KEPUTUSAN RASMI BORANG 14 SPR"
+            : "KEPUTUSAN PENGIRAAN UNDI"
           : "JUARA TURUN PADANG & PHOTO-OP GE16",
       W / 2,
       128
@@ -120,19 +120,18 @@ export function ActShareCardModal({
     ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
     ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
     ctx.lineWidth = 1;
+    ctx.beginPath();
     ctx.roundRect(45, 150, W - 90, 520, 20);
     ctx.fill();
     ctx.stroke();
 
-    // 5. DRAW CUSTOM PIXEL AVATAR
+    // 5. CANDIDATE PUPPET (head drawn in below, once its layers load)
     // Avatar pedestal/shadow
     ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
     ctx.beginPath();
     ctx.ellipse(W / 2, 380, 80, 18, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Draw Candidate Avatar using our pixel renderer at 4.2x scale
-    drawPixelCandidate(ctx, profile, W / 2, 380, 4.2);
 
     // 6. CANDIDATE NAME & DETAILS
     ctx.textAlign = "center";
@@ -143,6 +142,7 @@ export function ActShareCardModal({
     // Party pill badge
     const pColor = party.themeColor === "#F8FAFC" ? "#475569" : party.themeColor;
     ctx.fillStyle = pColor;
+    ctx.beginPath();
     ctx.roundRect(W / 2 - 110, 442, 220, 32, 16);
     ctx.fill();
 
@@ -156,6 +156,7 @@ export function ActShareCardModal({
 
     // Stats Grid inside Certificate
     ctx.fillStyle = "rgba(2, 6, 23, 0.7)";
+    ctx.beginPath();
     ctx.roundRect(65, 495, W - 130, 155, 14);
     ctx.fill();
 
@@ -237,9 +238,9 @@ export function ActShareCardModal({
         ? "Calon Harapan Rakyat ⭐"
         : actNumber === 3
           ? seatsWon >= 112
-            ? "YAB Perdana Menteri Baru 👑"
+            ? "Majoriti Dewan Rakyat 🏛️"
             : "Tokoh Rundingan Kerusi 🤝"
-          : "Raja Photo-Op Pasar Malam 🏆",
+          : "Juara Photo-Op Pasar Malam 🏆",
       W - 85,
       630
     );
@@ -260,7 +261,7 @@ export function ActShareCardModal({
     ctx.fillText(actNumber === 3 && seatsWon >= 112 ? "CUKUP JUMLAH!" : "DILULUSKAN!", 0, 2);
 
     ctx.font = "bold 9px sans-serif";
-    ctx.fillText("SPR PARODI MALAYSIA", 0, 16);
+    ctx.fillText("PARODI · BUKAN DOKUMEN RASMI", 0, 16);
     ctx.restore();
 
     // 8. EDUCATIONAL CONSTITUTIONAL FOOTNOTE
@@ -286,8 +287,8 @@ export function ActShareCardModal({
     );
     ctx.fillText(
       actNumber === 3
-        ? "112 kerusi daripada 222 kerusi Parlimen adalah syarat sah membentuk kerajaan!"
-        : "Peraturan 8: Deposit RM10,000 selamat selagi raih melebihi 1/8 undi sah!",
+        ? "112 daripada 222 kerusi ialah majoriti mudah Dewan Rakyat."
+        : "Deposit RM10,000 selamat selagi raih lebih 1/8 undi.",
       W / 2,
       746
     );
@@ -302,12 +303,30 @@ export function ActShareCardModal({
     ctx.fillText("Misi Kumpul 112 Kerusi Sebelum Hilang Deposit", W / 2, 822);
     ctx.fillText("https://cukupjumlah.my (Parodi & Sivik PRU16)", W / 2, 842);
 
-    // Cache data url for easy downloading
-    try {
-      setDataUrl(canvas.toDataURL("image/png"));
-    } catch (e) {
-      console.error(e);
-    }
+    const cache = () => {
+      try {
+        setDataUrl(canvas.toDataURL("image/png"));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    cache();
+
+    // The puppet's head: neck pin (256, 456) of its 512 canvas lands on the pedestal.
+    let cancelled = false;
+    renderPortrait(profile.puppet)
+      .then((head) => {
+        if (cancelled) return;
+        const size = 225;
+        ctx.drawImage(head, W / 2 - size / 2, 375 - (456 / 512) * size, size, size);
+        cache();
+      })
+      .catch(() => {
+        // Keep the card without the head if a layer fails to load.
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [profile, actNumber, actTitle, seatsWon, livesRemaining]);
 
   const handleDownload = () => {
