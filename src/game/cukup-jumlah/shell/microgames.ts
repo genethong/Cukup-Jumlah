@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { RoundId } from "./flow";
 import { Borang14 } from "./games/Borang14";
+import { GorengKueyTeow } from "./games/GorengKueyTeow";
 import type { MicrogameProps, StageLayout } from "./microgame";
 import { GAME_TEXT, UI, type Text } from "./strings";
 import { TepukRentak } from "./TepukRentak";
@@ -25,6 +26,7 @@ const STAND_IN: MicrogameEntry = {
 
 const BUILT: Partial<Record<RoundId, MicrogameEntry>> = {
   borang_14: { Game: Borang14, layout: "between", howTo: GAME_TEXT.borang14.tapHint },
+  goreng_kueyteow: { Game: GorengKueyTeow, layout: "stall", howTo: GAME_TEXT.goreng.howTo },
 };
 
 export function microgameFor(round: RoundId): MicrogameEntry {

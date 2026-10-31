@@ -33,8 +33,8 @@ export function fill(text: string, slots: Record<string, string | number>): stri
 export const UI = {
   title: { ms: "Cukup Jumlah!", en: "Cukup Jumlah!" },
   tagline: {
-    ms: "Permainan rentak pilihan raya dalam pentas wayang",
-    en: "An election rhythm game on the shadow-puppet stage",
+    ms: "Permainan arked pilihan raya di pentas wayang",
+    en: "An election arcade game on the shadow-puppet stage",
   },
   play: { ms: "Main", en: "Play" },
   continueAs: { ms: "Teruskan sebagai {name}", en: "Continue as {name}" },
@@ -276,6 +276,32 @@ export const GAME_TEXT = {
     signed: {
       ms: "Borang 14 ditandatangani Ketua Tempat Mengundi",
       en: "Form 14 signed by the presiding officer",
+    },
+  },
+  goreng: {
+    howTo: { ms: "Tahan kuali bila kamera sedia", en: "Hold the wok when a camera's ready" },
+    cook: { ms: "Masakan", en: "Cooking" },
+    photos: { ms: "Gambar", en: "Photos" },
+    hawker: { ms: "Tukang masak", en: "The cook" },
+    pose: { ms: "SENYUM!", en: "SMILE!" },
+    good: { ms: "Gambar cantik!", en: "Great shot!" },
+    bad: { ms: "Gambar memalukan!", en: "Awkward shot!" },
+    hogging: { ms: "Bagi dia masak!", en: "Let him cook!" },
+    sign: { ms: "CHAR KUEY TEOW", en: "CHAR KUEY TEOW" },
+    hold: { ms: "Tahan senduk", en: "Hold the senduk" },
+    holdNow: { ms: "TAHAN!", en: "HOLD!" },
+    paper: { ms: "Warta Gerai", en: "The Stall Gazette" },
+    headlineGood: {
+      ms: "YB turun padang, masak untuk rakyat!",
+      en: "YB rolls up sleeves, cooks for the people!",
+    },
+    headlineBad: {
+      ms: "YB sibuk main telefon di gerai",
+      en: "YB glued to phone at hawker stall",
+    },
+    done: {
+      ms: "Siap! Rakyat kenyang, YB dapat gambar",
+      en: "Done! Fed the people, got the photos",
     },
   },
 } satisfies Record<string, Record<string, Text>>;

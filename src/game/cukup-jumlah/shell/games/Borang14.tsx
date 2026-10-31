@@ -1,16 +1,10 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { BEATS_PER_BAR } from "../../beat/timing";
-import {
-  gendangDum,
-  gendangMiss,
-  gendangTak,
-  kesi,
-  paperSlap,
-  tick,
-} from "../../beat/wayangSounds";
+import { gendangMiss, paperSlap, tick } from "../../beat/wayangSounds";
 import { PARTIES, type Party } from "../../creator/candidate";
 import type { MicrogameProps } from "../microgame";
-import { LEAD_IN_BEATS, leadInStep, scheduleLeadIn } from "../leadIn";
+import { LEAD_IN_BEATS, leadInStep } from "../leadIn";
+import { beginGroove } from "../music";
 import { GAME_TEXT, fill, type Lang } from "../strings";
 import {
   BALLOTS,
@@ -88,12 +82,7 @@ export function Borang14({
   // Groove and countdown. Bar 0 is the dalang's call; then the fuse burns for the time limit.
   useEffect(() => {
     const limitS = (bars + EXTRA_BARS) * BEATS_PER_BAR * clock.spb;
-    void clock.begin((index, when, out) => {
-      if (scheduleLeadIn(clock.ctx, out, index, when)) return;
-      if (index % 2 === 0) gendangDum(clock.ctx, out, when);
-      else gendangTak(clock.ctx, out, when);
-      kesi(clock.ctx, out, when + clock.spb / 2);
-    });
+    beginGroove(clock);
 
     let raf = 0;
     let nextTick = 0;

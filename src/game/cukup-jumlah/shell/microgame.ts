@@ -1,6 +1,8 @@
 import type { BeatClock } from "../beat/beatClock";
 import type { Grade } from "../beat/timing";
 import type { Candidate, TalentId } from "../creator/candidate";
+import type { ExpressionId } from "../puppet/loadRig";
+import type { PuppetAnim } from "../puppet/motion";
 import type { RoundId } from "./flow";
 import type { Lang } from "./strings";
 
@@ -30,6 +32,9 @@ export type MicrogameProps = {
   onTimeLeft?: (fraction: number, seconds: number) => void;
   /** Each good or bad move; the shell can react (sound, puppet). */
   onJudge: (grade: Grade) => void;
+  /** Holds the player's puppet in an action of the game's own (e.g. posing at the wok);
+   *  null hands it back to the shell's reactions. */
+  onPuppet?: (act: { anim: PuppetAnim; face: ExpressionId | null } | null) => void;
   /** Call once, when the round is decided. */
   onFinish: (success: boolean) => void;
 };
@@ -37,9 +42,10 @@ export type MicrogameProps = {
 /**
  * How the shell lays out the stage around a game. `center` keeps the puppet big in the
  * middle; `side` tucks it into the bottom-left; `between` stands it small at the bottom
- * centre, between a game's two side areas; `full` leaves it off so the game has the whole kelir.
+ * centre, between a game's two side areas; `stall` stands it on the left raised behind a
+ * counter the game draws; `full` leaves it off so the game has the whole kelir.
  */
-export type StageLayout = "center" | "side" | "between" | "full";
+export type StageLayout = "center" | "side" | "between" | "stall" | "full";
 
 /** Mistakes a game forgives before the round is lost. */
 export function mistakesAllowed(talent: TalentId, base = 1): number {

@@ -351,6 +351,7 @@ function RoundStage({
   const [sweep, setSweep] = useState(0);
   const [timeLeft, setTimeLeft] = useState<{ share: number; seconds: number } | null>(null);
   const [leadIn, setLeadIn] = useState(0);
+  const [held, setHeld] = useState<{ anim: PuppetAnim; face: ExpressionId | null } | null>(null);
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
 
@@ -363,6 +364,7 @@ function RoundStage({
     setAnim("idle");
     setTimeLeft(null);
     setLeadIn(0);
+    setHeld(null);
   }, [roundKey]);
 
   // When the reducer records the result, stamp it, then sweep the gunungan into the next round.
@@ -399,6 +401,9 @@ function RoundStage({
   // A full-stage game keeps the whole kelir for itself, result stamp included.
   const showPuppet = layout !== "full";
   const party = PARTIES.find((p) => p.id === candidate.party);
+  // A game holding the puppet in its own action wins over the shell's quick reactions,
+  // until the result stamp.
+  const shownFace = held && !moment ? held.face : face;
 
   return (
     <>
@@ -416,25 +421,28 @@ function RoundStage({
       <div
         hidden={!showPuppet}
         className={`pointer-events-none absolute inset-x-0 bottom-0 flex h-[58%] items-end ${
-          layout === "side" ? "justify-start pl-[1%]" : "justify-center"
+          layout === "side" || layout === "stall" ? "justify-start pl-[1%]" : "justify-center"
         }`}
       >
         <div
           className={
             layout === "side"
               ? "relative h-[66%] w-[42%]"
-              : layout === "between"
-                ? "relative mb-[1%] h-[56%] w-[28%]"
-                : "relative h-full w-[60%]"
+              : layout === "stall"
+                ? "relative h-[62%] w-[38%] -translate-y-[24%]"
+                : layout === "between"
+                  ? "relative mb-[1%] h-[56%] w-[28%]"
+                  : "relative h-full w-[60%]"
           }
         >
           <PuppetAvatar
-            config={face ? { ...candidate.puppet, expression: face } : candidate.puppet}
-            anim={anim}
+            config={shownFace ? { ...candidate.puppet, expression: shownFace } : candidate.puppet}
+            anim={held && !moment ? held.anim : anim}
             label={candidate.name}
           />
         </div>
-        {party && layout !== "between" && (
+        {/* Name tag only on stand-in rounds; real games use the bottom of the stage. */}
+        {party && beatPins && (
           <span
             className="absolute bottom-[3%] left-[4%] px-[2cqw] py-[0.6cqw] text-[3cqw] font-bold text-[var(--cream)]"
             style={{ backgroundColor: party.colour }}
@@ -456,6 +464,7 @@ function RoundStage({
         offsetMs={offsetMs}
         onBeat={setBeat}
         onLeadIn={setLeadIn}
+        onPuppet={setHeld}
         onTimeLeft={(share, seconds) => setTimeLeft({ share, seconds })}
         onJudge={onJudge}
         onFinish={onDone}
@@ -523,13 +532,7 @@ function ReadyGo({ step, lang }: { step: number; lang: Lang }) {
       {go ? (
         // One pop when MULA! lands; it then only fades as the gunungan lifts away.
         <div className={leaving ? "fade-away" : undefined}>
-          <CutStamp
-            key="go"
-            lines={[UI.go[lang]]}
-            tone="gold"
-            className="top-[56%] w-[62%]"
-            stay
-          />
+          <CutStamp key="go" lines={[UI.go[lang]]} tone="gold" className="top-[56%] w-[62%]" stay />
         </div>
       ) : (
         <span

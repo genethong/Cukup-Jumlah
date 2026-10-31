@@ -154,3 +154,28 @@ export function cempala(ctx: BaseAudioContext, out: AudioNode, when: number, lou
   thump(ctx, out, when, 820, 420, loud ? 0.32 : 0.22, 0.06);
   ring(ctx, out, when, [{ freq: 610, gain: 0.05, decay: 0.08 }], "triangle");
 }
+
+/** Kuey teow hitting a hot wok: a short hiss. Louder when stirred harder. */
+export function sizzle(ctx: BaseAudioContext, out: AudioNode, when: number, strength = 1) {
+  noiseBurst(ctx, out, when, "highpass", 2800, 0.6, 0.1 * strength, 0.16);
+}
+
+/** The spatula scraping the iron wok. */
+export function wokClang(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  ring(ctx, out, when, [
+    { freq: 1660, gain: 0.05, decay: 0.12 },
+    { freq: 2490, gain: 0.03, decay: 0.08 },
+  ]);
+  noiseBurst(ctx, out, when, "bandpass", 3600, 2, 0.06, 0.03);
+}
+
+/** Wok hei: the flame flaring up through the wok. */
+export function whoosh(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  noiseBurst(ctx, out, when, "lowpass", 900, 0.7, 0.35, 0.45);
+}
+
+/** A press camera's shutter. */
+export function shutter(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  noiseBurst(ctx, out, when, "bandpass", 4200, 3, 0.12, 0.025);
+  noiseBurst(ctx, out, when + 0.05, "bandpass", 3600, 3, 0.09, 0.02);
+}
