@@ -29,6 +29,7 @@ import {
   bumpsAllowed,
   restOnDesk,
   stepDip,
+  drift,
   sway,
   type Dip,
   type Tip,
@@ -103,15 +104,26 @@ export function CelupDakwat({
     let step = -1;
     let nextTick = 0;
     let last = clock.ctx.currentTime;
+    let lastTip = START;
+    const phase = Math.random() * 20;
     const frame = () => {
       if (done.current || dipRef.current.outcome !== "dipping") return;
       raf = requestAnimationFrame(frame);
       const t = clock.ctx.currentTime;
       const dt = Math.min(0.25, t - last);
       last = t;
-      const s = sway(t);
+      if (liveRef.current) {
+        // The rod creeps on its own; the player keeps correcting it.
+        const v = drift(t, phase, lastTip.y >= INK_Y);
+        target.current = clampTarget({
+          x: target.current.x + v.vx * dt,
+          y: target.current.y + v.vy * dt,
+        });
+      }
+      const s = sway(t, dipRef.current.soak / SOAK_S);
       const aim = clampTarget(target.current);
       const tip = restOnDesk({ x: aim.x + s.dx, y: aim.y + s.dy });
+      lastTip = tip;
       if (!clock.running) {
         setView((v) => ({ ...v, tip }));
         return;

@@ -10,6 +10,7 @@ import {
   START,
   TOO_DEEP_Y,
   bumpsAllowed,
+  drift,
   insideMouth,
   restOnDesk,
   stepDip,
@@ -48,6 +49,13 @@ describe("Celup Dakwat Kekal dip rules", () => {
     expect(once.dip.outcome).toBe("dipping");
     expect(stepDip(once.dip, rim, 0.1, bumpsAllowed(false)).dip.outcome).toBe("spilled");
     expect(stepDip(once.dip, rim, 0.1, bumpsAllowed(true)).dip.outcome).toBe("dipping");
+  });
+
+  it("drifts sideways by itself and sinks only in the ink; the shake grows", () => {
+    expect(drift(0.5, 0, false).vy).toBe(0);
+    expect(drift(0.5, 0, true).vy).toBeGreaterThan(0);
+    expect(Math.abs(drift(1, 0, false).vx)).toBeGreaterThan(0);
+    expect(Math.abs(sway(0.5, 1).dx)).toBeGreaterThan(Math.abs(sway(0.5, 0).dx));
   });
 
   it("lets the finger rest on the desk away from the bottle", () => {

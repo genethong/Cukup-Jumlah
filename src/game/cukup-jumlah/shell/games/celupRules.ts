@@ -1,7 +1,8 @@
 // Celup Dakwat Kekal (CELUP!): the YB is voting. As in a general election, the second
 // polling clerk asks the voter to dip the left index finger into the ink bottle before the
 // ballot is issued. The YB wants a clean dip for the polling-day photo: steer the swaying
-// finger into the narrow mouth, dip it to the nail and hold it there. Hit the rim and the
+// finger into the narrow mouth, dip it to the nail and hold it there while the rod drifts and
+// the hand gets heavier and shakier the longer it soaks. Hit the rim and the
 // bottle wobbles (twice and it tips over); go too deep and the papers laugh.
 // Pure rules here; the screen is CelupDakwat.tsx.
 //
@@ -18,11 +19,11 @@ export const FINGER_HALF = 1.9;
 export const BOTTLE_REACH = MOUTH_HALF + 7;
 /** The tip deep enough to ink the whole nail, and no deeper than this. */
 export const BAND_TOP = INK_Y + 3;
-export const BAND_BOTTOM = INK_Y + 8;
+export const BAND_BOTTOM = INK_Y + 7;
 /** Past this the finger is purple right down to the knuckle. */
-export const TOO_DEEP_Y = INK_Y + 13;
+export const TOO_DEEP_Y = INK_Y + 12;
 /** Seconds held in the band for the ink to take. */
-export const SOAK_S = 0.5;
+export const SOAK_S = 1.6;
 /** Where the finger starts: up and to the side, so it has to be steered in. */
 export const START = { x: 87, y: 64 };
 
@@ -33,11 +34,32 @@ export function bumpsAllowed(forgiving: boolean): number {
   return forgiving ? 2 : 1;
 }
 
-/** The puppet's rod-held hand never keeps quite still: a slow drift and a little bob. */
-export function sway(t: number): { dx: number; dy: number } {
+/**
+ * The puppet's rod-held hand never keeps quite still: a quick wobble and a little bob,
+ * growing with `shake` (0 calm, 1 at the end of a soak) as the YB's hand tires.
+ */
+export function sway(t: number, shake = 0): { dx: number; dy: number } {
+  const k = 1 + shake * 0.7;
   return {
-    dx: Math.sin(t * 2.6) * 1.4 + Math.sin(t * 1.1 + 1) * 0.8,
-    dy: Math.sin(t * 3.1) * 0.8,
+    dx: (Math.sin(t * 2.6) * 1.4 + Math.sin(t * 1.1 + 1) * 0.8) * k,
+    dy: Math.sin(t * 3.1) * 0.8 * k,
+  };
+}
+
+/** How fast (in % of the stage per second) the rod creeps sideways on its own. */
+export const DRIFT_X = 4;
+/** How fast the hand sinks once it is in the ink: hold it up or it goes too deep. */
+export const SINK_Y = 3.5;
+
+/**
+ * The rod's own creep at time `t` (with a per-round `phase`), which the player must keep
+ * correcting: it wanders side to side, and in the ink it sinks too.
+ */
+export function drift(t: number, phase: number, inInk: boolean): { vx: number; vy: number } {
+  const u = t + phase;
+  return {
+    vx: (Math.sin(u * 0.9) * 0.7 + Math.sin(u * 2.1) * 0.3) * DRIFT_X,
+    vy: inInk ? SINK_Y : 0,
   };
 }
 
