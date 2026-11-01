@@ -35,7 +35,8 @@ import { Villager } from "./PerangSpeaker";
 
 const T = GAME_TEXT.baling;
 const TICK_FROM_S = 2;
-const BIN = { x: 90, y: 88 };
+/** The bin sits right under the tray: swipe down to drop a gift in. */
+const BIN = { x: TRAY.x, y: 92 };
 /** Swipes shorter than this (in % of the stage) are ignored. */
 const MIN_SWIPE = 4;
 
@@ -238,15 +239,35 @@ export function BalingRisalah({
     swipe.current = { id: e.pointerId, x: e.clientX, y: e.clientY, w: r.width, h: r.height };
     e.currentTarget.setPointerCapture?.(e.pointerId);
   };
-  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+  // The throw goes as soon as the finger has moved far enough, not on release, so it feels
+  // instant.
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const s = swipe.current;
     if (!s || s.id !== e.pointerId) return;
-    swipe.current = null;
     const dx = ((e.clientX - s.x) / s.w) * 100;
     const dy = ((e.clientY - s.y) / s.h) * 100;
-    if (dy <= -MIN_SWIPE) throwItem(flickTarget(dx, dy));
-    else if (dy >= MIN_SWIPE) throwItem("bin");
+    if (dy <= -MIN_SWIPE) {
+      swipe.current = null;
+      throwItem(flickTarget(dx, dy));
+    } else if (dy >= MIN_SWIPE) {
+      swipe.current = null;
+      throwItem("bin");
+    }
   };
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (swipe.current?.id === e.pointerId) swipe.current = null;
+  };
+
+  // Stop the page itself from scrolling or bouncing under a swipe (iOS ignores touch-action
+  // on some layers).
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const stop = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener("touchmove", stop, { passive: false });
+    return () => el.removeEventListener("touchmove", stop);
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -273,9 +294,11 @@ export function BalingRisalah({
 
   return (
     <div
+      ref={root}
       className="absolute inset-0 z-10 select-none"
-      style={{ touchAction: "none" }}
+      style={{ touchAction: "none", overscrollBehavior: "none" }}
       onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={() => (swipe.current = null)}
     >
@@ -324,10 +347,13 @@ export function BalingRisalah({
           )}
         </div>
         <div className="mt-[0.6cqw] h-[2cqw] w-[30cqw] rounded-full bg-[#8a5a32] shadow-[0_0.6cqw_0_#4f321b]" />
-        <span className="mt-[1cqw] font-tally text-[3cqw] tracking-[0.06em] whitespace-nowrap text-[var(--ink)] uppercase">
-          {T.swipe[lang]}
-        </span>
       </div>
+      <span
+        className="pointer-events-none absolute -translate-x-1/2 font-tally text-[3cqw] tracking-[0.06em] whitespace-nowrap text-[var(--ink)] uppercase"
+        style={{ left: `${TRAY.x}%`, top: `${TRAY.y - 12}%` }}
+      >
+        {T.swipe[lang]}
+      </span>
 
       {/* The bin, for gifts. */}
       <div
@@ -367,7 +393,7 @@ export function BalingRisalah({
       ))}
 
       {/* Leaflets handed out, out of those needed. */}
-      <div className="pointer-events-none absolute top-[61%] left-[60%] flex -translate-x-1/2 items-center gap-[1cqw] rounded-sm bg-[#2b2522]/85 px-[2cqw] py-[0.5cqw] font-tally text-[3.2cqw] tracking-[0.06em] whitespace-nowrap text-[var(--cream)] uppercase">
+      <div className="pointer-events-none absolute top-[58.5%] left-[60%] flex -translate-x-1/2 items-center gap-[1cqw] rounded-sm bg-[#2b2522]/85 px-[2cqw] py-[0.5cqw] font-tally text-[3.2cqw] tracking-[0.06em] whitespace-nowrap text-[var(--cream)] uppercase">
         {T.count[lang]} {stall.delivered}/{needed}
       </div>
 

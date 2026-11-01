@@ -15,43 +15,43 @@ import { LEAD_IN_BEATS, leadInStep } from "../leadIn";
 import { beginGroove } from "../music";
 import { GAME_TEXT } from "../strings";
 import {
-  CENTRE,
+  CENTRES,
   FLAGS_NEEDED,
   FRESH_NIGHT,
-  HITS_PER_FLAG,
-  RING,
+  SNEAK_GAP_S,
+  SNEAK_S,
   clockMinutes,
-  hammer,
   midnightAt,
   nightVerdict,
   offencesAllowed,
-  planted,
-  type Hammer,
+  pullDown,
+  sneakIn,
+  tap,
   type Night,
+  type Tap,
 } from "./pacakRules";
+import { Villager } from "./PerangSpeaker";
 
 const T = GAME_TEXT.pacak;
 /** The kampung ground, in % of the stage; flags go in below the clock row, away from the
  *  corner where the YB stands. */
 const GROUND_TOP = 40;
 const PLANT_TOP = 51;
-const YB_CORNER = { right: 40, top: 66 };
+const YB_CORNER = { right: 36, top: 70 };
+/** The rival's people start creeping in after this many seconds of play. */
+const FIRST_SNEAK_S = 1.4;
 
-type Pop = { id: number; x: number; y: number; result: Hammer };
+type Pop = { id: number; x: number; y: number; text: string; bad: boolean };
 
 const POP = {
-  hit: "popHit",
   planted: "popPlanted",
+  chased: "popChased",
   ring: "popRing",
   taken: "popTaken",
-  late: "popLate",
-} as const satisfies Record<Hammer, keyof typeof T>;
+} as const satisfies Record<Tap, keyof typeof T>;
 
 function clockText(minutes: number): { text: string; late: boolean } {
-  if (minutes >= 60) {
-    const m = Math.floor(minutes - 60);
-    return { text: `12:${String(m).padStart(2, "0")} AM`, late: true };
-  }
+  if (minutes >= 60) return { text: "12:00 AM", late: true };
   return { text: `11:${String(Math.floor(minutes)).padStart(2, "0")} PM`, late: false };
 }
 
@@ -64,22 +64,22 @@ export function PacakBendera({
   onLeadIn,
   onTimeLeft,
   onJudge,
-  onPuppet,
   onFinish,
 }: MicrogameProps) {
-  const callbacks = useRef({ onLeadIn, onTimeLeft, onJudge, onPuppet, onFinish });
-  callbacks.current = { onLeadIn, onTimeLeft, onJudge, onPuppet, onFinish };
+  const callbacks = useRef({ onLeadIn, onTimeLeft, onJudge, onFinish });
+  callbacks.current = { onLeadIn, onTimeLeft, onJudge, onFinish };
   const allowed = offencesAllowed(talent === "mesra_rakyat");
   const colour = PARTIES.find((p) => p.id === candidate.party)?.colour ?? "#8a1c19";
 
   const [night, setNight] = useState<Night>(FRESH_NIGHT);
+  const [now, setNow] = useState(0);
   const [minutes, setMinutes] = useState(50);
   const [pops, setPops] = useState<Pop[]>([]);
   const [live, setLive] = useState(false);
   const [outcome, setOutcome] = useState<"won" | "lost" | null>(null);
 
   const nightRef = useRef<Night>(FRESH_NIGHT);
-  const lateRef = useRef(false);
+  const playRef = useRef(0);
   const liveRef = useRef(false);
   const ended = useRef(false);
   const done = useRef(false);
@@ -96,14 +96,19 @@ export function PacakBendera({
   const finishRef = useRef(finish);
   finishRef.current = finish;
 
+  const pop = (x: number, y: number, text: string, bad: boolean) => {
+    const id = ++ids.current;
+    setPops((p) => [...p.slice(-4), { id, x, y, text, bad }]);
+    later(() => setPops((p) => p.filter((q) => q.id !== id)), 700);
+  };
+  const popRef = useRef(pop);
+  popRef.current = pop;
+
   const end = (won: boolean) => {
     if (ended.current) return;
     ended.current = true;
     setOutcome(won ? "won" : "lost");
     clock.halt();
-    callbacks.current.onPuppet?.(
-      won ? { anim: "hop", face: "big_laugh" } : { anim: "rod-wiggle", face: "shocked_o" },
-    );
     later(() => finishRef.current(won), won ? 900 : 1400);
   };
   const endRef = useRef(end);
@@ -118,6 +123,7 @@ export function PacakBendera({
     let raf = 0;
     let step = -1;
     let nextTick = 0;
+    let nextSneak = FIRST_SNEAK_S;
     const frame = () => {
       if (done.current || ended.current) return;
       raf = requestAnimationFrame(frame);
@@ -131,6 +137,7 @@ export function PacakBendera({
       }
       const playS = (heardBeats - LEAD_IN_BEATS) * clock.spb;
       if (playS < 0) return;
+      playRef.current = playS;
       if (!liveRef.current) {
         liveRef.current = true;
         setLive(true);
@@ -144,16 +151,34 @@ export function PacakBendera({
         tick(clock.ctx, clock.out, t);
         nextTick = t + clock.spb / 2;
       }
-      if (mins >= 60 && !lateRef.current) {
-        lateRef.current = true;
-        cempala(clock.ctx, clock.out, t, true);
+
+      // The rival's people creep up on your flags, and pull down any not chased off.
+      let n = nightRef.current;
+      if (playS >= nextSneak) {
+        n = sneakIn(n, playS);
+        nextSneak = playS + SNEAK_GAP_S * (0.7 + Math.random() * 0.6);
       }
-      const verdict = nightVerdict(nightRef.current, FLAGS_NEEDED, allowed, lateRef.current);
+      const before = n;
+      const { night: after, fell } = pullDown(n, playS);
+      if (fell > 0) {
+        for (const f of before.flags.filter((g) => !after.flags.includes(g))) {
+          popRef.current(f.x, f.y, T.popPulled[lang], true);
+        }
+        gendangMiss(clock.ctx, clock.out, t);
+      }
+      if (after !== nightRef.current) {
+        nightRef.current = after;
+        setNight(after);
+      }
+      setNow(playS);
+
+      const midnight = mins >= 60;
+      const verdict = nightVerdict(nightRef.current, FLAGS_NEEDED, allowed, midnight);
       if (verdict !== "going") {
-        if (verdict === "lost") gendangMiss(clock.ctx, clock.out, t);
+        if (midnight) cempala(clock.ctx, clock.out, t, true);
+        if (verdict === "won") gendangHit(clock.ctx, clock.out, t + 0.05, true);
+        else gendangMiss(clock.ctx, clock.out, t + 0.05);
         endRef.current(verdict === "won");
-      } else if (leftS <= 0) {
-        endRef.current(false);
       }
     };
     raf = requestAnimationFrame(frame);
@@ -161,7 +186,7 @@ export function PacakBendera({
       cancelAnimationFrame(raf);
       clock.halt();
     };
-  }, [clock, bars, allowed]);
+  }, [clock, bars, allowed, lang]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!liveRef.current || ended.current) return;
@@ -169,27 +194,28 @@ export function PacakBendera({
     const x = ((e.clientX - r.left) / r.width) * 100;
     const y = ((e.clientY - r.top) / r.height) * 100;
     if (y < PLANT_TOP || (x < YB_CORNER.right && y > YB_CORNER.top)) return;
-    const { night: next, result } = hammer(nightRef.current, { x, y }, lateRef.current);
+    const { night: next, result } = tap(nightRef.current, { x, y });
     nightRef.current = next;
     setNight(next);
-    const id = ++ids.current;
-    setPops((p) => [...p.slice(-4), { id, x, y, result }]);
-    later(() => setPops((p) => p.filter((q) => q.id !== id)), 700);
+    popRef.current(x, y, T[POP[result]][lang], result === "ring");
     const t = clock.ctx.currentTime;
-    if (result === "hit") gendangTak(clock.ctx, clock.out, t);
     if (result === "planted") {
-      paperSlap(clock.ctx, clock.out, t);
-      gendangHit(clock.ctx, clock.out, t + 0.03, true);
+      gendangTak(clock.ctx, clock.out, t);
+      paperSlap(clock.ctx, clock.out, t + 0.02);
+    }
+    if (result === "chased") {
+      gendangHit(clock.ctx, clock.out, t, true);
       callbacks.current.onJudge("perfect");
     }
-    if (result === "ring" || result === "late") {
+    if (result === "ring") {
       gendangMiss(clock.ctx, clock.out, t);
       callbacks.current.onJudge("miss");
     }
   };
 
   const shown = clockText(minutes);
-  const offence = night.late ? T.lateFact[lang] : night.offences > 0 ? T.ringFact[lang] : null;
+  const standing = night.flags.length;
+  const shortBy = Math.max(0, FLAGS_NEEDED - standing);
 
   return (
     <div
@@ -197,40 +223,43 @@ export function PacakBendera({
       style={{ touchAction: "none" }}
       onPointerDown={onPointerDown}
     >
-      {/* The kampung at night: grass, a lane, and the polling centre (a school). */}
+      {/* The kampung at night: grass, a lane, and two polling centres with their rings. */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,#5d7a4a,#46603a)]"
         style={{ top: `${GROUND_TOP}%` }}
       />
-      <div className="pointer-events-none absolute inset-x-0 top-[78%] h-[3%] bg-[#b39a72]/70" />
+      <div className="pointer-events-none absolute inset-x-0 top-[80%] h-[3%] bg-[#b39a72]/70" />
       {[
-        { x: 10, y: 53 },
-        { x: 30, y: 58 },
-        { x: 92, y: 88 },
+        { x: 48, y: 54 },
+        { x: 92, y: 90 },
       ].map((h) => (
         <span
           key={`${h.x}`}
-          className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 text-[7cqw] opacity-80"
+          className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 text-[6cqw] opacity-80"
           style={{ left: `${h.x}%`, top: `${h.y}%` }}
         >
           🏠
         </span>
       ))}
-      <div
-        className="pointer-events-none absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full border-[0.8cqw] border-dashed border-[#e4572e] bg-[#e4572e]/15"
-        style={{ left: `${CENTRE.x}%`, top: `${CENTRE.y}%`, width: `${RING * 2}%` }}
-      />
-      <div
-        className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-        style={{ left: `${CENTRE.x}%`, top: `${CENTRE.y}%` }}
-      >
-        <span className="text-[8cqw] leading-none">🏫</span>
-        <span className="mt-[0.4cqw] rounded-sm bg-[#fbf3e4] px-[1cqw] font-tally text-[2.4cqw] whitespace-nowrap text-[var(--ink)] uppercase">
-          {T.centre[lang]}
-        </span>
-      </div>
+      {CENTRES.map((c, i) => (
+        <div key={`ring-${i}`}>
+          <div
+            className="pointer-events-none absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full border-[0.8cqw] border-dashed border-[#e4572e] bg-[#e4572e]/15"
+            style={{ left: `${c.x}%`, top: `${c.y}%`, width: `${c.r * 2}%` }}
+          />
+          <div
+            className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+            style={{ left: `${c.x}%`, top: `${c.y}%` }}
+          >
+            <span className="text-[7cqw] leading-none">{i === 0 ? "🏫" : "🏛️"}</span>
+            <span className="mt-[0.4cqw] rounded-sm bg-[#fbf3e4] px-[1cqw] font-tally text-[2.2cqw] whitespace-nowrap text-[var(--ink)] uppercase">
+              {T.centre[lang]}
+            </span>
+          </div>
+        </div>
+      ))}
 
-      <div className="pointer-events-none absolute bottom-[1%] left-[1%] h-[34%] w-[38%]">
+      <div className="pointer-events-none absolute bottom-[1%] left-[1%] h-[30%] w-[34%]">
         <PuppetAvatar
           config={
             outcome === "lost"
@@ -244,21 +273,45 @@ export function PacakBendera({
         />
       </div>
 
-      {night.flags.map((f, i) => (
-        <FlagArt key={`flag-${i}`} x={f.x} y={f.y} hits={f.hits} colour={colour} />
+      {night.flags.map((f) => (
+        <FlagArt key={`flag-${f.id}`} x={f.x} y={f.y} colour={colour} />
       ))}
+
+      {/* The rival's people, creeping up on a flag: the closer they get, the bolder. */}
+      {night.sneaks.map((s) => {
+        const f = night.flags.find((g) => g.id === s.flagId);
+        if (!f) return null;
+        const p = Math.min(1, Math.max(0, 1 - (s.pullAt - now) / SNEAK_S));
+        return (
+          <div
+            key={`sneak-${s.id}`}
+            className="pointer-events-none absolute h-[7%] -translate-y-full"
+            style={{
+              left: `${f.x + 6 - p * 4}%`,
+              top: `${f.y}%`,
+              aspectRatio: "1 / 2",
+              opacity: 0.45 + p * 0.55,
+            }}
+          >
+            <div className="crowd-walk h-full">
+              <Villager variant={s.id % 3} covering={false} won />
+            </div>
+            <span className="absolute -top-[45%] left-1/2 -translate-x-1/2 rounded-full bg-[var(--sambal)] px-[1cqw] font-display text-[3.4cqw] font-bold text-[var(--cream)]">
+              !
+            </span>
+          </div>
+        );
+      })}
 
       {pops.map((p) => (
         <span
           key={`pop-${p.id}`}
           className={`combo-pop pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-[160%] rounded-sm px-[1.2cqw] font-display text-[3.4cqw] font-bold whitespace-nowrap italic ${
-            p.result === "ring" || p.result === "late"
-              ? "bg-[var(--sambal)] text-[var(--cream)]"
-              : "bg-[#fdfaf2] text-[var(--ink)]"
+            p.bad ? "bg-[var(--sambal)] text-[var(--cream)]" : "bg-[#fdfaf2] text-[var(--ink)]"
           }`}
           style={{ left: `${p.x}%`, top: `${p.y}%` }}
         >
-          {T[POP[p.result]][lang]}
+          {p.text}
         </span>
       ))}
 
@@ -275,11 +328,11 @@ export function PacakBendera({
         {shown.text}
       </div>
       <div className="pointer-events-none absolute top-[41%] left-[3%] rounded-sm bg-[#2b2522]/85 px-[2cqw] py-[0.5cqw] font-tally text-[3.4cqw] tracking-[0.06em] whitespace-nowrap text-[var(--cream)] uppercase">
-        {T.count[lang]} {planted(night)}/{FLAGS_NEEDED}
+        {T.count[lang]} {standing}/{FLAGS_NEEDED}
       </div>
       {live && !outcome && (
         <span className="pointer-events-none absolute top-[47%] left-[3%] font-tally text-[2.8cqw] tracking-[0.06em] text-[#f3ebdf] uppercase">
-          {T.tapHint[lang].replace("{n}", String(HITS_PER_FLAG))}
+          {T.tapHint[lang]}
         </span>
       )}
 
@@ -288,43 +341,38 @@ export function PacakBendera({
           <p className="font-display text-[5.4cqw] font-bold italic">
             {outcome === "won"
               ? T.won[lang]
-              : night.late
-                ? T.late[lang]
-                : night.offences > allowed
-                  ? T.ring[lang]
-                  : T.short[lang]}
+              : night.offences > allowed
+                ? T.ring[lang]
+                : T.short[lang].replace("{n}", String(shortBy))}
           </p>
-          <p className="mt-[0.6cqw] text-[3.2cqw] leading-tight">{offence ?? T.fact[lang]}</p>
+          <p className="mt-[0.6cqw] text-[3.2cqw] leading-tight">
+            {night.offences > allowed ? T.ringFact[lang] : T.fact[lang]}
+          </p>
         </div>
       )}
     </div>
   );
 }
 
-/** A flag going in: the pole rises with each hammer tap, the cloth goes up when it's in. */
-function FlagArt({ x, y, hits, colour }: { x: number; y: number; hits: number; colour: string }) {
-  const up = Math.min(1, hits / HITS_PER_FLAG);
+/** A flag in the party's colour, planted in the grass. */
+function FlagArt({ x, y, colour }: { x: number; y: number; colour: string }) {
   return (
     <svg
       viewBox="0 0 30 50"
-      className="pointer-events-none absolute h-[7%] -translate-x-[20%] -translate-y-full overflow-visible"
+      className="combo-pop pointer-events-none absolute h-[7%] -translate-x-[20%] -translate-y-full overflow-visible"
       style={{ left: `${x}%`, top: `${y}%` }}
       aria-hidden="true"
     >
       <ellipse cx="6" cy="49" rx="5" ry="1.6" fill="#2b2522" opacity="0.4" />
-      <rect x="5" y={50 - 48 * up} width="2.4" height={48 * up} fill="#8a5a32" />
-      {up >= 1 && (
-        <g className="combo-pop">
-          <path d="M7.4 3 L28 9 L7.4 16 Z" fill={colour} />
-          <path
-            d="M7.4 3 L28 9 L7.4 16"
-            fill="none"
-            stroke="#3a2414"
-            strokeOpacity="0.4"
-            strokeWidth="0.8"
-          />
-        </g>
-      )}
+      <rect x="5" y="2" width="2.4" height="48" fill="#8a5a32" />
+      <path d="M7.4 3 L28 9 L7.4 16 Z" fill={colour} />
+      <path
+        d="M7.4 3 L28 9 L7.4 16"
+        fill="none"
+        stroke="#3a2414"
+        strokeOpacity="0.4"
+        strokeWidth="0.8"
+      />
     </svg>
   );
 }

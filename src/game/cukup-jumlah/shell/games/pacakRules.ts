@@ -1,22 +1,28 @@
-// Pacak Bendera (PACAK!): the last night of the campaign. Hammer flags into the kampung
-// before the clock reaches 11:59pm, when campaigning has to stop. Each flag takes a few
-// hammer taps. Never plant inside the ring around the polling centre: campaign material
-// within 50 m of a polling centre is an offence. The clock runs faster near the end.
+// Pacak Bendera (PACAK!): the last night of the campaign. Plant flags around the kampung and
+// keep them standing until the clock reaches 11:59pm, when campaigning has to stop. The
+// rival's people sneak up to pull your flags down: tap them away before they do. Never plant
+// inside the ring around a polling centre: campaign material within 50 m of a polling
+// centre is an offence. The clock runs faster near the end.
 // Pure rules here; the screen is PacakBendera.tsx.
 //
 // Spots are in % of the stage: x of its width, y of its height.
 
-export const FLAGS_NEEDED = 7;
-export const HITS_PER_FLAG = 3;
-/** The polling centre and its no-campaign ring (radius in % of width). */
-export const CENTRE = { x: 66, y: 66 };
-export const RING = 15;
+/** Flags that must still be standing at midnight. */
+export const FLAGS_NEEDED = 8;
+/** The polling centres and their no-campaign rings (radius in % of width). */
+export const CENTRES = [
+  { x: 70, y: 64, r: 15 },
+  { x: 24, y: 56, r: 12 },
+] as const;
 /** Flags must stand at least this far apart (% of width). */
 export const MIN_GAP = 8;
 /** The stage is 9:16, so a % of height is this many % of width. */
 const ASPECT = 16 / 9;
 /** The clock face: from 11:50pm to midnight. */
 export const CLOCK_FROM_MIN = 50;
+/** Seconds between the rival's people creeping in, and how long one takes to pull a flag. */
+export const SNEAK_GAP_S = 1.1;
+export const SNEAK_S = 0.9;
 
 /** Ring taps forgiven before the round is lost; Mesra Rakyat gets one more. */
 export function offencesAllowed(forgiving: boolean): number {
@@ -25,7 +31,7 @@ export function offencesAllowed(forgiving: boolean): number {
 
 /** When midnight strikes, in seconds of play: late in the round, but not always as late. */
 export function midnightAt(limitS: number, random: () => number = Math.random): number {
-  return limitS * (0.78 + random() * 0.12);
+  return limitS * (0.84 + random() * 0.1);
 }
 
 /**
@@ -44,51 +50,68 @@ export function gap(a: { x: number; y: number }, b: { x: number; y: number }): n
 }
 
 export function inRing(spot: { x: number; y: number }): boolean {
-  return gap(spot, CENTRE) <= RING;
+  return CENTRES.some((c) => gap(spot, c) <= c.r);
 }
 
-export type Flag = { x: number; y: number; hits: number };
-export type Night = { flags: Flag[]; offences: number; late: boolean };
+export type Flag = { id: number; x: number; y: number };
+/** One of the rival's people creeping up to `flagId`; it comes down at `pullAt`. */
+export type Sneak = { id: number; flagId: number; pullAt: number };
+export type Night = { flags: Flag[]; sneaks: Sneak[]; offences: number; nextId: number };
 
-export const FRESH_NIGHT: Night = { flags: [], offences: 0, late: false };
+export const FRESH_NIGHT: Night = { flags: [], sneaks: [], offences: 0, nextId: 1 };
 
-export function planted(n: Night): number {
-  return n.flags.filter((f) => f.hits >= HITS_PER_FLAG).length;
-}
-
-export type Hammer = "hit" | "planted" | "ring" | "taken" | "late";
+export type Tap = "planted" | "chased" | "ring" | "taken";
 
 /**
- * A hammer tap at `spot`. After midnight it's campaigning on polling day. Inside the ring
- * it's an offence. On an unfinished flag nearby it hammers that flag; near a finished one
- * there's no room; anywhere else it starts a new flag.
+ * A tap at `spot`. Near a flag someone is creeping up on, it chases them off. Inside a ring
+ * it's an offence. Near another flag there's no room. Anywhere else it plants a flag.
  */
-export function hammer(
-  n: Night,
-  spot: { x: number; y: number },
-  afterMidnight: boolean,
-): { night: Night; result: Hammer } {
-  if (afterMidnight) return { night: { ...n, late: true }, result: "late" };
-  if (inRing(spot)) return { night: { ...n, offences: n.offences + 1 }, result: "ring" };
-  const near = n.flags.findIndex((f) => gap(f, spot) < MIN_GAP);
-  if (near >= 0) {
-    const f = n.flags[near]!;
-    if (f.hits >= HITS_PER_FLAG) return { night: n, result: "taken" };
-    const hits = f.hits + 1;
-    const flags = n.flags.map((g, i) => (i === near ? { ...g, hits } : g));
-    return { night: { ...n, flags }, result: hits >= HITS_PER_FLAG ? "planted" : "hit" };
+export function tap(n: Night, spot: { x: number; y: number }): { night: Night; result: Tap } {
+  const sneak = n.sneaks.find((s) => {
+    const f = n.flags.find((g) => g.id === s.flagId);
+    return f && gap(f, spot) < MIN_GAP * 1.2;
+  });
+  if (sneak) {
+    return { night: { ...n, sneaks: n.sneaks.filter((s) => s !== sneak) }, result: "chased" };
   }
-  const flags = [...n.flags, { x: spot.x, y: spot.y, hits: 1 }];
-  return { night: { ...n, flags }, result: HITS_PER_FLAG <= 1 ? "planted" : "hit" };
+  if (inRing(spot)) return { night: { ...n, offences: n.offences + 1 }, result: "ring" };
+  if (n.flags.some((f) => gap(f, spot) < MIN_GAP)) return { night: n, result: "taken" };
+  const flag = { id: n.nextId, x: spot.x, y: spot.y };
+  return { night: { ...n, flags: [...n.flags, flag], nextId: n.nextId + 1 }, result: "planted" };
 }
 
+/** Someone creeps up on a flag nobody is after yet, if there is one. */
+export function sneakIn(n: Night, t: number, random: () => number = Math.random): Night {
+  const free = n.flags.filter((f) => !n.sneaks.some((s) => s.flagId === f.id));
+  if (free.length === 0) return n;
+  const f = free[Math.floor(random() * free.length)]!;
+  const sneak = { id: n.nextId, flagId: f.id, pullAt: t + SNEAK_S };
+  return { ...n, sneaks: [...n.sneaks, sneak], nextId: n.nextId + 1 };
+}
+
+/** Flags whose sneak got there in time come down. Returns how many fell. */
+export function pullDown(n: Night, t: number): { night: Night; fell: number } {
+  const due = n.sneaks.filter((s) => t >= s.pullAt);
+  if (due.length === 0) return { night: n, fell: 0 };
+  const gone = new Set(due.map((s) => s.flagId));
+  return {
+    fell: gone.size,
+    night: {
+      ...n,
+      flags: n.flags.filter((f) => !gone.has(f.id)),
+      sneaks: n.sneaks.filter((s) => !gone.has(s.flagId)),
+    },
+  };
+}
+
+/** Lost on too many ring offences; at midnight, won with enough flags still standing. */
 export function nightVerdict(
   n: Night,
   needed: number,
   allowed: number,
-  afterMidnight: boolean,
+  midnight: boolean,
 ): "won" | "lost" | "going" {
-  if (n.late || n.offences > allowed) return "lost";
-  if (planted(n) >= needed) return "won";
-  return afterMidnight ? "lost" : "going";
+  if (n.offences > allowed) return "lost";
+  if (!midnight) return "going";
+  return n.flags.length >= needed ? "won" : "lost";
 }

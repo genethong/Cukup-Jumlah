@@ -114,9 +114,13 @@ export function depositsFor(talent: TalentId): number {
   return talent === "muka_tembok" ? START_DEPOSITS + 1 : START_DEPOSITS;
 }
 
-/** Bars of play after the one-bar lead-in. Lidah Manis buys an extra bar (≈2 s). */
-export function roundBars(talent: TalentId | undefined): number {
-  return talent === "lidah_manis" ? 4 : 3;
+/** Bars of play most rounds get after the one-bar lead-in (a bar is about 1.9 s). */
+export const DEFAULT_BARS = 3;
+
+/** Bars of play after the one-bar lead-in: the round's own length, and Lidah Manis buys an
+ *  extra bar (≈2 s). */
+export function roundBars(talent: TalentId | undefined, base = DEFAULT_BARS): number {
+  return talent === "lidah_manis" ? base + 1 : base;
 }
 
 /** The round being played or just finished. */

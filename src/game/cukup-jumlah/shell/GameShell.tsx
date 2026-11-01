@@ -395,7 +395,7 @@ function RoundStage({
   };
 
   const words = ROUNDS[round];
-  const { Game, layout, howTo, beatPins } = microgameFor(round);
+  const { Game, layout, howTo, beatPins, bars } = microgameFor(round);
   // Play has begun once the beat starts (stand-ins) or the fuse starts burning (games).
   const started = beat > 0 || (timeLeft !== null && timeLeft.share < 0.999);
   // A full-stage game keeps the whole kelir for itself, result stamp included.
@@ -460,7 +460,7 @@ function RoundStage({
         candidate={candidate}
         lang={lang}
         talent={candidate.talent}
-        bars={roundBars(candidate.talent)}
+        bars={roundBars(candidate.talent, bars)}
         offsetMs={offsetMs}
         onBeat={setBeat}
         onLeadIn={setLeadIn}

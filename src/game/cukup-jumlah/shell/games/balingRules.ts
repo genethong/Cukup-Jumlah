@@ -8,18 +8,18 @@
 
 export type Item = "leaflet" | "cash" | "rice";
 
-export const LEAFLETS_NEEDED = 6;
+export const LEAFLETS_NEEDED = 5;
 /** Share of the tray that is gifts. */
 export const GIFT_SHARE = 0.3;
 /** Where the tray is, and the lane the villagers walk along. */
-export const TRAY = { x: 60, y: 80 };
+export const TRAY = { x: 64, y: 76 };
 export const LANE_Y = 50;
 /** The stage is 9:16, so a % of height is this many % of width. */
 const ASPECT = 16 / 9;
 /** Seconds a flicked leaflet takes to reach the lane. */
-export const FLIGHT_S = 0.32;
+export const FLIGHT_S = 0.24;
 /** How close (in % of width) a villager must be to catch a leaflet. */
-export const CATCH = 7;
+export const CATCH = 8;
 
 export function leafletsNeeded(forgiving: boolean): number {
   return forgiving ? LEAFLETS_NEEDED - 1 : LEAFLETS_NEEDED;
@@ -58,7 +58,7 @@ export function villagerX(v: Villager, t: number): number {
 /** A villager steps in from one side every so often, at a stroll. */
 export function spawnVillager(id: number, t: number, random: () => number = Math.random): Villager {
   const fromLeft = random() < 0.5;
-  const speed = 12 + random() * 10;
+  const speed = 10 + random() * 8;
   return { id, x0: fromLeft ? -6 : 106, t0: t, speed: fromLeft ? speed : -speed, served: false };
 }
 

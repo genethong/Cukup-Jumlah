@@ -1,5 +1,6 @@
 // Bayar Deposit (KIRA!): pay the parliamentary deposit, exactly RM10,000, out of a briefcase
-// of mixed bundles. Tap bundles onto the counter (and back), then pay. The clerk counts it
+// with a stack of each kind of bundle. Tap stacks to put bundles on the counter (and back),
+// then pay. The clerk counts it
 // and says if it's short or over; too many wrong payments and the time is gone.
 // Pure rules here; the screen is BayarDeposit.tsx.
 

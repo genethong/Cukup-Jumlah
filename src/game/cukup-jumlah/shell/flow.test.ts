@@ -41,6 +41,7 @@ describe("game flow", () => {
   it("gives Muka Tembok a fourth deposit and Lidah Manis an extra bar", () => {
     expect(cast({ ...DEFAULT_CANDIDATE, talent: "muka_tembok" }).deposits).toBe(4);
     expect(roundBars("lidah_manis")).toBe(roundBars("mesra_rakyat") + 1);
+    expect(roundBars("lidah_manis", 5)).toBe(6);
   });
 
   it("keeps 112 reachable from a perfect run", () => {

@@ -356,26 +356,27 @@ export const GAME_TEXT = {
     },
   },
   pacak: {
-    howTo: { ms: "Pacak bendera sebelum 11:59 malam", en: "Plant flags before 11:59pm" },
+    howTo: {
+      ms: "Pacak bendera, jaga sampai 11:59 malam",
+      en: "Plant flags, guard them till 11:59pm",
+    },
     centre: { ms: "Pusat mengundi", en: "Polling centre" },
     count: { ms: "Bendera", en: "Flags" },
-    tapHint: { ms: "Ketuk {n} kali setiap bendera", en: "Tap {n} times per flag" },
-    popHit: { ms: "Tok!", en: "Tok!" },
+    tapHint: {
+      ms: "Ketuk: pacak · ketuk yang curi: halau",
+      en: "Tap: plant · tap a sneak: chase off",
+    },
     popPlanted: { ms: "Terpacak!", en: "Planted!" },
+    popChased: { ms: "Pergi!", en: "Shoo!" },
     popRing: { ms: "Dalam 50 m!", en: "Within 50 m!" },
     popTaken: { ms: "Dah ada", en: "Taken" },
-    popLate: { ms: "Dah tamat!", en: "Too late!" },
+    popPulled: { ms: "Dicabut!", en: "Pulled down!" },
     won: { ms: "Kampung penuh bendera!", en: "Flags all over the kampung!" },
-    late: { ms: "Kempen dah tamat!", en: "Campaigning is over!" },
     ring: { ms: "Kesalahan kempen!", en: "Campaign offence!" },
-    short: { ms: "Tak sempat!", en: "Ran out of time!" },
+    short: { ms: "Kurang {n} bendera!", en: "{n} flags short!" },
     fact: {
       ms: "Kempen tamat 11:59 malam sebelum hari mengundi.",
       en: "Campaigning ends at 11:59pm the night before polling.",
-    },
-    lateFact: {
-      ms: "Selepas 11:59 malam, semua kempen mesti berhenti.",
-      en: "After 11:59pm, all campaigning has to stop.",
     },
     ringFact: {
       ms: "Bahan kempen dalam 50 m dari pusat mengundi ialah satu kesalahan.",

@@ -6,6 +6,7 @@ import { LEAD_IN_BEATS, leadInStep } from "../leadIn";
 import { beginGroove } from "../music";
 import { GAME_TEXT, type Lang } from "../strings";
 import {
+  BUNDLES,
   DEPOSIT,
   dealCase,
   judgePayment,
@@ -118,11 +119,17 @@ export function BayarDeposit({
     };
   }, [clock, bars, allowed]);
 
-  const move = (id: number) => {
+  /** Move one bundle of `value` from the briefcase to the counter, or back. */
+  const move = (value: Bundle, toCounter: boolean) => {
     if (!liveRef.current || ended.current) return;
-    setSlots((s) => s.map((b) => (b.id === id ? { ...b, onCounter: !b.onCounter } : b)));
+    setSlots((s) => {
+      const i = s.findIndex((b) => b.value === value && b.onCounter !== toCounter);
+      return i < 0 ? s : s.map((b, j) => (j === i ? { ...b, onCounter: toCounter } : b));
+    });
     paperSlap(clock.ctx, clock.out, clock.ctx.currentTime);
   };
+  const count = (value: Bundle, onCounter: boolean) =>
+    slots.filter((s) => s.value === value && s.onCounter === onCounter).length;
 
   const counter = slots.filter((s) => s.onCounter);
   const paid = total(counter.map((s) => s.value));
@@ -177,13 +184,14 @@ export function BayarDeposit({
       <span className="pointer-events-none absolute top-[55%] left-[4%] rounded-sm bg-[#fbf3e4] px-[1.4cqw] py-[0.2cqw] font-tally text-[2.6cqw] tracking-[0.06em] text-[var(--ink)] uppercase">
         {T.counter[lang]}
       </span>
-      <div className="absolute inset-x-[4%] top-[40%] flex h-[14%] flex-wrap content-end items-end justify-center gap-[1cqw]">
-        {counter.map((s) => (
-          <BundleChip
-            key={`c-${s.id}`}
-            value={s.value}
+      <div className="absolute inset-x-[4%] top-[42%] flex h-[12%] items-end justify-center gap-[2cqw]">
+        {BUNDLES.filter((v) => count(v, true) > 0).map((v) => (
+          <BundleStack
+            key={`c-${v}`}
+            value={v}
+            n={count(v, true)}
             small
-            onTap={() => move(s.id)}
+            onTap={() => move(v, false)}
             disabled={busy}
           />
         ))}
@@ -205,19 +213,18 @@ export function BayarDeposit({
         </p>
       )}
 
-      {/* The briefcase of bundles. */}
-      <div className="absolute top-[62%] right-[2%] bottom-[11%] left-[44%] rounded-[2cqw] border-[0.8cqw] border-[#4f321b] bg-[#2b1d14] p-[1.4cqw] shadow-[inset_0_1cqw_2cqw_rgba(0,0,0,0.5)]">
-        <div className="grid h-full grid-cols-4 content-start gap-[1cqw]">
-          {slots
-            .filter((s) => !s.onCounter)
-            .map((s) => (
-              <BundleChip
-                key={`b-${s.id}`}
-                value={s.value}
-                onTap={() => move(s.id)}
-                disabled={busy}
-              />
-            ))}
+      {/* The briefcase: one stack per kind of bundle. Tap a stack to put one on the counter. */}
+      <div className="absolute top-[63%] right-[2%] bottom-[11%] left-[44%] rounded-[2cqw] border-[0.8cqw] border-[#4f321b] bg-[#2b1d14] p-[1.6cqw] shadow-[inset_0_1cqw_2cqw_rgba(0,0,0,0.5)]">
+        <div className="grid h-full grid-cols-2 gap-[1.6cqw]">
+          {BUNDLES.map((v) => (
+            <BundleStack
+              key={`b-${v}`}
+              value={v}
+              n={count(v, false)}
+              onTap={() => move(v, true)}
+              disabled={busy || count(v, false) === 0}
+            />
+          ))}
         </div>
       </div>
 
@@ -246,20 +253,22 @@ const NOTE_COLOUR: Record<Bundle, { face: string; edge: string; label: string }>
   50: { face: "#5fa39a", edge: "#346b63", label: "RM50" },
 };
 
-/** A bundle of notes: thicker for bigger amounts, labelled with what it adds up to. */
-function BundleChip({
+/** A stack of same-value bundles, thicker the more there are, with how many on a badge. */
+function BundleStack({
   value,
+  n,
   small,
   disabled,
   onTap,
 }: {
   value: Bundle;
+  n: number;
   small?: boolean;
   disabled: boolean;
   onTap: () => void;
 }) {
   const c = NOTE_COLOUR[value];
-  const layers = value >= 1000 ? 4 : value >= 500 ? 3 : value >= 100 ? 2 : 1;
+  const layers = Math.min(6, n);
   return (
     <button
       type="button"
@@ -269,8 +278,8 @@ function BundleChip({
         onTap();
       }}
       aria-label={c.label}
-      className={`relative flex items-center justify-center rounded-[0.8cqw] border-[0.4cqw] font-tally font-bold text-[#fbf3e4] ${
-        small ? "h-[6cqw] w-[13cqw] text-[2.4cqw]" : "h-[8cqw] w-full text-[2.8cqw]"
+      className={`relative flex items-center justify-center rounded-[0.8cqw] border-[0.4cqw] font-tally font-bold text-[#fbf3e4] disabled:opacity-40 ${
+        small ? "h-[6.5cqw] w-[15cqw] text-[2.6cqw]" : "h-full w-full text-[3.6cqw]"
       }`}
       style={{
         background: c.face,
@@ -283,13 +292,16 @@ function BundleChip({
       }}
     >
       {c.label}
+      <span className="absolute -top-[1.6cqw] -right-[1.6cqw] flex h-[5cqw] min-w-[5cqw] items-center justify-center rounded-full bg-[#fbf3e4] px-[0.8cqw] text-[2.8cqw] text-[var(--ink)] shadow">
+        ×{n}
+      </span>
     </button>
   );
 }
 
 function Fact({ lang }: { lang: Lang }) {
   return (
-    <div className="combo-pop pointer-events-none absolute top-[33%] left-1/2 z-30 w-[80%] -translate-x-1/2 rounded-sm bg-[#efe1c3] px-[3cqw] py-[1.4cqw] text-center text-[var(--ink)] shadow-[0_6px_12px_rgba(40,14,6,0.4)]">
+    <div className="combo-pop pointer-events-none absolute top-[44%] left-1/2 z-30 w-[80%] -translate-x-1/2 rounded-sm bg-[#efe1c3] px-[3cqw] py-[1.4cqw] text-center text-[var(--ink)] shadow-[0_6px_12px_rgba(40,14,6,0.4)]">
       <p className="font-display text-[5.4cqw] font-bold italic">{T.exact[lang]}</p>
       <p className="mt-[0.6cqw] text-[3.2cqw] leading-tight">{T.fact[lang]}</p>
     </div>
