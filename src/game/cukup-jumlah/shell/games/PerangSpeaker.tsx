@@ -499,7 +499,7 @@ function walking(p: number, drift: number): boolean {
 }
 
 /** A villager in shadow; those on your half stand dark and solid, the rest faded. */
-function Villager({
+export function Villager({
   variant,
   covering,
   won,

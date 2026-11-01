@@ -43,9 +43,10 @@ export type MicrogameProps = {
  * How the shell lays out the stage around a game. `center` keeps the puppet big in the
  * middle; `side` tucks it into the bottom-left; `between` stands it small at the bottom
  * centre, between a game's two side areas; `stall` stands it on the left raised behind a
- * counter the game draws; `full` leaves it off so the game has the whole kelir.
+ * counter the game draws; `cameo` swaps the puppet for a small portrait badge of its face in the
+ * corner, for games that need the room; `full` leaves it off so the game has the whole kelir.
  */
-export type StageLayout = "center" | "side" | "between" | "stall" | "full";
+export type StageLayout = "center" | "side" | "between" | "stall" | "cameo" | "full";
 
 /** Mistakes a game forgives before the round is lost. */
 export function mistakesAllowed(talent: TalentId, base = 1): number {

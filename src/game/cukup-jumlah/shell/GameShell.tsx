@@ -6,7 +6,7 @@ import { Backstage } from "../creator/Backstage";
 import { PARTIES, loadCandidate, type Candidate } from "../creator/candidate";
 import type { ExpressionId } from "../puppet/loadRig";
 import type { PuppetAnim } from "../puppet/motion";
-import { PuppetAvatar } from "../puppet/PuppetAvatar";
+import { PuppetAvatar, PuppetCameo } from "../puppet/PuppetAvatar";
 import { Gunungan } from "../stage/Gunungan";
 import { BallotBox, DepositEnvelope } from "../stage/Hud";
 import { BeatPins, CutStamp, DalangBanner, Kelir, StageBox } from "../stage/Panggung";
@@ -395,11 +395,11 @@ function RoundStage({
   };
 
   const words = ROUNDS[round];
-  const { Game, layout, howTo, beatPins } = microgameFor(round);
+  const { Game, layout, howTo, beatPins, bars } = microgameFor(round);
   // Play has begun once the beat starts (stand-ins) or the fuse starts burning (games).
   const started = beat > 0 || (timeLeft !== null && timeLeft.share < 0.999);
   // A full-stage game keeps the whole kelir for itself, result stamp included.
-  const showPuppet = layout !== "full";
+  const showPuppet = layout !== "full" && layout !== "cameo";
   const party = PARTIES.find((p) => p.id === candidate.party);
   // A game holding the puppet in its own action wins over the shell's quick reactions,
   // until the result stamp.
@@ -452,6 +452,21 @@ function RoundStage({
         )}
       </div>
 
+      {/* A game that needs the room keeps the YB as a portrait badge, still reacting. */}
+      {layout === "cameo" && (
+        <div className="pointer-events-none absolute top-[15%] left-[2.5%] z-20 aspect-square w-[15cqw]">
+          <div
+            key={`cameo-${shownFace ?? "rest"}`}
+            className="combo-pop h-full w-full overflow-hidden rounded-full border-[0.8cqw] border-[var(--brass)] bg-[#e8d9b8] shadow-[0_0.8cqw_1.4cqw_rgba(40,14,6,0.4)]"
+          >
+            <PuppetCameo
+              config={shownFace ? { ...candidate.puppet, expression: shownFace } : candidate.puppet}
+              className="h-full w-full scale-110"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Stays up under the result stamp so its final state (e.g. a signed form) shows. */}
       <Game
         key={roundKey}
@@ -460,7 +475,7 @@ function RoundStage({
         candidate={candidate}
         lang={lang}
         talent={candidate.talent}
-        bars={roundBars(candidate.talent)}
+        bars={roundBars(candidate.talent, bars)}
         offsetMs={offsetMs}
         onBeat={setBeat}
         onLeadIn={setLeadIn}

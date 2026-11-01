@@ -336,6 +336,43 @@ export async function renderPortrait(config: PuppetConfig): Promise<HTMLCanvasEl
   return out;
 }
 
+/**
+ * Just the puppet's head, for a small portrait badge: the same layered face (and hat) as the
+ * full puppet, redrawn whenever the config or expression changes.
+ */
+export function PuppetCameo({
+  config,
+  className = "",
+}: {
+  config: PuppetConfig;
+  className?: string;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const configRef = useRef(config);
+  configRef.current = config;
+  const key = JSON.stringify(config);
+
+  useEffect(() => {
+    let cancel = false;
+    renderPortrait(configRef.current)
+      .then((portrait) => {
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext("2d");
+        if (cancel || !canvas || !ctx) return;
+        ctx.clearRect(0, 0, 512, 512);
+        ctx.drawImage(portrait, 0, 0);
+      })
+      .catch(() => {
+        // A missing layer leaves the badge empty rather than breaking the round.
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [key]);
+
+  return <canvas ref={canvasRef} width={512} height={512} aria-hidden className={className} />;
+}
+
 /** Layered face: 512 canvas, neck pin at (256, 456). Composited to match the approved shade math. */
 export function PuppetFace({ face, hat }: { face: ResolvedFaceConfig; hat: HatClip | null }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);

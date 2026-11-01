@@ -135,10 +135,7 @@ export const ROUNDS: Record<RoundId, { call: Text; hint: Text }> = {
   },
   pacak_bendera: {
     call: { ms: "PACAK!", en: "PLANT!" },
-    hint: {
-      ms: "Kempen tamat 11:59 malam sebelum hari mengundi",
-      en: "Campaigning ends 11:59pm the night before polling",
-    },
+    hint: { ms: "Kempen tamat 11:59 malam", en: "Campaigning ends at 11:59pm" },
   },
   celup_dakwat: {
     call: { ms: "CELUP!", en: "DIP!" },
@@ -331,5 +328,59 @@ export const GAME_TEXT = {
     rivalCrowd: { ms: "Lawan", en: "Rival" },
     won: { ms: "Padang penuh!", en: "Packed field!" },
     lost: { ms: "Penonton lari!", en: "The crowd walked off!" },
+  },
+  baling: {
+    howTo: { ms: "Edar risalah, buang hadiah", en: "Hand out leaflets, bin the gifts" },
+    swipe: { ms: "Leret atas: edar · bawah: tong", en: "Swipe up: hand out · down: bin" },
+    bin: { ms: "Tong", en: "Bin" },
+    count: { ms: "Risalah", en: "Leaflets" },
+    thanks: { ms: "Terima kasih!", en: "Thanks!" },
+    missed: { ms: "Jatuh!", en: "Missed!" },
+    bribe: { ms: "Itu rasuah!", en: "That's bribery!" },
+    bribeFact: {
+      ms: "Beri wang atau barang untuk pengaruhi undi ialah rasuah (Akta Kesalahan Pilihan Raya 1954).",
+      en: "Giving money or goods to sway a vote is bribery (Election Offences Act 1954).",
+    },
+    won: { ms: "Risalah habis diedar!", en: "Leaflets all handed out!" },
+  },
+  bayar: {
+    howTo: { ms: "Bayar tepat RM10,000", en: "Pay exactly RM10,000" },
+    counter: { ms: "Kaunter deposit", en: "Deposit counter" },
+    pay: { ms: "Bayar", en: "Pay" },
+    exact: { ms: "Cukup-cukup!", en: "Exactly right!" },
+    short: { ms: "Kurang {rm}!", en: "{rm} short!" },
+    over: { ms: "Lebih {rm}!", en: "{rm} over!" },
+    fact: {
+      ms: "Deposit Parlimen RM10,000 hangus jika calon dapat kurang 1/8 undi.",
+      en: "The RM10,000 deposit is lost if the candidate gets under 1/8 of the votes.",
+    },
+  },
+  pacak: {
+    howTo: {
+      ms: "Pacak bendera, jaga sampai 11:59 malam",
+      en: "Plant flags, guard them till 11:59pm",
+    },
+    centre: { ms: "Pusat mengundi", en: "Polling centre" },
+    count: { ms: "Bendera", en: "Flags" },
+    tapHint: {
+      ms: "Ketuk: pacak · ketuk yang curi: halau",
+      en: "Tap: plant · tap a sneak: chase off",
+    },
+    popPlanted: { ms: "Terpacak!", en: "Planted!" },
+    popChased: { ms: "Pergi!", en: "Shoo!" },
+    popRing: { ms: "Dalam 50 m!", en: "Within 50 m!" },
+    popTaken: { ms: "Dah ada", en: "Taken" },
+    popPulled: { ms: "Dicabut!", en: "Pulled down!" },
+    won: { ms: "Kampung penuh bendera!", en: "Flags all over the kampung!" },
+    ring: { ms: "Kesalahan kempen!", en: "Campaign offence!" },
+    short: { ms: "Kurang {n} bendera!", en: "{n} flags short!" },
+    fact: {
+      ms: "Kempen tamat 11:59 malam sebelum hari mengundi.",
+      en: "Campaigning ends at 11:59pm the night before polling.",
+    },
+    ringFact: {
+      ms: "Bahan kempen dalam 50 m dari pusat mengundi ialah satu kesalahan.",
+      en: "Campaign material within 50 m of a polling centre is an offence.",
+    },
   },
 } satisfies Record<string, Record<string, Text>>;
