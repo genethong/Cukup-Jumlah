@@ -12,7 +12,7 @@ export const LEAFLETS_NEEDED = 5;
 /** Share of the tray that is gifts. */
 export const GIFT_SHARE = 0.3;
 /** Where the tray is, and the lane the villagers walk along. */
-export const TRAY = { x: 64, y: 76 };
+export const TRAY = { x: 50, y: 76 };
 export const LANE_Y = 50;
 /** The stage is 9:16, so a % of height is this many % of width. */
 const ASPECT = 16 / 9;

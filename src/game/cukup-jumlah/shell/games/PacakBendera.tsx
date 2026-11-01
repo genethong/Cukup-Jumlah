@@ -9,7 +9,6 @@ import {
   tick,
 } from "../../beat/wayangSounds";
 import { PARTIES } from "../../creator/candidate";
-import { PuppetAvatar } from "../../puppet/PuppetAvatar";
 import type { MicrogameProps } from "../microgame";
 import { LEAD_IN_BEATS, leadInStep } from "../leadIn";
 import { beginGroove } from "../music";
@@ -33,13 +32,11 @@ import {
 import { Villager } from "./PerangSpeaker";
 
 const T = GAME_TEXT.pacak;
-/** The kampung ground, in % of the stage; flags go in below the clock row, away from the
- *  corner where the YB stands. */
+/** The kampung ground, in % of the stage; flags go in below the clock row. */
 const GROUND_TOP = 40;
 const PLANT_TOP = 51;
-const YB_CORNER = { right: 36, top: 70 };
 /** The rival's people start creeping in after this many seconds of play. */
-const FIRST_SNEAK_S = 1.4;
+const FIRST_SNEAK_S = 2;
 
 type Pop = { id: number; x: number; y: number; text: string; bad: boolean };
 
@@ -165,6 +162,7 @@ export function PacakBendera({
           popRef.current(f.x, f.y, T.popPulled[lang], true);
         }
         gendangMiss(clock.ctx, clock.out, t);
+        callbacks.current.onJudge("miss");
       }
       if (after !== nightRef.current) {
         nightRef.current = after;
@@ -193,7 +191,7 @@ export function PacakBendera({
     const r = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - r.left) / r.width) * 100;
     const y = ((e.clientY - r.top) / r.height) * 100;
-    if (y < PLANT_TOP || (x < YB_CORNER.right && y > YB_CORNER.top)) return;
+    if (y < PLANT_TOP) return;
     const { night: next, result } = tap(nightRef.current, { x, y });
     nightRef.current = next;
     setNight(next);
@@ -259,20 +257,6 @@ export function PacakBendera({
         </div>
       ))}
 
-      <div className="pointer-events-none absolute bottom-[1%] left-[1%] h-[30%] w-[34%]">
-        <PuppetAvatar
-          config={
-            outcome === "lost"
-              ? { ...candidate.puppet, expression: "shocked_o" }
-              : outcome === "won"
-                ? { ...candidate.puppet, expression: "big_laugh" }
-                : candidate.puppet
-          }
-          anim={outcome === "won" ? "hop" : pops.length ? "rod-wiggle" : "idle"}
-          label={candidate.name}
-        />
-      </div>
-
       {night.flags.map((f) => (
         <FlagArt key={`flag-${f.id}`} x={f.x} y={f.y} colour={colour} />
       ))}
@@ -285,7 +269,7 @@ export function PacakBendera({
         return (
           <div
             key={`sneak-${s.id}`}
-            className="pointer-events-none absolute h-[7%] -translate-y-full"
+            className="pointer-events-none absolute h-[8%] -translate-y-full"
             style={{
               left: `${f.x + 6 - p * 4}%`,
               top: `${f.y}%`,
@@ -359,7 +343,7 @@ function FlagArt({ x, y, colour }: { x: number; y: number; colour: string }) {
   return (
     <svg
       viewBox="0 0 30 50"
-      className="combo-pop pointer-events-none absolute h-[7%] -translate-x-[20%] -translate-y-full overflow-visible"
+      className="combo-pop pointer-events-none absolute h-[8.5%] -translate-x-[20%] -translate-y-full overflow-visible"
       style={{ left: `${x}%`, top: `${y}%` }}
       aria-hidden="true"
     >

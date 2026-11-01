@@ -214,8 +214,8 @@ export function BayarDeposit({
       )}
 
       {/* The briefcase: one stack per kind of bundle. Tap a stack to put one on the counter. */}
-      <div className="absolute top-[63%] right-[2%] bottom-[11%] left-[44%] rounded-[2cqw] border-[0.8cqw] border-[#4f321b] bg-[#2b1d14] p-[1.6cqw] shadow-[inset_0_1cqw_2cqw_rgba(0,0,0,0.5)]">
-        <div className="grid h-full grid-cols-2 gap-[1.6cqw]">
+      <div className="absolute top-[63%] right-[6%] bottom-[11%] left-[6%] rounded-[2cqw] border-[0.8cqw] border-[#4f321b] bg-[#2b1d14] p-[1.6cqw] shadow-[inset_0_1cqw_2cqw_rgba(0,0,0,0.5)]">
+        <div className="grid h-full grid-cols-4 gap-[1.6cqw]">
           {BUNDLES.map((v) => (
             <BundleStack
               key={`b-${v}`}
@@ -235,7 +235,7 @@ export function BayarDeposit({
           pay();
         }}
         disabled={busy || counter.length === 0}
-        className="absolute right-[2%] bottom-[2%] left-[44%] h-[7.5%] rounded-[2.4cqw] border-[0.8cqw] border-[#5b1a14] bg-[var(--sambal)] font-display text-[6cqw] font-bold text-[var(--cream)] italic shadow-[0_1cqw_0_#3b1410] active:translate-y-[0.6cqw] active:shadow-none disabled:opacity-60"
+        className="absolute right-[6%] bottom-[2%] left-[6%] h-[7.5%] rounded-[2.4cqw] border-[0.8cqw] border-[#5b1a14] bg-[var(--sambal)] font-display text-[6cqw] font-bold text-[var(--cream)] italic shadow-[0_1cqw_0_#3b1410] active:translate-y-[0.6cqw] active:shadow-none disabled:opacity-60"
         style={{ touchAction: "manipulation" }}
       >
         {T.pay[lang]} {rm(DEPOSIT)}

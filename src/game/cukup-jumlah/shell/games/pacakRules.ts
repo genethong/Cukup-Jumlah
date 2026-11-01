@@ -8,7 +8,7 @@
 // Spots are in % of the stage: x of its width, y of its height.
 
 /** Flags that must still be standing at midnight. */
-export const FLAGS_NEEDED = 8;
+export const FLAGS_NEEDED = 7;
 /** The polling centres and their no-campaign rings (radius in % of width). */
 export const CENTRES = [
   { x: 70, y: 64, r: 15 },
@@ -21,8 +21,8 @@ const ASPECT = 16 / 9;
 /** The clock face: from 11:50pm to midnight. */
 export const CLOCK_FROM_MIN = 50;
 /** Seconds between the rival's people creeping in, and how long one takes to pull a flag. */
-export const SNEAK_GAP_S = 1.1;
-export const SNEAK_S = 0.9;
+export const SNEAK_GAP_S = 1.5;
+export const SNEAK_S = 1.2;
 
 /** Ring taps forgiven before the round is lost; Mesra Rakyat gets one more. */
 export function offencesAllowed(forgiving: boolean): number {
@@ -69,7 +69,7 @@ export type Tap = "planted" | "chased" | "ring" | "taken";
 export function tap(n: Night, spot: { x: number; y: number }): { night: Night; result: Tap } {
   const sneak = n.sneaks.find((s) => {
     const f = n.flags.find((g) => g.id === s.flagId);
-    return f && gap(f, spot) < MIN_GAP * 1.2;
+    return f && gap(f, spot) < MIN_GAP * 1.5;
   });
   if (sneak) {
     return { night: { ...n, sneaks: n.sneaks.filter((s) => s !== sneak) }, result: "chased" };

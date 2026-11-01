@@ -60,10 +60,10 @@ describe("Pacak Bendera rules", () => {
   });
 
   it("is decided at midnight by the flags still standing", () => {
-    const flags = Array.from({ length: 8 }, (_, i) => ({ id: i, x: i * 10, y: 90 }));
+    const flags = Array.from({ length: 7 }, (_, i) => ({ id: i, x: i * 10, y: 90 }));
     const full = { ...FRESH_NIGHT, flags };
-    expect(nightVerdict(full, 8, 0, false)).toBe("going");
-    expect(nightVerdict(full, 8, 0, true)).toBe("won");
-    expect(nightVerdict({ ...full, flags: flags.slice(1) }, 8, 0, true)).toBe("lost");
+    expect(nightVerdict(full, 7, 0, false)).toBe("going");
+    expect(nightVerdict(full, 7, 0, true)).toBe("won");
+    expect(nightVerdict({ ...full, flags: flags.slice(1) }, 7, 0, true)).toBe("lost");
   });
 });

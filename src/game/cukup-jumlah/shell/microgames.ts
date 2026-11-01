@@ -32,9 +32,9 @@ const STAND_IN: MicrogameEntry = {
 };
 
 const BUILT: Partial<Record<RoundId, MicrogameEntry>> = {
-  bayar_deposit: { Game: BayarDeposit, layout: "side", howTo: GAME_TEXT.bayar.howTo, bars: 5 },
-  baling_risalah: { Game: BalingRisalah, layout: "side", howTo: GAME_TEXT.baling.howTo, bars: 5 },
-  pacak_bendera: { Game: PacakBendera, layout: "full", howTo: GAME_TEXT.pacak.howTo, bars: 5 },
+  bayar_deposit: { Game: BayarDeposit, layout: "cameo", howTo: GAME_TEXT.bayar.howTo, bars: 5 },
+  baling_risalah: { Game: BalingRisalah, layout: "cameo", howTo: GAME_TEXT.baling.howTo, bars: 5 },
+  pacak_bendera: { Game: PacakBendera, layout: "cameo", howTo: GAME_TEXT.pacak.howTo, bars: 5 },
   borang_14: { Game: Borang14, layout: "between", howTo: GAME_TEXT.borang14.tapHint },
   goreng_kueyteow: { Game: GorengKueyTeow, layout: "stall", howTo: GAME_TEXT.goreng.howTo },
   celup_dakwat: { Game: CelupDakwat, layout: "side", howTo: GAME_TEXT.celup.howTo },

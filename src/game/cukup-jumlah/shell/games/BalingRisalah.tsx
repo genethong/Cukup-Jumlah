@@ -393,7 +393,7 @@ export function BalingRisalah({
       ))}
 
       {/* Leaflets handed out, out of those needed. */}
-      <div className="pointer-events-none absolute top-[58.5%] left-[60%] flex -translate-x-1/2 items-center gap-[1cqw] rounded-sm bg-[#2b2522]/85 px-[2cqw] py-[0.5cqw] font-tally text-[3.2cqw] tracking-[0.06em] whitespace-nowrap text-[var(--cream)] uppercase">
+      <div className="pointer-events-none absolute top-[58.5%] left-[50%] flex -translate-x-1/2 items-center gap-[1cqw] rounded-sm bg-[#2b2522]/85 px-[2cqw] py-[0.5cqw] font-tally text-[3.2cqw] tracking-[0.06em] whitespace-nowrap text-[var(--cream)] uppercase">
         {T.count[lang]} {stall.delivered}/{needed}
       </div>
 
