@@ -23,6 +23,8 @@ const T = GAME_TEXT.pecut;
 const RUNNER_Y = 86;
 const PCT_PER_M = 1.6;
 const LANE_X = [24, 50, 76];
+/** A sideways swipe this far (in % of the stage width) changes lane. */
+const SWIPE = 7;
 
 export function PecutSPR(props: MicrogameProps) {
   const { clock, candidate, lang, onJudge } = props;
@@ -68,6 +70,24 @@ export function PecutSPR(props: MicrogameProps) {
     setRun(runRef.current);
     gendangTak(clock.ctx, clock.out, clock.ctx.currentTime);
   };
+  const gesture = useRef<{
+    id: number;
+    x: number;
+    w: number;
+    left: number;
+    swiped: boolean;
+  } | null>(null);
+
+  // Stop the page itself from scrolling or bouncing under a swipe.
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const stop = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener("touchmove", stop, { passive: false });
+    return () => el.removeEventListener("touchmove", stop);
+  }, []);
+
   const steerRef = useRef(steer);
   steerRef.current = steer;
 
@@ -87,12 +107,39 @@ export function PecutSPR(props: MicrogameProps) {
 
   return (
     <div
+      ref={root}
       className="absolute inset-0 z-10 select-none"
-      style={{ touchAction: "none" }}
+      style={{ touchAction: "none", overscrollBehavior: "none" }}
       onPointerDown={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
-        steer(e.clientX - r.left < r.width / 2 ? -1 : 1);
+        gesture.current = {
+          id: e.pointerId,
+          x: e.clientX,
+          w: r.width,
+          left: r.left,
+          swiped: false,
+        };
+        e.currentTarget.setPointerCapture?.(e.pointerId);
       }}
+      onPointerMove={(e) => {
+        // A sideways swipe changes lane as soon as it has moved far enough; a long swipe
+        // can cross two lanes.
+        const g = gesture.current;
+        if (!g || g.id !== e.pointerId) return;
+        const dx = ((e.clientX - g.x) / g.w) * 100;
+        if (Math.abs(dx) >= SWIPE) {
+          steer(dx < 0 ? -1 : 1);
+          gesture.current = { ...g, x: e.clientX, swiped: true };
+        }
+      }}
+      onPointerUp={(e) => {
+        // A tap without a swipe steers toward the side tapped.
+        const g = gesture.current;
+        gesture.current = null;
+        if (!g || g.id !== e.pointerId || g.swiped) return;
+        steer(e.clientX - g.left < g.w / 2 ? -1 : 1);
+      }}
+      onPointerCancel={() => (gesture.current = null)}
     >
       {/* The road to the nomination centre, three lanes wide. */}
       <div className="pointer-events-none absolute inset-x-[8%] top-[38%] bottom-0 overflow-hidden bg-[linear-gradient(180deg,#b9a985,#a8956e)]">

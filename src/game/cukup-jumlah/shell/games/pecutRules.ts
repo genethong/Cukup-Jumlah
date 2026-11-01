@@ -5,8 +5,8 @@
 
 export const LANES = 3;
 /** Distance to the counter, and running speed, in metres and metres per second. */
-export const DISTANCE = 100;
-export const SPEED = 14;
+export const DISTANCE = 150;
+export const SPEED = 15;
 /** Seconds lost stumbling after a bump. */
 export const STUMBLE_S = 0.7;
 /** How close (in metres) an obstacle in your lane must be to bump into you. */

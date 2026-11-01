@@ -403,9 +403,9 @@ export const GAME_TEXT = {
     },
   },
   pecut: {
-    howTo: { ms: "Ketuk kiri/kanan untuk tukar lorong", en: "Tap left/right to switch lanes" },
+    howTo: { ms: "Leret kiri/kanan untuk tukar lorong", en: "Swipe left/right to switch lanes" },
     counter: { ms: "Kaunter penamaan", en: "Nomination counter" },
-    tapHint: { ms: "◀ ketuk kiri · ketuk kanan ▶", en: "◀ tap left · tap right ▶" },
+    tapHint: { ms: "◀ leret atau ketuk ▶", en: "◀ swipe or tap ▶" },
     ouch: { ms: "Aduh!", en: "Oof!" },
     won: { ms: "Sempat hantar borang!", en: "Papers in on time!" },
     lost: { ms: "Kaunter dah tutup!", en: "The counter's closed!" },

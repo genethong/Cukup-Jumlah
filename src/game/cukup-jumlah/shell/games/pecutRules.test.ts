@@ -53,6 +53,7 @@ describe("Pecut SPR rules", () => {
   it("wins at the counter, with time to spare for a clean run", () => {
     expect(runVerdict({ ...FRESH_RUN, distance: DISTANCE }, false)).toBe("won");
     expect(runVerdict(FRESH_RUN, true)).toBe("lost");
-    expect(DISTANCE / SPEED).toBeLessThan(9.6 * 0.8);
+    // 7 bars of play is about 13.4 s; a clean run leaves room for a few bumps.
+    expect(DISTANCE / SPEED).toBeLessThan(13.4 * 0.8);
   });
 });
