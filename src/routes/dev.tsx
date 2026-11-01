@@ -2,13 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PuppetLab } from "@/game/cukup-jumlah/puppet/PuppetLab";
 import { PuppetSheet } from "@/game/cukup-jumlah/puppet/PuppetSheet";
 import { StageStyleFrame } from "@/game/cukup-jumlah/stage/StageStyleFrame";
+import { ArtStyleFrames } from "@/game/cukup-jumlah/stage/ArtStyleFrames";
 import { BeatLab } from "@/game/cukup-jumlah/beat/BeatLab";
 import { Backstage } from "@/game/cukup-jumlah/creator/Backstage";
 import { OptionAudit } from "@/game/cukup-jumlah/puppet/OptionAudit";
 import { GameShell } from "@/game/cukup-jumlah/shell/GameShell";
 import { ACTS, COALITION_ROUND, type RoundId } from "@/game/cukup-jumlah/shell/flow";
 
-const LABS = ["puppet", "panggung", "rentak", "belakang", "audit", "shell"] as const;
+const LABS = ["puppet", "panggung", "rentak", "belakang", "audit", "shell", "gaya"] as const;
 type LabId = (typeof LABS)[number];
 
 function isLab(value: unknown): value is LabId {
@@ -48,6 +49,7 @@ function DevLabPage() {
   if (lab === "rentak") return <BeatLab />;
   if (lab === "belakang") return <Backstage />;
   if (lab === "audit") return <OptionAudit />;
+  if (lab === "gaya") return <ArtStyleFrames />;
   if (lab === "shell") return <GameShell key={round ?? "full"} practice={round ?? null} />;
   return <PuppetLab />;
 }
