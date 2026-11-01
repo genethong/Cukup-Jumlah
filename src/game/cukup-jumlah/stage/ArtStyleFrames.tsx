@@ -43,7 +43,7 @@ export function ArtStyleFrames() {
   const me = candidate?.puppet ?? SAMPLE;
   const colour = PARTIES.find((p) => p.id === candidate?.party)?.colour ?? PARTIES[0]!.colour;
   return (
-    <main className="panggung min-h-dvh bg-[#140b06] px-4 py-6 text-[var(--cream)]">
+    <main className="panggung h-dvh overflow-y-auto overscroll-contain bg-[#140b06] px-4 py-6 text-[var(--cream)]">
       <h1 className="mb-1 text-center font-display text-2xl font-bold italic">Gaya seni</h1>
       <p className="mx-auto mb-6 max-w-[40rem] text-center text-sm opacity-80">
         Same moment of Perang Speaker in three looks. Only the stage art differs; the puppets stay
