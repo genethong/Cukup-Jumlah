@@ -19,7 +19,11 @@
 }
 
 .kelir-glow {
-  background: radial-gradient(ellipse 45% 40% at 50% 14%, rgba(255, 190, 90, 0.45), transparent 70%);
+  background: radial-gradient(
+    ellipse 45% 40% at 50% 14%,
+    rgba(255, 190, 90, 0.45),
+    transparent 70%
+  );
   animation: pelita-flicker 2.6s ease-in-out infinite;
 }
 
@@ -129,6 +133,11 @@
   animation: machine-feed 600ms ease-in forwards;
 }
 
+/* The party seal slamming down onto a letter and lifting again. */
+.seal-slam {
+  animation: seal-slam 260ms cubic-bezier(0.3, 0, 0.2, 1);
+}
+
 /* A broken-off promise tumbling down. */
 .piece-fall {
   animation: piece-fall 800ms ease-in forwards;
@@ -171,147 +180,329 @@
 }
 
 @keyframes pelita-flicker {
-  0%, 100% { opacity: 0.85; }
-  30% { opacity: 1; }
-  55% { opacity: 0.75; }
-  80% { opacity: 0.95; }
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  30% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.75;
+  }
+  80% {
+    opacity: 0.95;
+  }
 }
 
 @keyframes flame-sway {
-  0%, 100% { transform: rotate(-3deg) scaleY(1); }
-  50% { transform: rotate(3deg) scaleY(1.08); }
+  0%,
+  100% {
+    transform: rotate(-3deg) scaleY(1);
+  }
+  50% {
+    transform: rotate(3deg) scaleY(1.08);
+  }
 }
 
 @keyframes stamp-pop {
-  0% { transform: translate(-50%, -50%) scale(1.8) rotate(-14deg); opacity: 0; }
-  18% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
-  75% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(0.96) rotate(-8deg); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(1.8) rotate(-14deg);
+    opacity: 0;
+  }
+  18% {
+    transform: translate(-50%, -50%) scale(1) rotate(-8deg);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(-50%, -50%) scale(1) rotate(-8deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.96) rotate(-8deg);
+    opacity: 0;
+  }
 }
 
 @keyframes stamp-stay {
-  0% { transform: translate(-50%, -50%) scale(1.8) rotate(-14deg); opacity: 0; }
-  100% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
+  0% {
+    transform: translate(-50%, -50%) scale(1.8) rotate(-14deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(-8deg);
+    opacity: 1;
+  }
 }
 
 @keyframes ballot-show {
-  0% { transform: translateY(18%) rotate(-7deg); opacity: 0; }
-  100% { transform: translateY(0) rotate(-2deg); opacity: 1; }
+  0% {
+    transform: translateY(18%) rotate(-7deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) rotate(-2deg);
+    opacity: 1;
+  }
 }
 
 @keyframes ballot-shake {
-  0%, 100% { transform: translateX(0) rotate(-2deg); }
-  20% { transform: translateX(-6%) rotate(-5deg); }
-  40% { transform: translateX(5%) rotate(2deg); }
-  60% { transform: translateX(-3%) rotate(-3deg); }
-  80% { transform: translateX(2%) rotate(-1deg); }
+  0%,
+  100% {
+    transform: translateX(0) rotate(-2deg);
+  }
+  20% {
+    transform: translateX(-6%) rotate(-5deg);
+  }
+  40% {
+    transform: translateX(5%) rotate(2deg);
+  }
+  60% {
+    transform: translateX(-3%) rotate(-3deg);
+  }
+  80% {
+    transform: translateX(2%) rotate(-1deg);
+  }
 }
 
 @keyframes combo-pop {
-  0% { transform: scale(2.2) rotate(-12deg); opacity: 0; }
-  60% { transform: scale(0.95) rotate(4deg); opacity: 1; }
-  100% { transform: scale(1) rotate(3deg); opacity: 1; }
+  0% {
+    transform: scale(2.2) rotate(-12deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.95) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(3deg);
+    opacity: 1;
+  }
 }
 
 @keyframes fuse-hot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
 
 @keyframes gunungan-stand {
-  0% { transform: translate(-50%, 30%) scale(0.7); opacity: 0; }
-  100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  0% {
+    transform: translate(-50%, 30%) scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes gunungan-lift {
-  0% { transform: translate(-50%, 0) rotate(0deg); opacity: 1; }
-  100% { transform: translate(-50%, -90%) rotate(-14deg) scale(0.8); opacity: 0; }
+  0% {
+    transform: translate(-50%, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -90%) rotate(-14deg) scale(0.8);
+    opacity: 0;
+  }
 }
 
 @keyframes count-pop {
-  0% { transform: translate(-50%, -50%) scale(1.9) rotate(-10deg); opacity: 0; }
-  100% { transform: translate(-50%, -50%) scale(1) rotate(-4deg); opacity: 1; }
+  0% {
+    transform: translate(-50%, -50%) scale(1.9) rotate(-10deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(-4deg);
+    opacity: 1;
+  }
 }
 
 @keyframes ballot-fly-left {
-  0% { transform: rotate(-6deg); opacity: 1; }
-  100% { transform: translate(-48%, 150%) rotate(-24deg) scale(0.3); opacity: 0.2; }
+  0% {
+    transform: rotate(-6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-48%, 150%) rotate(-24deg) scale(0.3);
+    opacity: 0.2;
+  }
 }
 
 @keyframes ballot-fly-right {
-  0% { transform: rotate(6deg); opacity: 1; }
-  100% { transform: translate(48%, 150%) rotate(24deg) scale(0.3); opacity: 0.2; }
+  0% {
+    transform: rotate(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(48%, 150%) rotate(24deg) scale(0.3);
+    opacity: 0.2;
+  }
 }
 
 @keyframes fade-away {
-  to { opacity: 0; }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes smoke-rise {
-  0% { transform: translateY(0) scale(0.5); opacity: 0; }
-  25% { opacity: 1; }
-  100% { transform: translateY(-260%) scale(1.8); opacity: 0; }
+  0% {
+    transform: translateY(0) scale(0.5);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-260%) scale(1.8);
+    opacity: 0;
+  }
 }
 
 @keyframes camera-flash {
-  0% { opacity: 0.95; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes press-in {
-  from { transform: translateY(40%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(40%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes hold-glow {
-  from { box-shadow: 0 6px 0 rgba(40, 14, 6, 0.5), 0 0 0 0 rgba(228, 87, 46, 0.6); }
-  to { box-shadow: 0 6px 0 rgba(40, 14, 6, 0.5), 0 0 0 3cqw rgba(228, 87, 46, 0); }
+  from {
+    box-shadow:
+      0 6px 0 rgba(40, 14, 6, 0.5),
+      0 0 0 0 rgba(228, 87, 46, 0.6);
+  }
+  to {
+    box-shadow:
+      0 6px 0 rgba(40, 14, 6, 0.5),
+      0 0 0 3cqw rgba(228, 87, 46, 0);
+  }
 }
 
 @keyframes bottle-wobble {
-  0%, 100% { transform: rotate(0); }
-  25% { transform: rotate(-4deg); }
-  60% { transform: rotate(3deg); }
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-4deg);
+  }
+  60% {
+    transform: rotate(3deg);
+  }
 }
 
 @keyframes crowd-walk {
-  from { translate: 0 0; }
-  to { translate: 0 -8%; }
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -8%;
+  }
 }
 
 @keyframes note-riffle {
-  from { top: -50%; }
-  to { top: 105%; }
+  from {
+    top: -50%;
+  }
+  to {
+    top: 105%;
+  }
 }
 
 @keyframes machine-shake {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0.3cqw 0; }
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0.3cqw 0;
+  }
 }
 
 @keyframes machine-feed {
-  to { translate: 30cqw -2cqw; opacity: 0; scale: 0.6; }
+  to {
+    translate: 30cqw -2cqw;
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+@keyframes seal-slam {
+  0% {
+    scale: 1;
+  }
+  30% {
+    scale: 0.86;
+    box-shadow: 0 0 0 rgba(20, 8, 2, 0.35);
+  }
+  100% {
+    scale: 1;
+  }
 }
 
 @keyframes piece-fall {
-  to { translate: 0 40%; rotate: 8deg; opacity: 0; }
+  to {
+    translate: 0 40%;
+    rotate: 8deg;
+    opacity: 0;
+  }
 }
 
 @keyframes bottle-tip {
-  to { transform: rotate(-24deg); }
+  to {
+    transform: rotate(-24deg);
+  }
 }
 
 @keyframes senduk-stir {
-  from { transform: rotate(-9deg); }
-  to { transform: rotate(9deg); }
+  from {
+    transform: rotate(-9deg);
+  }
+  to {
+    transform: rotate(9deg);
+  }
 }
 
 @keyframes gunungan-sweep {
-  0% { transform: translate(-50%, -50%) translateX(75%) rotate(10deg) scale(0.5); opacity: 0; }
-  12% { opacity: 1; }
-  45%, 55% { transform: translate(-50%, -50%) translateX(0) rotate(0deg) scale(1.15); opacity: 1; }
-  88% { opacity: 1; }
-  100% { transform: translate(-50%, -50%) translateX(-75%) rotate(-10deg) scale(0.5); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) translateX(75%) rotate(10deg) scale(0.5);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  45%,
+  55% {
+    transform: translate(-50%, -50%) translateX(0) rotate(0deg) scale(1.15);
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translateX(-75%) rotate(-10deg) scale(0.5);
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -379,6 +570,14 @@
 }
 
 @keyframes gunungan-fade {
-  0%, 100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0; }
-  40%, 60% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 0;
+  }
+  40%,
+  60% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 1;
+  }
 }

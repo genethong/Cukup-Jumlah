@@ -4,9 +4,12 @@ import { BalingRisalah } from "./games/BalingRisalah";
 import { BayarDeposit } from "./games/BayarDeposit";
 import { Borang14 } from "./games/Borang14";
 import { CelupDakwat } from "./games/CelupDakwat";
+import { CopWatikah } from "./games/CopWatikah";
 import { GorengKueyTeow } from "./games/GorengKueyTeow";
+import { JogetTrend } from "./games/JogetTrend";
 import { PacakBendera } from "./games/PacakBendera";
 import { PecutSPR } from "./games/PecutSPR";
+import { RebutKamera } from "./games/RebutKamera";
 import { SemakBorang } from "./games/SemakBorang";
 import { SusunManifesto } from "./games/SusunManifesto";
 import { PerangSpeaker } from "./games/PerangSpeaker";
@@ -39,6 +42,8 @@ const BUILT: Partial<Record<RoundId, MicrogameEntry>> = {
   baling_risalah: { Game: BalingRisalah, layout: "cameo", howTo: GAME_TEXT.baling.howTo, bars: 5 },
   pacak_bendera: { Game: PacakBendera, layout: "cameo", howTo: GAME_TEXT.pacak.howTo, bars: 5 },
   semak_borang: { Game: SemakBorang, layout: "cameo", howTo: GAME_TEXT.semak.howTo, bars: 5 },
+  cop_watikah: { Game: CopWatikah, layout: "cameo", howTo: GAME_TEXT.cop.howTo, bars: 6 },
+  rebut_kamera: { Game: RebutKamera, layout: "cameo", howTo: GAME_TEXT.rebut.howTo, bars: 5 },
   pecut_spr: { Game: PecutSPR, layout: "cameo", howTo: GAME_TEXT.pecut.howTo, bars: 6 },
   susun_manifesto: {
     Game: SusunManifesto,
@@ -46,6 +51,7 @@ const BUILT: Partial<Record<RoundId, MicrogameEntry>> = {
     howTo: GAME_TEXT.susun.howTo,
     bars: 7,
   },
+  joget_trend: { Game: JogetTrend, layout: "full", howTo: GAME_TEXT.joget.howTo, bars: 8 },
   borang_14: { Game: Borang14, layout: "between", howTo: GAME_TEXT.borang14.tapHint },
   goreng_kueyteow: { Game: GorengKueyTeow, layout: "stall", howTo: GAME_TEXT.goreng.howTo },
   celup_dakwat: { Game: CelupDakwat, layout: "side", howTo: GAME_TEXT.celup.howTo },

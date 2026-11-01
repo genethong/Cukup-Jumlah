@@ -14,8 +14,8 @@ Agreed with Axel on 1 Nov 2026. Status: ✅ built, ⬜ to build.
 | ✅ Pecut SPR | PECUT! | Lane dodge | Dash through supporters to the nomination centre before 10:00 | Papers are accepted only 9–10am |
 | ✅ Semak Borang | SEMAK! | Spot the mistake | Tap the one wrong field on each nomination form (age 17, no signature, no deposit receipt) | A candidate must be a citizen aged 18+ (Federal Constitution Art. 47) |
 | ✅ Bayar Deposit | KIRA! | Count to exact | Drag RM1,000 / RM500 / RM100 bundles to pay exactly RM10,000; overpaying costs time. Pakar Kira shows a running total | RM10,000 for Parliament, lost below 1/8 of the votes; a separate RM5,000 campaign-material deposit |
-| ⬜ Cop Watikah | COP! | Stamp on the move | As leader, stamp the party seal in the box of each candidate's letter as it slides past; skip letters with a crossed-out name | Party candidates need the party's letter of authority to use its symbol |
-| ⬜ Rebut Kamera | SENYUM! | Step into the gap | Step into a gap in the group-photo line as the shutter fires; bumping someone is an "elbow" photo | (satire) |
+| ✅ Cop Watikah | COP! | Stamp on the move | As leader, stamp the party seal in the box of each candidate's letter as it slides past, unevenly spaced; the box sits left, centre or right. Skip letters with a crossed-out name or a rival party's letterhead | Party candidates need the party's letter of authority to use its symbol |
+| ✅ Rebut Kamera | SENYUM! | Step into the gap | Step into a gap in the group-photo line as the shutter fires; bumping someone is an "elbow" photo. From the second photo a latecomer wanders behind the line, then at the last moment heads for one gap and steps in just before the click | (satire) |
 
 ## Act 2: Campaign
 
@@ -26,7 +26,7 @@ Agreed with Axel on 1 Nov 2026. Status: ✅ built, ⬜ to build.
 | ⬜ Turap Jalan | TURAP! | Trace the road | Roll the road over the potholes before the photo car arrives (could become *Tampal Lubang*, the one-bucket pothole photo-op) | (satire) |
 | ✅ Susun Manifesto | JANJI! | Stacker | Drop promise blocks onto the manifesto tower; whatever overhangs breaks off as a broken promise; stack 8 | (satire) |
 | ✅ Baling Risalah | EDAR! | Flick only leaflets | Flick leaflets to passers-by; gifts (cash envelope, rice) go in the bin | Giving money or gifts to influence a vote is bribery, food and drink is treating (Election Offences Act 1954) |
-| ⬜ Joget Trend | JOGET! | Copy the dance | Copy a viral dance of about four puppet poses, in order, before the trend dies | GE15 was called the "TikTok election" |
+| ✅ Joget Trend | JOGET! | Copy the dance | A trend-setter shows a dance one pose a beat (arms up, lean left, lean right, squat); swipe anywhere (or the arrow keys) to copy it in order. Three dances (3, 3, 4 poses); a wrong pose replays the dance | GE15 was called the "TikTok election" |
 | ⬜ Cuci Longkang | SENTAL! | Rub it clean | Rub muck patches clean; dirty patches smell and residents' complaints pile up; the reporter arrives when the fuse ends | (satire) |
 | ✅ Pacak Bendera | PACAK! | Push your luck | Plant flags until just before 11:59pm, never inside the ring around the polling centre | Campaigning ends 11:59pm the night before polling; material within 50 m of a polling centre is an offence |
 
@@ -60,5 +60,6 @@ rejected ballots.
 ## Build order
 
 1. Baling Risalah, Bayar Deposit, Pacak Bendera
-2. Semak Borang, Pecut SPR, Potong Reben
-3. The rest
+2. Semak Borang, Pecut SPR, Potong Reben (now Susun Manifesto)
+3. Cop Watikah, Rebut Kamera, Joget Trend
+4. The rest
