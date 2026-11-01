@@ -7,6 +7,7 @@ import {
   floorVerdict,
   makeDances,
   shownMove,
+  shownSoFar,
   strike,
   type Floor,
   type Move,
@@ -41,6 +42,9 @@ describe("Joget Trend rules", () => {
     expect(shownMove(DANCES, FRESH_FLOOR, SPB * 2.2, SPB)).toBe("left");
     expect(advanceShow(DANCES, FRESH_FLOOR, SPB * 3.5, SPB).stage.kind).toBe("show");
     expect(toCopy(FRESH_FLOOR).stage).toEqual({ kind: "copy", dance: 0, step: 0 });
+    expect(shownSoFar(DANCES, FRESH_FLOOR, 0.1, SPB)).toEqual([]);
+    expect(shownSoFar(DANCES, FRESH_FLOOR, SPB * 2.2, SPB)).toEqual(["up", "left"]);
+    expect(shownSoFar(DANCES, FRESH_FLOOR, SPB * 9, SPB)).toEqual(DANCES[0]);
   });
 
   it("ignores poses while the dance is being shown", () => {

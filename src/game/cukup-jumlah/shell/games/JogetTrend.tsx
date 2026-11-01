@@ -15,6 +15,7 @@ import {
   floorVerdict,
   makeDances,
   shownMove,
+  shownSoFar,
   strike,
   type Floor,
   type Move,
@@ -131,9 +132,20 @@ export function JogetTrend(props: MicrogameProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const swipe = useRef<{ id: number; x: number; y: number; w: number } | null>(null);
+  const swipe = useRef<{ id: number; x: number; y: number; w: number; done: boolean } | null>(null);
+
+  // Stop the page itself from scrolling or bouncing under a swipe.
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const stop = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener("touchmove", stop, { passive: false });
+    return () => el.removeEventListener("touchmove", stop);
+  }, []);
 
   const shown = shownMove(dances, floor, now, clock.spb);
+  const soFar = shownSoFar(dances, floor, now, clock.spb);
   const holding = now - mine.at < HOLD_S;
   const myPose = holding && mine.move ? POSES[mine.move] : undefined;
   const myFace: ExpressionId | null = holding ? (mine.wrong ? "shocked_o" : "big_laugh") : null;
@@ -144,20 +156,22 @@ export function JogetTrend(props: MicrogameProps) {
     <div
       className="absolute inset-0 z-10 select-none"
       style={{ touchAction: "none" }}
+      ref={root}
       onPointerDown={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
-        swipe.current = { id: e.pointerId, x: e.clientX, y: e.clientY, w: r.width };
+        swipe.current = { id: e.pointerId, x: e.clientX, y: e.clientY, w: r.width, done: false };
+        e.currentTarget.setPointerCapture?.(e.pointerId);
       }}
-      onPointerUp={(e) => {
+      // A pose strikes as soon as the finger has travelled far enough, one per swipe.
+      onPointerMove={(e) => {
         const s = swipe.current;
-        swipe.current = null;
-        if (!s || s.id !== e.pointerId) return;
-        const dx = ((e.clientX - s.x) / s.w) * 100;
-        const dy = ((e.clientY - s.y) / s.w) * 100;
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE) return;
-        if (Math.abs(dx) > Math.abs(dy)) dance(dx < 0 ? "left" : "right");
-        else dance(dy < 0 ? "up" : "down");
+        if (!s || s.id !== e.pointerId || s.done) return;
+        const move = swipeMove(e.clientX - s.x, e.clientY - s.y, s.w);
+        if (!move) return;
+        s.done = true;
+        dance(move);
       }}
+      onPointerUp={() => (swipe.current = null)}
       onPointerCancel={() => (swipe.current = null)}
     >
       {/* The trend-setter's video on a phone. */}
@@ -176,6 +190,17 @@ export function JogetTrend(props: MicrogameProps) {
         <span className="absolute top-[4%] right-[6%] rounded-full bg-[#1f1a26]/80 px-[1.2cqw] font-tally text-[2.4cqw] text-[#f3ebdf]">
           ♥ {formatLikes(likes, lang)} {T.likes[lang]}
         </span>
+        {/* The moves shown so far, as the video's caption. */}
+        <div className="absolute inset-x-0 bottom-[17%] flex justify-center gap-[0.8cqw]">
+          {soFar.map((m, k) => (
+            <span
+              key={k}
+              className="flex h-[5cqw] w-[5cqw] items-center justify-center rounded-full bg-[#f3ebdf]/90 font-display text-[3.6cqw] font-bold text-[var(--ink)]"
+            >
+              {ARROWS[m]}
+            </span>
+          ))}
+        </div>
         {shown && (
           <span
             key={`arrow-${now - (now % clock.spb)}`}
@@ -188,6 +213,14 @@ export function JogetTrend(props: MicrogameProps) {
 
       {/* The YB, copying. */}
       <div className="pointer-events-none absolute top-[45%] right-[3%] h-[44%] w-[48%]">
+        {holding && mine.move && (
+          <span
+            key={`swiped-${mine.at}`}
+            className="combo-pop absolute top-[40%] left-1/2 z-10 -translate-x-1/2 font-display text-[12cqw] font-bold text-[var(--sambal)] opacity-80"
+          >
+            {ARROWS[mine.move]}
+          </span>
+        )}
         <PuppetAvatar
           config={myFace ? { ...candidate.puppet, expression: myFace } : candidate.puppet}
           pose={myPose}
@@ -223,27 +256,18 @@ export function JogetTrend(props: MicrogameProps) {
         )}
       </div>
 
-      {/* The four pose buttons. */}
-      <div className="absolute inset-x-[4%] bottom-[2.5%] flex justify-between gap-[2cqw]">
-        {(["left", "up", "down", "right"] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            aria-label={m}
-            className={`flex h-[12cqw] flex-1 items-center justify-center rounded-[2cqw] font-display text-[7cqw] font-bold shadow-[0_0.8cqw_0_rgba(40,14,6,0.5)] active:translate-y-[0.6cqw] active:shadow-none ${
-              stage.kind === "copy"
-                ? "bg-[#efe1c3] text-[var(--ink)]"
-                : "bg-[#efe1c3]/50 text-[var(--ink)]/50"
-            }`}
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              dance(m);
-            }}
-          >
-            {ARROWS[m]}
-          </button>
-        ))}
+      {/* Swipe anywhere; the pad shows which way strikes which pose. */}
+      <div
+        className={`pointer-events-none absolute inset-x-[4%] bottom-[2.5%] flex items-center justify-center gap-[2cqw] rounded-[2cqw] border-[0.5cqw] border-dashed py-[1.6cqw] ${
+          stage.kind === "copy"
+            ? "border-[var(--sambal)] bg-[#efe1c3]"
+            : "border-[#6b6965]/50 bg-[#efe1c3]/50"
+        }`}
+      >
+        <span className="font-tally text-[3.4cqw] tracking-[0.06em] text-[var(--ink)] uppercase">
+          {T.swipe[lang]}
+        </span>
+        <span className="font-display text-[5cqw] font-bold text-[var(--ink)]">↑ ← → ↓</span>
       </div>
 
       {pop && !outcome && now - mine.at < 0.9 && (
@@ -267,6 +291,15 @@ export function JogetTrend(props: MicrogameProps) {
       )}
     </div>
   );
+}
+
+/** Which pose a swipe of (dx, dy) pixels strikes, once it is long enough. */
+function swipeMove(dx: number, dy: number, width: number): Move | null {
+  const x = (dx / width) * 100;
+  const y = (dy / width) * 100;
+  if (Math.max(Math.abs(x), Math.abs(y)) < SWIPE) return null;
+  if (Math.abs(x) > Math.abs(y)) return x < 0 ? "left" : "right";
+  return y < 0 ? "up" : "down";
 }
 
 function formatLikes(n: number, lang: "ms" | "en"): string {

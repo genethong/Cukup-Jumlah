@@ -438,8 +438,8 @@ export const GAME_TEXT = {
   },
   cop: {
     howTo: {
-      ms: "Ketuk: cop dalam kotak · langkau nama dipotong",
-      en: "Tap: seal in the box · skip crossed-out names",
+      ms: "Cop dalam kotak · langkau nama dipotong & parti lain",
+      en: "Seal in the box · skip crossed-out names & other parties",
     },
     letter: { ms: "Surat Kebenaran Parti", en: "Party Letter of Authority" },
     candidate: { ms: "Calon", en: "Candidate" },
@@ -449,6 +449,7 @@ export const GAME_TEXT = {
     ok: { ms: "Sah!", en: "Sealed!" },
     crooked: { ms: "Cop senget!", en: "Crooked seal!" },
     crossed: { ms: "Nama dah dipotong!", en: "That name's crossed out!" },
+    rival: { ms: "Bukan surat parti kita!", en: "Not our party's letter!" },
     gone: { ms: "Tiada watikah!", en: "No letter!" },
     count: { ms: "Watikah", en: "Letters" },
     won: { ms: "Semua calon dapat watikah!", en: "Every candidate has a letter!" },
@@ -469,7 +470,8 @@ export const GAME_TEXT = {
     lost: { ms: "Gambar rosak!", en: "The photos are ruined!" },
   },
   joget: {
-    howTo: { ms: "Tengok, kemudian tiru tarian", en: "Watch, then copy the dance" },
+    howTo: { ms: "Tengok, kemudian leret untuk tiru", en: "Watch, then swipe to copy" },
+    swipe: { ms: "Leret di mana-mana", en: "Swipe anywhere" },
     watch: { ms: "TENGOK!", en: "WATCH!" },
     you: { ms: "GILIRAN ANDA!", en: "YOUR TURN!" },
     wrong: { ms: "Langkah sumbang!", en: "Wrong step!" },

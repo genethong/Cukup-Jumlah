@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { crowdCheer, gendangHit, gendangMiss, shutter, tick } from "../../beat/wayangSounds";
 import { PARTIES } from "../../creator/candidate";
-import { PuppetCameo } from "../../puppet/PuppetAvatar";
+import { PuppetAvatar } from "../../puppet/PuppetAvatar";
+import { randomConfig } from "../../puppet/options";
 import { mistakesAllowed, type MicrogameProps } from "../microgame";
 import { GAME_TEXT } from "../strings";
 import { useRound } from "../useRound";
 import {
   FIGURE_W,
+  MEMBERS,
   PHOTOS,
   PHOTO_S,
   SHUFFLE_S,
@@ -23,9 +25,11 @@ import {
 } from "./rebutRules";
 
 const T = GAME_TEXT.rebut;
-/** Where the line stands: the figures' feet, in % of the stage height. */
-const FEET_Y = 84;
-const FIGURE_H = 24;
+/** Where the line stands: the figures' feet, in % of the stage height, and how big each
+ *  puppet is drawn (wider than FIGURE_W, the room it takes in the line). */
+const FEET_Y = 89;
+const FIGURE_H = 36;
+const PUPPET_W = 22;
 
 type Shot = "good" | "elbow";
 
@@ -35,6 +39,8 @@ export function RebutKamera(props: MicrogameProps) {
   const colour = PARTIES.find((p) => p.id === candidate.party)?.colour ?? "#8a1c19";
 
   const [plan] = useState(() => planPhotos());
+  /** The colleagues in the line, and the latecomer last. */
+  const [crew] = useState(() => Array.from({ length: MEMBERS + 1 }, () => randomConfig()));
   const [now, setNow] = useState(0);
   const [yb, setYb] = useState(50);
   const [shots, setShots] = useState<Shot[]>([]);
@@ -109,6 +115,7 @@ export function RebutKamera(props: MicrogameProps) {
   const line = late?.stepped ? [...members, late.x] : members;
   const bumped = (x: number) => FIGURE_W - Math.abs(x - yb) > TOUCH;
   const lastShot = shots.at(-1);
+  const walking = Math.abs(target.current - yb) > 1 && !outcome;
   // Just after a click, the line holds still for the photo.
   const justShot = shots.length > 0 && now - shutterAt(shots.length - 1) < 0.45;
 
@@ -143,85 +150,71 @@ export function RebutKamera(props: MicrogameProps) {
 
       {/* The latecomer, waiting behind a gap. */}
       {late && !late.stepped && (
-        <div
-          className="pointer-events-none absolute opacity-60"
-          style={{
-            left: `${late.x - FIGURE_W / 2}%`,
-            width: `${FIGURE_W}%`,
-            top: `${FEET_Y - FIGURE_H - 7}%`,
-            height: `${FIGURE_H}%`,
-          }}
-        >
-          <Colleague variant={3} colour={colour} tilt={0} />
-          <span className="hold-glow absolute -top-[12%] left-1/2 -translate-x-1/2 rounded-full bg-[var(--sambal)] px-[1.2cqw] font-display text-[3.4cqw] font-bold text-[var(--cream)]">
+        <Figure x={late.x} lift={6} className="opacity-70">
+          <PuppetAvatar config={crew[MEMBERS]!} anim="idle" />
+          <span className="hold-glow absolute top-[2%] left-1/2 -translate-x-1/2 rounded-full bg-[var(--sambal)] px-[1.4cqw] font-display text-[3.6cqw] font-bold text-[var(--cream)]">
             !
           </span>
+        </Figure>
+      )}
+
+      {line.map((x, k) => {
+        const shoved = bumped(x) && justShot && lastShot === "elbow";
+        return (
+          <Figure
+            key={k}
+            x={x}
+            tilt={shoved ? (x < yb ? -12 : 12) : 0}
+            className={k >= members.length ? "press-in" : ""}
+          >
+            <PuppetAvatar
+              config={shoved ? { ...crew[k]!, expression: "angry_shout" } : crew[k]!}
+              anim={justShot && lastShot === "good" ? "hop" : shoved ? "rod-wiggle" : "idle"}
+            />
+          </Figure>
+        );
+      })}
+
+      {/* The YB, in front, trying to get into the shot. */}
+      <Figure x={yb} lift={-1.5} className="z-10">
+        <span
+          className="absolute bottom-[0%] left-1/2 h-[6%] w-[80%] -translate-x-1/2 rounded-[50%] opacity-60"
+          style={{ background: colour }}
+        />
+        <PuppetAvatar
+          config={
+            justShot
+              ? { ...candidate.puppet, expression: lastShot === "good" ? "big_laugh" : "shocked_o" }
+              : candidate.puppet
+          }
+          anim={
+            justShot ? (lastShot === "good" ? "hop" : "still") : walking ? "rod-wiggle" : "idle"
+          }
+          label={candidate.name}
+        />
+        <span
+          className="absolute top-[12%] left-1/2 h-0 w-0 -translate-x-1/2 border-x-[1.8cqw] border-t-[2.6cqw] border-x-transparent"
+          style={{ borderTopColor: colour }}
+        />
+      </Figure>
+
+      {/* The camera's viewfinder over the line while it counts down. */}
+      {live && count > 0 && !outcome && (
+        <div className="pointer-events-none absolute inset-x-[2%] top-[46%] bottom-[10%] z-10">
+          {[
+            "top-0 left-0 border-t-[0.8cqw] border-l-[0.8cqw]",
+            "top-0 right-0 border-t-[0.8cqw] border-r-[0.8cqw]",
+            "bottom-0 left-0 border-b-[0.8cqw] border-l-[0.8cqw]",
+            "bottom-0 right-0 border-b-[0.8cqw] border-r-[0.8cqw]",
+          ].map((c) => (
+            <span key={c} className={`absolute h-[10%] w-[10%] border-[#fbf6ea] ${c}`} />
+          ))}
         </div>
       )}
 
-      {line.map((x, k) => (
-        <div
-          key={k}
-          className={`pointer-events-none absolute ${k >= members.length ? "press-in" : ""}`}
-          style={{
-            left: `${x - FIGURE_W / 2}%`,
-            width: `${FIGURE_W}%`,
-            top: `${FEET_Y - FIGURE_H}%`,
-            height: `${FIGURE_H}%`,
-          }}
-        >
-          <Colleague
-            variant={k}
-            colour={colour}
-            tilt={bumped(x) && justShot && lastShot === "elbow" ? (x < yb ? -14 : 14) : 0}
-          />
-        </div>
-      ))}
-
-      {/* The YB, in front, trying to get into the shot. */}
-      <div
-        className="pointer-events-none absolute z-10"
-        style={{
-          left: `${yb - FIGURE_W / 2}%`,
-          width: `${FIGURE_W}%`,
-          top: `${FEET_Y - FIGURE_H + 1}%`,
-          height: `${FIGURE_H}%`,
-        }}
-      >
-        <span
-          className="absolute -top-[16%] left-1/2 h-0 w-0 -translate-x-1/2 border-x-[1.6cqw] border-t-[2.2cqw] border-x-transparent"
-          style={{ borderTopColor: colour }}
-        />
-        <span className="absolute -bottom-[3%] left-1/2 h-[6%] w-[120%] -translate-x-1/2 rounded-[50%] bg-[#2b2522]/35" />
-        <div className="absolute top-0 left-1/2 aspect-square w-[92%] -translate-x-1/2 overflow-hidden rounded-full">
-          <PuppetCameo
-            config={
-              justShot
-                ? {
-                    ...candidate.puppet,
-                    expression: lastShot === "good" ? "big_laugh" : "shocked_o",
-                  }
-                : candidate.puppet
-            }
-            className="h-full w-full scale-110"
-          />
-        </div>
-        <svg
-          viewBox="0 0 40 60"
-          className="absolute bottom-0 left-0 h-[62%] w-full"
-          aria-hidden="true"
-        >
-          <path d="M8 4 Q20 0 32 4 L34 36 H6 Z" fill={colour} />
-          <path d="M8 6 L4 32" stroke={colour} strokeWidth="6" strokeLinecap="round" />
-          <path d="M32 6 L36 32" stroke={colour} strokeWidth="6" strokeLinecap="round" />
-          <rect x="10" y="36" width="8" height="22" rx="2" fill="#3a3f46" />
-          <rect x="22" y="36" width="8" height="22" rx="2" fill="#3a3f46" />
-        </svg>
-      </div>
-
       {/* The photographer's countdown, and the flash. */}
       {live && count > 0 && !outcome && (
-        <div className="pointer-events-none absolute top-[88%] left-1/2 z-20 flex -translate-x-1/2 items-center gap-[1.4cqw] rounded-full bg-[#2b2522]/90 px-[2.4cqw] py-[0.4cqw]">
+        <div className="pointer-events-none absolute top-[91%] left-1/2 z-20 flex -translate-x-1/2 items-center gap-[1.4cqw] rounded-full bg-[#2b2522]/90 px-[2.4cqw] py-[0.4cqw]">
           <span className="text-[4.4cqw]">📷</span>
           <span
             key={`count-${i}-${count}`}
@@ -273,7 +266,7 @@ export function RebutKamera(props: MicrogameProps) {
       )}
 
       {live && !outcome && now < 1.2 && (
-        <span className="pointer-events-none absolute top-[93%] left-1/2 -translate-x-1/2 rounded-sm bg-[#2b2522]/80 px-[2cqw] py-[0.5cqw] font-tally text-[3.2cqw] tracking-[0.06em] whitespace-nowrap text-[var(--cream)] uppercase">
+        <span className="pointer-events-none absolute top-[96%] left-1/2 -translate-x-1/2 rounded-sm bg-[#2b2522]/80 px-[2cqw] py-[0.5cqw] font-tally text-[3.2cqw] tracking-[0.06em] whitespace-nowrap text-[var(--cream)] uppercase">
           {T.dragHint[lang]}
         </span>
       )}
@@ -295,26 +288,37 @@ function countdown(t: number, i: number): number {
   return 3 - Math.floor((rel - SHUFFLE_S) / step);
 }
 
-/** A party colleague in the line: cream baju, a party sash, shadow-puppet head. */
-function Colleague({ variant, colour, tilt }: { variant: number; colour: string; tilt: number }) {
-  const skin = ["#5a3a24", "#7a5034", "#9a6a44", "#6a4429", "#84583a"][variant % 5]!;
+/** One figure in the photo, centred on `x`, standing on the line (or `lift` % behind it).
+ *  The puppet is drawn wider than the space it takes in the line, as people crowd in. */
+function Figure({
+  x,
+  lift = 0,
+  tilt = 0,
+  className = "",
+  children,
+}: {
+  x: number;
+  lift?: number;
+  tilt?: number;
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <svg
-      viewBox="0 0 40 80"
-      className="h-full w-full overflow-visible transition-transform duration-150"
-      style={{ transform: `rotate(${tilt}deg)`, transformOrigin: "50% 100%" }}
-      aria-hidden="true"
+    <div
+      className={`pointer-events-none absolute ${className}`}
+      style={{
+        left: `${x - PUPPET_W / 2}%`,
+        width: `${PUPPET_W}%`,
+        top: `${FEET_Y - FIGURE_H - lift}%`,
+        height: `${FIGURE_H}%`,
+      }}
     >
-      <circle cx="20" cy="14" r="10" fill={skin} />
-      {variant % 3 === 0 && <path d="M10 10 Q20 0 30 10 Z" fill="#2b2522" />}
-      {variant % 3 === 1 && <rect x="11" y="3" width="18" height="7" rx="2" fill="#2b2522" />}
-      {variant % 3 === 2 && <path d="M9 12 Q20 -2 31 12 L31 22 Q20 18 9 22 Z" fill="#2b2522" />}
-      <path d="M8 26 Q20 22 32 26 L34 56 H6 Z" fill="#f3ebdf" stroke="#c9bfae" />
-      <path d="M10 26 L30 52" stroke={colour} strokeWidth="5" />
-      <path d="M8 28 L5 52" stroke="#f3ebdf" strokeWidth="6" strokeLinecap="round" />
-      <path d="M32 28 L35 52" stroke="#f3ebdf" strokeWidth="6" strokeLinecap="round" />
-      <rect x="10" y="56" width="8" height="22" rx="2" fill="#3a3f46" />
-      <rect x="22" y="56" width="8" height="22" rx="2" fill="#3a3f46" />
-    </svg>
+      <div
+        className="relative h-full w-full transition-transform duration-150"
+        style={{ transform: `rotate(${tilt}deg)`, transformOrigin: "50% 100%" }}
+      >
+        {children}
+      </div>
+    </div>
   );
 }

@@ -1,14 +1,14 @@
 // Joget Trend (JOGET!): copy the viral dance. A trend-setter on a phone shows a short dance,
-// one pose a beat; then it's the YB's turn to strike the same poses in the same order (swipe,
-// arrow keys or the four pose buttons). A wrong pose is a mistake and the dance is shown
-// again. Copy every dance before the trend dies (the fuse).
+// one pose a beat; then it's the YB's turn to strike the same poses in the same order (swipe
+// anywhere, or the arrow keys). A wrong pose is a mistake and the dance is shown again.
+// Copy every dance before the trend dies (the fuse).
 // Pure rules here; the screen is JogetTrend.tsx.
 
 export type Move = "up" | "left" | "right" | "down";
 export const MOVES: readonly Move[] = ["up", "left", "right", "down"];
 
 /** How many poses each dance has. */
-export const DANCE_LENGTHS = [3, 4, 4];
+export const DANCE_LENGTHS = [3, 3, 4];
 /** Beats of rest before a dance is shown (the first gets one, so play opens on it). */
 export const REST_BEATS = 1;
 
@@ -40,6 +40,13 @@ export function shownMove(dances: Move[][], f: Floor, t: number, spb: number): M
   if (f.stage.kind !== "show") return null;
   const beat = Math.floor((t - f.stage.from) / spb) - REST_BEATS;
   return beat >= 0 ? (dances[f.stage.dance]![beat] ?? null) : null;
+}
+
+/** The poses of the dance being shown so far, for the phone's caption. */
+export function shownSoFar(dances: Move[][], f: Floor, t: number, spb: number): Move[] {
+  if (f.stage.kind !== "show") return [];
+  const beat = Math.floor((t - f.stage.from) / spb) - REST_BEATS;
+  return beat >= 0 ? dances[f.stage.dance]!.slice(0, beat + 1) : [];
 }
 
 /** Once the last pose has been shown for a beat, the floor is the YB's. */

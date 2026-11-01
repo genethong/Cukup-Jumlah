@@ -26,6 +26,7 @@ import {
   sealedCount,
   stampAt,
   type Desk,
+  type Kind,
 } from "./copRules";
 
 const T = GAME_TEXT.cop;
@@ -56,7 +57,11 @@ export function CopWatikah(props: MicrogameProps) {
   const party = PARTIES.find((p) => p.id === candidate.party);
   const colour = party?.colour ?? "#8a1c19";
 
-  const [crossed] = useState(() => dealLetters());
+  const [letters] = useState(() => dealLetters());
+  const [rival] = useState(() => {
+    const others = PARTIES.filter((p) => p.id !== candidate.party);
+    return others[Math.floor(Math.random() * others.length)] ?? PARTIES[0]!;
+  });
   const [names] = useState(() => [...NAMES].sort(() => Math.random() - 0.5));
   const [desk, setDesk] = useState<Desk>(FRESH_DESK);
   const [now, setNow] = useState(0);
@@ -69,7 +74,7 @@ export function CopWatikah(props: MicrogameProps) {
   const settle = (next: Desk, t: number) => {
     deskRef.current = next;
     setDesk(next);
-    const v = deskVerdict(next, crossed, allowed, false);
+    const v = deskVerdict(next, letters, allowed, false);
     if (v === "won") {
       crowdCheer(clock.ctx, clock.out, t + 0.05);
       end(true);
@@ -82,14 +87,14 @@ export function CopWatikah(props: MicrogameProps) {
   const { outcome, playing, end } = useRound(props, ({ t, playS, leftS }) => {
     nowRef.current = playS;
     setNow(playS);
-    const gone = newlyGone(deskRef.current, crossed, playS);
+    const gone = newlyGone(deskRef.current, letters, playS);
     if (gone.length) {
       gendangMiss(clock.ctx, clock.out, t);
       onJudge("miss");
       setPop({ id: Math.random(), text: T.gone[lang], good: false });
       settle(markGone(deskRef.current, gone), t);
     }
-    if (deskVerdict(deskRef.current, crossed, allowed, leftS <= 0) === "lost") end(false);
+    if (deskVerdict(deskRef.current, letters, allowed, leftS <= 0) === "lost") end(false);
   });
 
   const stamp = () => {
@@ -98,7 +103,7 @@ export function CopWatikah(props: MicrogameProps) {
     readyAt.current = at + RELOAD_S;
     setSlam((n) => n + 1);
     const t = clock.ctx.currentTime;
-    const s = stampAt(deskRef.current, crossed, at);
+    const s = stampAt(deskRef.current, letters, at);
     const id = Math.random();
     if (s.kind === "empty" || s.kind === "again") {
       gendangTak(clock.ctx, clock.out, t);
@@ -129,7 +134,7 @@ export function CopWatikah(props: MicrogameProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const sealed = sealedCount(desk, crossed);
+  const sealed = sealedCount(desk, letters);
 
   return (
     <div
@@ -157,8 +162,8 @@ export function CopWatikah(props: MicrogameProps) {
         style={{ left: `${STAMP_X}%`, top: `${BELT_TOP - 3}%`, height: `${LETTER_H + 6}%` }}
       />
 
-      {crossed.map((isCrossed, i) => {
-        const x = letterX(i, now);
+      {letters.map((l, i) => {
+        const x = letterX(l, now);
         if (x < -LETTER_HALF - 2 || x > 100 + LETTER_HALF + 2) return null;
         const seal = desk.seals.find((s) => s.letter === i);
         return (
@@ -166,11 +171,13 @@ export function CopWatikah(props: MicrogameProps) {
             key={i}
             x={x}
             name={names[i % names.length]!}
-            crossed={isCrossed}
+            kind={l.kind}
+            box={l.box}
             seal={seal?.off ?? null}
             gone={desk.gone.includes(i)}
-            colour={colour}
+            sealColour={colour}
             icon={party?.icon ?? "★"}
+            head={l.kind === "rival" ? rival : (party ?? rival)}
             lang={lang}
           />
         );
@@ -224,22 +231,28 @@ export function CopWatikah(props: MicrogameProps) {
 function Letter({
   x,
   name,
-  crossed,
+  kind,
+  box,
   seal,
   gone,
-  colour,
+  sealColour,
   icon,
+  head,
   lang,
 }: {
   x: number;
   name: string;
-  crossed: boolean;
+  kind: Kind;
+  box: number;
   seal: number | null;
   gone: boolean;
-  colour: string;
+  sealColour: string;
   icon: string;
+  /** The party on the letterhead: the YB's own, or a rival's on a letter to let go. */
+  head: { name: string; colour: string; icon: string };
   lang: "ms" | "en";
 }) {
+  const colour = sealColour;
   const width = LETTER_HALF * 2;
   const inBox = seal !== null && Math.abs(seal) <= BOX_HALF;
   return (
@@ -254,8 +267,17 @@ function Letter({
         height: `${LETTER_H}%`,
       }}
     >
-      <div className="h-[0.8cqw] w-full rounded-full" style={{ background: colour }} />
-      <p className="mt-[0.8cqw] text-center font-tally text-[2.2cqw] leading-tight tracking-[0.04em] text-[#6b6965] uppercase">
+      {/* The letterhead: the party's colour, icon and name. */}
+      <div
+        className="flex w-full items-center justify-center gap-[0.6cqw] rounded-[0.4cqw] px-[0.6cqw] py-[0.3cqw]"
+        style={{ background: head.colour }}
+      >
+        <span className="text-[2.6cqw] leading-none">{head.icon}</span>
+        <span className="truncate font-tally text-[2.1cqw] leading-tight tracking-[0.03em] text-[#fbf6ea] uppercase">
+          {head.name}
+        </span>
+      </div>
+      <p className="mt-[0.6cqw] text-center font-tally text-[2cqw] leading-tight tracking-[0.04em] text-[#6b6965] uppercase">
         {T.letter[lang]}
       </p>
       <p className="mt-[0.6cqw] text-[2.2cqw] text-[#6b6965]">{T.candidate[lang]}</p>
@@ -263,7 +285,7 @@ function Letter({
         <p className="font-display text-[2.8cqw] leading-tight font-bold whitespace-nowrap text-[var(--ink)]">
           {name}
         </p>
-        {crossed && (
+        {kind === "crossed" && (
           <>
             <span className="absolute top-1/2 -left-[6%] h-[0.8cqw] w-[112%] -rotate-6 rounded-full bg-[var(--sambal)]" />
             <span className="absolute -top-[70%] -right-[10%] rotate-12 font-display text-[2.8cqw] font-bold text-[var(--sambal)]">
@@ -273,11 +295,15 @@ function Letter({
         )}
       </div>
 
-      {/* The seal box sits dead centre; the seal lands wherever the letter was. Sizes are in
-          cqw (stage width), the same unit as the letter's own width. */}
+      {/* The seal box sits left, centre or right; the seal lands wherever the letter was.
+          Sizes are in cqw (stage width), the same unit as the letter's own width. */}
       <div
-        className="absolute left-1/2 flex aspect-square -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[0.6cqw] border-[0.4cqw] border-dashed border-[#a8a29a]"
-        style={{ width: `${BOX_HALF * 2}cqw`, top: `${BOX_AT * 100}%` }}
+        className="absolute flex aspect-square -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[0.6cqw] border-[0.4cqw] border-dashed border-[#a8a29a]"
+        style={{
+          width: `${BOX_HALF * 2}cqw`,
+          top: `${BOX_AT * 100}%`,
+          left: `${50 + (box * 100) / width}%`,
+        }}
       >
         {seal === null && (
           <span className="text-center font-tally text-[1.8cqw] leading-none text-[#a8a29a] uppercase">
@@ -288,7 +314,7 @@ function Letter({
       {seal !== null && (
         <div
           className="absolute h-0 w-0"
-          style={{ left: `${50 + (seal * 100) / width}%`, top: `${BOX_AT * 100}%` }}
+          style={{ left: `${50 + ((box + seal) * 100) / width}%`, top: `${BOX_AT * 100}%` }}
         >
           <div
             className="stamp-stay absolute top-0 left-0 flex aspect-square items-center justify-center rounded-full border-[0.5cqw] text-[3.6cqw]"
