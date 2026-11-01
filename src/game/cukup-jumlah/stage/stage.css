@@ -110,6 +110,16 @@
   animation: hold-glow 480ms ease-in-out infinite alternate;
 }
 
+/* A villager walking across the field. */
+.crowd-walk {
+  animation: crowd-walk 300ms ease-in-out infinite alternate;
+}
+
+/* Villagers wincing at the amp's screech. */
+.ears-shake {
+  animation: bottle-wobble 260ms ease-in-out 3;
+}
+
 /* The ink bottle knocked by the finger. */
 .bottle-wobble {
   animation: bottle-wobble 300ms ease-out;
@@ -245,6 +255,11 @@
   60% { transform: rotate(3deg); }
 }
 
+@keyframes crowd-walk {
+  from { translate: 0 0; }
+  to { translate: 0 -8%; }
+}
+
 @keyframes bottle-tip {
   to { transform: rotate(-24deg); }
 }
@@ -275,6 +290,8 @@
     transform: translate(-50%, -50%) rotate(-8deg);
   }
   .bottle-wobble,
+  .ears-shake,
+  .crowd-walk,
   .bottle-tip,
   .senduk-stir,
   .press-in,

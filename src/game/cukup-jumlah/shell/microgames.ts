@@ -3,6 +3,7 @@ import type { RoundId } from "./flow";
 import { Borang14 } from "./games/Borang14";
 import { CelupDakwat } from "./games/CelupDakwat";
 import { GorengKueyTeow } from "./games/GorengKueyTeow";
+import { PerangSpeaker } from "./games/PerangSpeaker";
 import type { MicrogameProps, StageLayout } from "./microgame";
 import { GAME_TEXT, UI, type Text } from "./strings";
 import { TepukRentak } from "./TepukRentak";
@@ -29,6 +30,7 @@ const BUILT: Partial<Record<RoundId, MicrogameEntry>> = {
   borang_14: { Game: Borang14, layout: "between", howTo: GAME_TEXT.borang14.tapHint },
   goreng_kueyteow: { Game: GorengKueyTeow, layout: "stall", howTo: GAME_TEXT.goreng.howTo },
   celup_dakwat: { Game: CelupDakwat, layout: "side", howTo: GAME_TEXT.celup.howTo },
+  perang_speaker: { Game: PerangSpeaker, layout: "full", howTo: GAME_TEXT.speaker.howTo },
 };
 
 export function microgameFor(round: RoundId): MicrogameEntry {

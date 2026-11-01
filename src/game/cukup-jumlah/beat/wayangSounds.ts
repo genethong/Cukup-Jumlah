@@ -179,3 +179,38 @@ export function shutter(ctx: BaseAudioContext, out: AudioNode, when: number) {
   noiseBurst(ctx, out, when, "bandpass", 4200, 3, 0.12, 0.025);
   noiseBurst(ctx, out, when + 0.05, "bandpass", 3600, 3, 0.09, 0.02);
 }
+
+/** A shout through the ceramah PA: a buzzy vowel with a little hiss. Lower for the rival. */
+export function paShout(ctx: BaseAudioContext, out: AudioNode, when: number, rival = false) {
+  const base = rival ? 150 : 210;
+  ring(
+    ctx,
+    out,
+    when,
+    [
+      { freq: base, gain: 0.035, decay: 0.16 },
+      { freq: base * 2.02, gain: 0.02, decay: 0.12 },
+    ],
+    "sawtooth",
+  );
+  noiseBurst(ctx, out, when, "bandpass", rival ? 1100 : 1500, 1.4, 0.05, 0.1);
+}
+
+/** The amp's feedback screech: a thin whistle climbing for most of a second. */
+export function feedbackSqueal(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  const osc = ctx.createOscillator();
+  const amp = ctx.createGain();
+  osc.frequency.setValueAtTime(2400, when);
+  osc.frequency.exponentialRampToValueAtTime(3600, when + 0.7);
+  amp.gain.setValueAtTime(0.0001, when);
+  amp.gain.exponentialRampToValueAtTime(0.06, when + 0.08);
+  amp.gain.exponentialRampToValueAtTime(0.0001, when + 0.8);
+  osc.connect(amp).connect(out);
+  osc.start(when);
+  osc.stop(when + 0.82);
+}
+
+/** The crowd cheering: a soft wash of noise. */
+export function crowdCheer(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  noiseBurst(ctx, out, when, "bandpass", 900, 0.6, 0.14, 0.6);
+}
