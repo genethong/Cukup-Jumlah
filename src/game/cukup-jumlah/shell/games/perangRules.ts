@@ -29,6 +29,11 @@ export const RIVAL_QUIET = 0.05;
 export const CLASH_HEAT = 2.5;
 /** How much of the crowd's walk two loud stages cancel. */
 export const CLASH = 0.9;
+/** How much louder (share), longer (seconds) and shorter-breaked (share) the rival gets by
+ *  the end of the round. */
+export const RAMP_LOUDER = 0.6;
+export const RAMP_LONGER = 0.4;
+export const RAMP_SHORTER_BREAK = 0.5;
 /** The rival raises the mic this long before each burst. */
 export const TELL_S = 0.45;
 
@@ -63,22 +68,26 @@ function shuffled(xs: number[], random: () => number): number[] {
   return out;
 }
 
-export type Burst = { from: number; to: number };
+export type Burst = { from: number; to: number; level: number };
 
-/** The rival's shouting bursts, in seconds of play, with a drink of water between. */
+/**
+ * The rival's shouting bursts, in seconds of play, with a drink of water between. The rival
+ * isn't lazy: as the night goes on they shout louder and longer and take shorter sips.
+ */
 export function rivalBursts(limitS: number, random: () => number = Math.random): Burst[] {
   const out: Burst[] = [];
   let t = 0.4;
   while (t < limitS) {
-    const len = 0.8 + random() * 0.3;
-    out.push({ from: t, to: t + len });
-    t += len + 1 + random() * 0.3;
+    const f = Math.min(1, t / limitS);
+    const len = 0.8 + random() * 0.3 + RAMP_LONGER * f;
+    out.push({ from: t, to: t + len, level: RIVAL_LOUD * (1 + RAMP_LOUDER * f) });
+    t += len + (1 + random() * 0.3) * (1 - RAMP_SHORTER_BREAK * f);
   }
   return out;
 }
 
 export function rivalLevel(bursts: Burst[], t: number): number {
-  return bursts.some((b) => t >= b.from && t < b.to) ? RIVAL_LOUD : RIVAL_QUIET;
+  return bursts.find((b) => t >= b.from && t < b.to)?.level ?? RIVAL_QUIET;
 }
 
 /** The rival is about to shout: the mic goes up. */
@@ -126,7 +135,7 @@ export function stepRally(
   const heat = Math.min(1, Math.max(0, r.heat + (volume * rate - (1 - volume) * COOL_RATE) * dt));
   // Both stages blaring at once is just noise: the crowd hardly moves. Contrast moves it.
   const pull =
-    (volume - rival) * (1 - (CLASH * Math.min(volume, rival)) / RIVAL_LOUD) -
+    (volume - rival) * Math.max(0, 1 - (CLASH * Math.min(volume, rival)) / RIVAL_LOUD) -
     (tripped > 0 ? WALK_OFF : 0);
   const crowd = r.crowd.map((p, i) =>
     Math.min(1, Math.max(0, p - pull * WALK * (r.pace[i] ?? 1) * dt)),

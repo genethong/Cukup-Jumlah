@@ -18,6 +18,7 @@ import { beginGroove } from "../music";
 import { GAME_TEXT } from "../strings";
 import {
   CROWD,
+  RIVAL_LOUD,
   RIVAL_QUIET,
   freshRally,
   needed,
@@ -49,7 +50,7 @@ const RIVAL: PuppetConfig = {
 };
 
 type Rival = "quiet" | "tell" | "loud";
-type View = { rally: Rally; rival: Rival };
+type View = { rally: Rally; rival: Rival; level: number };
 
 export function PerangSpeaker({
   clock,
@@ -70,6 +71,7 @@ export function PerangSpeaker({
   const [view, setView] = useState<View>(() => ({
     rally: freshRally(startCrowd(), startPaces()),
     rival: "quiet",
+    level: RIVAL_QUIET,
   }));
   const [live, setLive] = useState(false);
   const [outcome, setOutcome] = useState<"won" | "lost" | null>(null);
@@ -140,7 +142,7 @@ export function PerangSpeaker({
       const before = rallyRef.current;
       const { rally, screeched } = stepRally(before, level, dt);
       rallyRef.current = rally;
-      setView({ rally, rival });
+      setView({ rally, rival, level });
       if (screeched) {
         feedbackSqueal(clock.ctx, clock.out, t);
         gendangMiss(clock.ctx, clock.out, t + 0.05);
@@ -190,7 +192,9 @@ export function PerangSpeaker({
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const { rally, rival } = view;
+  const { rally, rival, level } = view;
+  // Late in the night the rival gives it everything.
+  const furious = level > RIVAL_LOUD * 1.3;
   const mine = yours(rally.crowd);
   const shouting = rally.volume > 0.3;
   const out = rally.tripped > 0;
@@ -233,7 +237,11 @@ export function PerangSpeaker({
       <Stage side="left" colour={party?.colour ?? "#8a2f2f"} />
       <Stage side="right" colour="#5f6f80" />
       <SpeakerTower side="left" level={out ? 0 : rally.volume} smoking={hot || out} />
-      <SpeakerTower side="right" level={rival === "loud" ? 0.8 : 0} smoking={false} />
+      <SpeakerTower
+        side="right"
+        level={rival === "loud" ? Math.min(1, level * 1.2) : 0}
+        smoking={false}
+      />
 
       <div className="pointer-events-none absolute bottom-[38%] left-[11%] h-[24%] w-[26%]">
         <PuppetAvatar
@@ -256,7 +264,15 @@ export function PerangSpeaker({
       {live && !outcome && (
         <Bubble
           side="right"
-          text={rival === "loud" ? T.rival[lang] : rival === "tell" ? T.tell[lang] : T.drink[lang]}
+          text={
+            rival === "loud"
+              ? furious
+                ? T.rivalFurious[lang]
+                : T.rival[lang]
+              : rival === "tell"
+                ? T.tell[lang]
+                : T.drink[lang]
+          }
           loud={rival === "loud"}
         />
       )}

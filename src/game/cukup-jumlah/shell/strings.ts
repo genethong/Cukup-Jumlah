@@ -323,6 +323,7 @@ export const GAME_TEXT = {
     mine: { ms: "Undilah saya!", en: "Vote for me!" },
     screech: { ms: "NGIIING!", en: "SCREEEECH!" },
     rival: { ms: "Dengar sini!", en: "Listen here!" },
+    rivalFurious: { ms: "DENGAR SINI!!!", en: "LISTEN HERE!!!" },
     tell: { ms: "Ehem…", en: "Ahem…" },
     drink: { ms: "Minum air…", en: "Sip of water…" },
     rivalName: { ms: "Calon lawan", en: "Rival" },

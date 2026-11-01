@@ -31,9 +31,19 @@ describe("Perang Speaker rules", () => {
     const bursts = rivalBursts(6, () => 0.5);
     expect(bursts.length).toBeGreaterThan(2);
     const b = bursts[1]!;
-    expect(rivalLevel(bursts, b.from + 0.1)).toBe(RIVAL_LOUD);
+    expect(rivalLevel(bursts, b.from + 0.1)).toBeGreaterThanOrEqual(RIVAL_LOUD);
     expect(rivalLevel(bursts, b.to + 0.1)).toBe(RIVAL_QUIET);
     expect(rivalTell(bursts, b.from - TELL_S / 2)).toBe(true);
+  });
+
+  it("has the rival shout louder and longer, with shorter breaks, as the night goes on", () => {
+    const bursts = rivalBursts(6, () => 0.5);
+    const first = bursts[0]!;
+    const last = bursts.at(-1)!;
+    expect(last.level).toBeGreaterThan(first.level);
+    expect(last.to - last.from).toBeGreaterThan(first.to - first.from);
+    const gap = (i: number) => bursts[i + 1]!.from - bursts[i]!.to;
+    expect(gap(bursts.length - 2)).toBeLessThan(gap(0));
   });
 
   it("draws the crowd when shouting into the rival's pause", () => {
