@@ -115,6 +115,20 @@
   animation: crowd-walk 300ms ease-in-out infinite alternate;
 }
 
+/* Notes riffling through the counting machine, and the machine humming. */
+.note-riffle {
+  animation: note-riffle 180ms linear infinite;
+}
+
+.machine-shake {
+  animation: machine-shake 90ms linear infinite;
+}
+
+/* Bundles sliding off the counter into the machine. */
+.machine-feed {
+  animation: machine-feed 600ms ease-in forwards;
+}
+
 /* Villagers wincing at the amp's screech. */
 .ears-shake {
   animation: bottle-wobble 260ms ease-in-out 3;
@@ -260,6 +274,20 @@
   to { translate: 0 -8%; }
 }
 
+@keyframes note-riffle {
+  from { top: -50%; }
+  to { top: 105%; }
+}
+
+@keyframes machine-shake {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0.3cqw 0; }
+}
+
+@keyframes machine-feed {
+  to { translate: 30cqw -2cqw; opacity: 0; scale: 0.6; }
+}
+
 @keyframes bottle-tip {
   to { transform: rotate(-24deg); }
 }
@@ -292,6 +320,9 @@
   .bottle-wobble,
   .ears-shake,
   .crowd-walk,
+  .note-riffle,
+  .machine-shake,
+  .machine-feed,
   .bottle-tip,
   .senduk-stir,
   .press-in,

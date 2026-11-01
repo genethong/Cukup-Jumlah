@@ -214,3 +214,16 @@ export function feedbackSqueal(ctx: BaseAudioContext, out: AudioNode, when: numb
 export function crowdCheer(ctx: BaseAudioContext, out: AudioNode, when: number) {
   noiseBurst(ctx, out, when, "bandpass", 900, 0.6, 0.14, 0.6);
 }
+
+/** A note flicking through the counting machine: a short papery tick. */
+export function noteFlick(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  noiseBurst(ctx, out, when, "bandpass", 2600, 4, 0.06, 0.025);
+}
+
+/** The counting machine's verdict: a bright ding when it's right. */
+export function ding(ctx: BaseAudioContext, out: AudioNode, when: number) {
+  ring(ctx, out, when, [
+    { freq: 1568, gain: 0.07, decay: 0.6 },
+    { freq: 3136, gain: 0.02, decay: 0.3 },
+  ]);
+}
