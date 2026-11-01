@@ -28,6 +28,8 @@ const SCROLL_FROM = 4;
 /** Seconds before the next promise starts sliding. */
 const NEXT_S = 0.25;
 const COLOURS = ["#0E897F", "#C18D48", "#6B6965"];
+/** Narrower than this (% of width), a card shows its promise on a tag instead. */
+const NARROW = 30;
 
 type Falling = { id: number; block: Block; level: number; label: number; whole: boolean };
 type Pop = { id: number; text: string; good: boolean };
@@ -215,9 +217,11 @@ function PromiseBlock({
   tint: string;
   active?: boolean;
 }) {
+  // A card too narrow for its words wears them on a tag that sticks out past its edges.
+  const narrow = block.w < NARROW;
   return (
     <div
-      className={`pointer-events-none absolute flex items-center justify-center overflow-hidden rounded-[0.8cqw] border-[0.5cqw] border-[#2b2522]/30 ${
+      className={`pointer-events-none absolute flex items-center justify-center rounded-[0.8cqw] border-[0.5cqw] border-[#2b2522]/30 ${
         active
           ? "shadow-[0_1.2cqw_1.4cqw_rgba(40,14,6,0.35)]"
           : "shadow-[0_0.5cqw_0_rgba(40,14,6,0.3)]"
@@ -230,9 +234,16 @@ function PromiseBlock({
         background: tint,
       }}
     >
-      <span className="truncate px-[1cqw] font-display text-[3.6cqw] font-bold text-[#F3EBDF]">
-        {text}
-      </span>
+      {text &&
+        (narrow ? (
+          <span className="absolute left-1/2 z-10 -translate-x-1/2 rounded-[0.6cqw] bg-[#F3EBDF] px-[1.2cqw] py-[0.1cqw] font-display text-[3cqw] font-bold whitespace-nowrap text-[var(--ink)] shadow-[0_0.4cqw_0.8cqw_rgba(40,14,6,0.35)]">
+            {text}
+          </span>
+        ) : (
+          <span className="truncate px-[1cqw] font-display text-[3.6cqw] font-bold text-[#F3EBDF]">
+            {text}
+          </span>
+        ))}
     </div>
   );
 }

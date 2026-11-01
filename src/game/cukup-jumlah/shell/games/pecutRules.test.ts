@@ -3,8 +3,10 @@ import {
   DISTANCE,
   FRESH_RUN,
   LANES,
-  SPEED,
+  STEP_IN_M,
   STUMBLE_S,
+  cleanRunS,
+  laneAt,
   layCourse,
   runVerdict,
   stepRun,
@@ -17,7 +19,12 @@ describe("Pecut SPR rules", () => {
       const course = layCourse();
       expect(course.length).toBeGreaterThan(4);
       const rows = new Map<number, Set<number>>();
-      for (const o of course) rows.set(o.at, (rows.get(o.at) ?? new Set()).add(o.lane));
+      for (const o of course) {
+        const lanes = rows.get(o.at) ?? new Set<number>();
+        lanes.add(o.lane);
+        if (o.toLane !== undefined) lanes.add(o.toLane);
+        rows.set(o.at, lanes);
+      }
       for (const lanes of rows.values()) expect(lanes.size).toBeLessThan(LANES);
     }
   });
@@ -43,6 +50,12 @@ describe("Pecut SPR rules", () => {
     expect(after.bumps).toBe(1);
   });
 
+  it("has reporters step into the next lane as you come near", () => {
+    const o = { at: 40, lane: 0, kind: "reporter" as const, toLane: 1 };
+    expect(laneAt(o, 0)).toBe(0);
+    expect(laneAt(o, 40 - STEP_IN_M)).toBe(1);
+  });
+
   it("dodges by being in another lane", () => {
     const course = [{ at: 5, lane: 0, kind: "banner" as const }];
     let r = FRESH_RUN;
@@ -53,7 +66,8 @@ describe("Pecut SPR rules", () => {
   it("wins at the counter, with time to spare for a clean run", () => {
     expect(runVerdict({ ...FRESH_RUN, distance: DISTANCE }, false)).toBe("won");
     expect(runVerdict(FRESH_RUN, true)).toBe("lost");
-    // 7 bars of play is about 13.4 s; a clean run leaves room for a few bumps.
-    expect(DISTANCE / SPEED).toBeLessThan(13.4 * 0.8);
+    // 6 bars of play is about 11.5 s; a clean run leaves room for three or so bumps.
+    expect(cleanRunS()).toBeLessThan(11.5 - 3 * STUMBLE_S);
+    expect(cleanRunS()).toBeGreaterThan(11.5 - 5 * STUMBLE_S);
   });
 });

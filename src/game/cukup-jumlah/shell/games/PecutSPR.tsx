@@ -9,6 +9,8 @@ import {
   DISTANCE,
   FRESH_RUN,
   LANES,
+  aboutToStep,
+  laneAt,
   layCourse,
   runVerdict,
   stepRun,
@@ -170,14 +172,19 @@ export function PecutSPR(props: MicrogameProps) {
         return (
           <div
             key={`o-${i}`}
-            className="pointer-events-none absolute flex h-[9%] w-[22%] -translate-x-1/2 -translate-y-full items-end justify-center"
+            className="pointer-events-none absolute flex h-[9%] w-[22%] -translate-x-1/2 -translate-y-full items-end justify-center transition-[left] duration-200"
             style={{
-              left: `${LANE_X[o.lane]}%`,
+              left: `${LANE_X[laneAt(o, run.distance)]}%`,
               top: `${y}%`,
               opacity: run.hit.includes(i) ? 0.45 : 1,
             }}
           >
             <ObstacleArt kind={o.kind} />
+            {aboutToStep(o, run.distance) && (
+              <span className="hold-glow absolute -top-[30%] rounded-full bg-[var(--sambal)] px-[1.2cqw] font-display text-[3.6cqw] font-bold text-[var(--cream)]">
+                {o.toLane! > o.lane ? "!→" : "←!"}
+              </span>
+            )}
           </div>
         );
       })}
@@ -248,6 +255,14 @@ export function PecutSPR(props: MicrogameProps) {
 
 /** A clump of supporters, a banner across the lane, or a kompang troupe. */
 function ObstacleArt({ kind }: { kind: Kind }) {
+  if (kind === "reporter") {
+    return (
+      <div className="relative h-full" style={{ aspectRatio: "1 / 2" }}>
+        <Villager variant={1} covering={false} won />
+        <span className="absolute top-[30%] -right-[60%] text-[4.4cqw]">🎙️</span>
+      </div>
+    );
+  }
   if (kind === "banner") {
     return (
       <svg viewBox="0 0 60 30" className="h-[70%] w-full" aria-hidden="true">

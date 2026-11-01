@@ -39,7 +39,7 @@ const BUILT: Partial<Record<RoundId, MicrogameEntry>> = {
   baling_risalah: { Game: BalingRisalah, layout: "cameo", howTo: GAME_TEXT.baling.howTo, bars: 5 },
   pacak_bendera: { Game: PacakBendera, layout: "cameo", howTo: GAME_TEXT.pacak.howTo, bars: 5 },
   semak_borang: { Game: SemakBorang, layout: "cameo", howTo: GAME_TEXT.semak.howTo, bars: 5 },
-  pecut_spr: { Game: PecutSPR, layout: "cameo", howTo: GAME_TEXT.pecut.howTo, bars: 7 },
+  pecut_spr: { Game: PecutSPR, layout: "cameo", howTo: GAME_TEXT.pecut.howTo, bars: 6 },
   susun_manifesto: {
     Game: SusunManifesto,
     layout: "cameo",
