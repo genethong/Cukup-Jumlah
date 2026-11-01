@@ -1,7 +1,8 @@
 // Rebut Kamera (SENYUM!): the nomination-day group photo. Party colleagues stand in a line
 // that keeps shuffling and swaying; the YB walks along it and must be standing in a gap when
 // the shutter fires. Overlapping someone is an elbow shot. From the second photo a latecomer
-// waits behind one of the gaps and steps into it just before the click.
+// wanders up and down behind the line, then at the last moment heads for one of the gaps and
+// steps into it just before the click.
 // Pure rules here; the screen is RebutKamera.tsx.
 //
 // x is in % of the stage width, each figure's centre; t is seconds of play.
@@ -16,8 +17,10 @@ export const LINE_RIGHT = 96;
 export const PHOTO_S = 2.9;
 export const SHUFFLE_S = 0.5;
 export const SHUTTER_S = 2.4;
-/** The latecomer steps in this long before the click. */
-export const LATE_S = 0.6;
+/** The latecomer heads for their gap this long before stepping in, and steps in this long
+ *  before the click. */
+export const HEAD_S = 0.5;
+export const LATE_S = 0.5;
 /** Overlap (in %) that still passes as standing close. */
 export const TOUCH = 1.5;
 /** How fast the YB walks, in % of the width per second. */
@@ -34,6 +37,8 @@ export type Photo = {
   gaps: number[];
   /** The gap the latecomer will fill, if any. */
   late: number | null;
+  /** Where along the wander the latecomer starts. */
+  phase: number;
 };
 
 export function shutterAt(i: number): number {
@@ -68,7 +73,7 @@ function layLine(i: number, rand: () => number): Photo {
       x += w + space;
     }
     const late = gaps > 1 ? gapAt[Math.floor(rand() * gapAt.length)]! : null;
-    return { slots, gaps: gapAt, late };
+    return { slots, gaps: gapAt, late, phase: rand() * Math.PI * 2 };
   }
 }
 
@@ -96,12 +101,33 @@ export function memberX(plan: Photo[], k: number, t: number): number {
   return from + (to - from) * p + swayAt(t);
 }
 
-/** The latecomer: waiting behind their gap, then in the line just before the click. */
-export function lateAt(plan: Photo[], t: number): { x: number; stepped: boolean } | null {
+/** Where the wandering latecomer is behind the line, before heading for a gap. */
+function wanderX(photo: Photo, rel: number): number {
+  return 50 + 34 * Math.sin(rel * 1.7 + photo.phase);
+}
+
+export type Late = {
+  x: number;
+  /** Heading for their gap now (the tell). */
+  heading: boolean;
+  /** In the line. */
+  stepped: boolean;
+};
+
+/** The latecomer: wandering behind the line, heading for their gap, then in the line just
+ *  before the click. */
+export function lateAt(plan: Photo[], t: number): Late | null {
   const i = photoAt(t);
-  const gap = plan[i]!.late;
-  if (gap === null) return null;
-  return { x: gap + swayAt(t), stepped: t >= shutterAt(i) - LATE_S };
+  const photo = plan[i]!;
+  if (photo.late === null) return null;
+  const stepAt = shutterAt(i) - LATE_S;
+  const headAt = stepAt - HEAD_S;
+  const gapX = photo.late + swayAt(t);
+  if (t >= stepAt) return { x: gapX, heading: true, stepped: true };
+  if (t < headAt) return { x: wanderX(photo, t - i * PHOTO_S), heading: false, stepped: false };
+  const from = wanderX(photo, headAt - i * PHOTO_S);
+  const x = from + (gapX - from) * ease((t - headAt) / HEAD_S);
+  return { x, heading: true, stepped: false };
 }
 
 /** The figures in the line at `t` (members, plus the latecomer once stepped in). */

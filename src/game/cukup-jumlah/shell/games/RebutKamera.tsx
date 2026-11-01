@@ -148,13 +148,15 @@ export function RebutKamera(props: MicrogameProps) {
       </div>
       <div className="pointer-events-none absolute inset-x-0 top-[62%] bottom-0 bg-[linear-gradient(180deg,#8a5a32,#6e4524)]" />
 
-      {/* The latecomer, waiting behind a gap. */}
+      {/* The latecomer, wandering behind the line until they make for a gap. */}
       {late && !late.stepped && (
-        <Figure x={late.x} lift={6} className="opacity-70">
-          <PuppetAvatar config={crew[MEMBERS]!} anim="idle" />
-          <span className="hold-glow absolute top-[2%] left-1/2 -translate-x-1/2 rounded-full bg-[var(--sambal)] px-[1.4cqw] font-display text-[3.6cqw] font-bold text-[var(--cream)]">
-            !
-          </span>
+        <Figure x={late.x} lift={6} className={late.heading ? "opacity-90" : "opacity-60"}>
+          <PuppetAvatar config={crew[MEMBERS]!} anim="rod-wiggle" />
+          {late.heading && (
+            <span className="hold-glow absolute top-[2%] left-1/2 -translate-x-1/2 rounded-full bg-[var(--sambal)] px-[1.4cqw] font-display text-[3.6cqw] font-bold text-[var(--cream)]">
+              !
+            </span>
+          )}
         </Figure>
       )}
 

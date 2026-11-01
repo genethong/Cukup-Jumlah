@@ -25,9 +25,10 @@ export const LETTERS = 9;
 /** Letters to let go by: crossed-out names and rival letterheads. */
 export const SKIPS = 3;
 export const NEEDED = LETTERS - SKIPS;
-/** Spacing between letters on the belt (a letter is 24 wide), and where its seal box sits. */
+/** Spacing between letters on the belt (a letter is 24 wide), and where its seal box sits:
+ *  off centre, but clear of the letter's edges. */
 const GAPS = [27, 31, 38, 44];
-const BOX_AT = [-BOX_HALF, 0, BOX_HALF];
+const BOX_AT = [-3.5, 0, 3.5];
 
 export type Kind = "good" | "crossed" | "rival";
 export type Letter = {

@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   FIGURE_W,
+  HEAD_S,
   LATE_S,
   LINE_LEFT,
   LINE_RIGHT,
   MEMBERS,
+  PHOTO_S,
   PHOTOS,
   WALK,
   judgeShot,
@@ -52,6 +54,17 @@ describe("Rebut Kamera rules", () => {
     expect(lateAt(plan, shutterAt(0))).toBeNull();
     expect(lateAt(plan, shutterAt(1) - LATE_S - 0.1)?.stepped).toBe(false);
     expect(lateAt(plan, shutterAt(1))?.stepped).toBe(true);
+    expect(lateAt(plan, shutterAt(1))!.x).toBeCloseTo(plan[1]!.late! + swayAt(shutterAt(1)));
+  });
+
+  it("has the latecomer wander, then head for the gap only at the last moment", () => {
+    const plan = planPhotos();
+    const headAt = shutterAt(1) - LATE_S - HEAD_S;
+    const xs = [0.2, 0.6, 1.0].map((d) => lateAt(plan, PHOTO_S + d)!);
+    expect(xs.every((l) => !l.heading)).toBe(true);
+    expect(new Set(xs.map((l) => l.x.toFixed(1))).size).toBeGreaterThan(1);
+    expect(lateAt(plan, headAt - 0.05)!.heading).toBe(false);
+    expect(lateAt(plan, headAt + 0.05)!.heading).toBe(true);
     expect(lineAt(plan, shutterAt(1))).toHaveLength(MEMBERS + 1);
   });
 

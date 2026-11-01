@@ -15,7 +15,7 @@ Agreed with Axel on 1 Nov 2026. Status: ✅ built, ⬜ to build.
 | ✅ Semak Borang | SEMAK! | Spot the mistake | Tap the one wrong field on each nomination form (age 17, no signature, no deposit receipt) | A candidate must be a citizen aged 18+ (Federal Constitution Art. 47) |
 | ✅ Bayar Deposit | KIRA! | Count to exact | Drag RM1,000 / RM500 / RM100 bundles to pay exactly RM10,000; overpaying costs time. Pakar Kira shows a running total | RM10,000 for Parliament, lost below 1/8 of the votes; a separate RM5,000 campaign-material deposit |
 | ✅ Cop Watikah | COP! | Stamp on the move | As leader, stamp the party seal in the box of each candidate's letter as it slides past, unevenly spaced; the box sits left, centre or right. Skip letters with a crossed-out name or a rival party's letterhead | Party candidates need the party's letter of authority to use its symbol |
-| ✅ Rebut Kamera | SENYUM! | Step into the gap | Step into a gap in the group-photo line as the shutter fires; bumping someone is an "elbow" photo. From the second photo a latecomer waits behind one gap and steps in just before the click | (satire) |
+| ✅ Rebut Kamera | SENYUM! | Step into the gap | Step into a gap in the group-photo line as the shutter fires; bumping someone is an "elbow" photo. From the second photo a latecomer wanders behind the line, then at the last moment heads for one gap and steps in just before the click | (satire) |
 
 ## Act 2: Campaign
 
