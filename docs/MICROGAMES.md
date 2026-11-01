@@ -11,9 +11,9 @@ Agreed with Axel on 1 Nov 2026. Status: ✅ built, ⬜ to build.
 
 | Round | Call | Action | What happens | Fact shown |
 |---|---|---|---|---|
-| ⬜ Pecut SPR | PECUT! | Lane dodge | Dash through supporters to the nomination centre before 10:00 | Papers are accepted only 9–10am |
-| ⬜ Semak Borang | SEMAK! | Spot the mistake | Tap the one wrong field on each nomination form (age 17, no signature, no deposit receipt) | A candidate must be a citizen aged 18+ (Federal Constitution Art. 47) |
-| ⬜ Bayar Deposit | KIRA! | Count to exact | Drag RM1,000 / RM500 / RM100 bundles to pay exactly RM10,000; overpaying costs time. Pakar Kira shows a running total | RM10,000 for Parliament, lost below 1/8 of the votes; a separate RM5,000 campaign-material deposit |
+| ✅ Pecut SPR | PECUT! | Lane dodge | Dash through supporters to the nomination centre before 10:00 | Papers are accepted only 9–10am |
+| ✅ Semak Borang | SEMAK! | Spot the mistake | Tap the one wrong field on each nomination form (age 17, no signature, no deposit receipt) | A candidate must be a citizen aged 18+ (Federal Constitution Art. 47) |
+| ✅ Bayar Deposit | KIRA! | Count to exact | Drag RM1,000 / RM500 / RM100 bundles to pay exactly RM10,000; overpaying costs time. Pakar Kira shows a running total | RM10,000 for Parliament, lost below 1/8 of the votes; a separate RM5,000 campaign-material deposit |
 | ⬜ Cop Watikah | COP! | Stamp on the move | As leader, stamp the party seal in the box of each candidate's letter as it slides past; skip letters with a crossed-out name | Party candidates need the party's letter of authority to use its symbol |
 | ⬜ Rebut Kamera | SENYUM! | Step into the gap | Step into a gap in the group-photo line as the shutter fires; bumping someone is an "elbow" photo | (satire) |
 
@@ -24,11 +24,11 @@ Agreed with Axel on 1 Nov 2026. Status: ✅ built, ⬜ to build.
 | ✅ Goreng Kuey Teow | KACAU! | Hold to pose | Grab the senduk only when a camera flashes; let the hawker cook | (satire) |
 | ✅ Perang Speaker | LAUNG! | Mash with heat | Shout into the rival's water breaks; overheat and the amp screeches | (satire) |
 | ⬜ Turap Jalan | TURAP! | Trace the road | Roll the road over the potholes before the photo car arrives (could become *Tampal Lubang*, the one-bucket pothole photo-op) | (satire) |
-| ⬜ Potong Reben | GUNTING! | One clean slice | Swipe across the ribbon in one stroke when it pulls taut | (satire) |
-| ⬜ Baling Risalah | EDAR! | Flick only leaflets | Flick leaflets to passers-by; gifts (cash envelope, rice) go in the bin | Giving money or gifts to influence a vote is bribery, food and drink is treating (Election Offences Act 1954) |
+| ✅ Potong Reben | GUNTING! | One clean slice | Swipe across the ribbon in one stroke when it pulls taut | (satire) |
+| ✅ Baling Risalah | EDAR! | Flick only leaflets | Flick leaflets to passers-by; gifts (cash envelope, rice) go in the bin | Giving money or gifts to influence a vote is bribery, food and drink is treating (Election Offences Act 1954) |
 | ⬜ Joget Trend | JOGET! | Copy the dance | Copy a viral dance of about four puppet poses, in order, before the trend dies | GE15 was called the "TikTok election" |
 | ⬜ Cuci Longkang | SENTAL! | Rub it clean | Rub muck patches clean; dirty patches smell and residents' complaints pile up; the reporter arrives when the fuse ends | (satire) |
-| ⬜ Pacak Bendera | PACAK! | Push your luck | Plant flags until just before 11:59pm, never inside the ring around the polling centre | Campaigning ends 11:59pm the night before polling; material within 50 m of a polling centre is an offence |
+| ✅ Pacak Bendera | PACAK! | Push your luck | Plant flags until just before 11:59pm, never inside the ring around the polling centre | Campaigning ends 11:59pm the night before polling; material within 50 m of a polling centre is an offence |
 
 Joget Trend replaces the earlier Payung Bos idea (a boss doesn't fit the player as leader).
 

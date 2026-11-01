@@ -129,6 +129,15 @@
   animation: machine-feed 600ms ease-in forwards;
 }
 
+/* The two halves of a cut ribbon dropping away. */
+.ribbon-fall-left {
+  animation: ribbon-fall-left 600ms ease-in forwards;
+}
+
+.ribbon-fall-right {
+  animation: ribbon-fall-right 600ms ease-in forwards;
+}
+
 /* Villagers wincing at the amp's screech. */
 .ears-shake {
   animation: bottle-wobble 260ms ease-in-out 3;
@@ -288,6 +297,14 @@
   to { translate: 30cqw -2cqw; opacity: 0; scale: 0.6; }
 }
 
+@keyframes ribbon-fall-left {
+  to { translate: -2px 14px; rotate: 6deg; opacity: 0.2; }
+}
+
+@keyframes ribbon-fall-right {
+  to { translate: 2px 14px; rotate: -6deg; opacity: 0.2; }
+}
+
 @keyframes bottle-tip {
   to { transform: rotate(-24deg); }
 }
@@ -320,6 +337,8 @@
   .bottle-wobble,
   .ears-shake,
   .crowd-walk,
+  .ribbon-fall-left,
+  .ribbon-fall-right,
   .note-riffle,
   .machine-shake,
   .machine-feed,
