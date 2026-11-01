@@ -7,8 +7,8 @@ import { CelupDakwat } from "./games/CelupDakwat";
 import { GorengKueyTeow } from "./games/GorengKueyTeow";
 import { PacakBendera } from "./games/PacakBendera";
 import { PecutSPR } from "./games/PecutSPR";
-import { PotongReben } from "./games/PotongReben";
 import { SemakBorang } from "./games/SemakBorang";
+import { SusunManifesto } from "./games/SusunManifesto";
 import { PerangSpeaker } from "./games/PerangSpeaker";
 import type { MicrogameProps, StageLayout } from "./microgame";
 import { GAME_TEXT, UI, type Text } from "./strings";
@@ -40,7 +40,12 @@ const BUILT: Partial<Record<RoundId, MicrogameEntry>> = {
   pacak_bendera: { Game: PacakBendera, layout: "cameo", howTo: GAME_TEXT.pacak.howTo, bars: 5 },
   semak_borang: { Game: SemakBorang, layout: "cameo", howTo: GAME_TEXT.semak.howTo, bars: 5 },
   pecut_spr: { Game: PecutSPR, layout: "cameo", howTo: GAME_TEXT.pecut.howTo, bars: 7 },
-  potong_reben: { Game: PotongReben, layout: "cameo", howTo: GAME_TEXT.potong.howTo, bars: 5 },
+  susun_manifesto: {
+    Game: SusunManifesto,
+    layout: "cameo",
+    howTo: GAME_TEXT.susun.howTo,
+    bars: 7,
+  },
   borang_14: { Game: Borang14, layout: "between", howTo: GAME_TEXT.borang14.tapHint },
   goreng_kueyteow: { Game: GorengKueyTeow, layout: "stall", howTo: GAME_TEXT.goreng.howTo },
   celup_dakwat: { Game: CelupDakwat, layout: "side", howTo: GAME_TEXT.celup.howTo },

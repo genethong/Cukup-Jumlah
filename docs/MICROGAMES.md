@@ -24,13 +24,13 @@ Agreed with Axel on 1 Nov 2026. Status: ✅ built, ⬜ to build.
 | ✅ Goreng Kuey Teow | KACAU! | Hold to pose | Grab the senduk only when a camera flashes; let the hawker cook | (satire) |
 | ✅ Perang Speaker | LAUNG! | Mash with heat | Shout into the rival's water breaks; overheat and the amp screeches | (satire) |
 | ⬜ Turap Jalan | TURAP! | Trace the road | Roll the road over the potholes before the photo car arrives (could become *Tampal Lubang*, the one-bucket pothole photo-op) | (satire) |
-| ✅ Potong Reben | GUNTING! | One clean slice | Swipe across the ribbon in one stroke when it pulls taut | (satire) |
+| ✅ Susun Manifesto | JANJI! | Stacker | Drop promise blocks onto the manifesto tower; whatever overhangs breaks off as a broken promise; stack 8 | (satire) |
 | ✅ Baling Risalah | EDAR! | Flick only leaflets | Flick leaflets to passers-by; gifts (cash envelope, rice) go in the bin | Giving money or gifts to influence a vote is bribery, food and drink is treating (Election Offences Act 1954) |
 | ⬜ Joget Trend | JOGET! | Copy the dance | Copy a viral dance of about four puppet poses, in order, before the trend dies | GE15 was called the "TikTok election" |
 | ⬜ Cuci Longkang | SENTAL! | Rub it clean | Rub muck patches clean; dirty patches smell and residents' complaints pile up; the reporter arrives when the fuse ends | (satire) |
 | ✅ Pacak Bendera | PACAK! | Push your luck | Plant flags until just before 11:59pm, never inside the ring around the polling centre | Campaigning ends 11:59pm the night before polling; material within 50 m of a polling centre is an offence |
 
-Joget Trend replaces the earlier Payung Bos idea (a boss doesn't fit the player as leader).
+Susun Manifesto replaces Potong Reben (a one-swipe wait that wasn't fun). Joget Trend replaces the earlier Payung Bos idea (a boss doesn't fit the player as leader).
 
 ## Act 3: Polling day
 
