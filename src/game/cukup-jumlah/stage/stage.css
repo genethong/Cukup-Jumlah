@@ -110,6 +110,11 @@
   animation: hold-glow 480ms ease-in-out infinite alternate;
 }
 
+/* Villagers wincing at the amp's screech. */
+.ears-shake {
+  animation: bottle-wobble 260ms ease-in-out 3;
+}
+
 /* The ink bottle knocked by the finger. */
 .bottle-wobble {
   animation: bottle-wobble 300ms ease-out;
@@ -275,6 +280,7 @@
     transform: translate(-50%, -50%) rotate(-8deg);
   }
   .bottle-wobble,
+  .ears-shake,
   .bottle-tip,
   .senduk-stir,
   .press-in,
