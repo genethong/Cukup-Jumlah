@@ -1,39 +1,58 @@
 import { describe, expect, it } from "vitest";
 import {
-  FINGERS,
-  FRESH_OFFER,
-  INK_FINGER_INDEX,
-  celupVerdict,
-  offerFinger,
-  wrongAllowed,
+  BAND_TOP,
+  BOTTLE_X,
+  FRESH_DIP,
+  INK_Y,
+  MOUTH_HALF,
+  RIM_Y,
+  SOAK_S,
+  START,
+  TOO_DEEP_Y,
+  bumpsAllowed,
+  insideMouth,
+  restOnDesk,
+  stepDip,
+  sway,
 } from "./celupRules";
 
-describe("Celup Dakwat Kekal rules", () => {
-  it("puts the YB's left hand on the player's right, thumbs inward", () => {
-    expect(FINGERS.slice(0, 5).every((f) => f.hand === "right")).toBe(true);
-    expect(FINGERS[4]!.name).toBe("thumb");
-    expect(FINGERS[5]!.name).toBe("thumb");
-    // The left index is just right of centre, beside the left thumb: easy to mistake.
-    expect(INK_FINGER_INDEX).toBe(6);
-    expect(FINGERS[3]).toEqual({ hand: "right", name: "index" });
+describe("Celup Dakwat Kekal dip rules", () => {
+  it("starts away from the bottle, and the sway is small next to the mouth", () => {
+    expect(insideMouth(START.x)).toBe(false);
+    for (let t = 0; t < 10; t += 0.1) expect(Math.abs(sway(t).dx)).toBeLessThan(MOUTH_HALF);
   });
 
-  it("inks only the left index finger", () => {
-    expect(offerFinger(FRESH_OFFER, INK_FINGER_INDEX)).toEqual({
-      right: true,
-      offer: { wrong: 0, inked: true },
-    });
-    expect(offerFinger(FRESH_OFFER, 3)).toEqual({
-      right: false,
-      offer: { wrong: 1, inked: false },
-    });
+  it("inks the finger once it has soaked in the band", () => {
+    let d = FRESH_DIP;
+    const tip = { x: BOTTLE_X, y: BAND_TOP + 1 };
+    d = stepDip(d, tip, SOAK_S / 2, 1).dip;
+    expect(d.outcome).toBe("dipping");
+    d = stepDip(d, tip, SOAK_S / 2, 1).dip;
+    expect(d.outcome).toBe("won");
   });
 
-  it("forgives one wrong finger (two with Mesra Rakyat), then loses", () => {
-    expect(celupVerdict({ wrong: 1, inked: false }, wrongAllowed(false), false)).toBe("waiting");
-    expect(celupVerdict({ wrong: 2, inked: false }, wrongAllowed(false), false)).toBe("lost");
-    expect(celupVerdict({ wrong: 2, inked: false }, wrongAllowed(true), false)).toBe("waiting");
-    expect(celupVerdict({ wrong: 1, inked: true }, 1, false)).toBe("won");
-    expect(celupVerdict(FRESH_OFFER, 1, true)).toBe("lost");
+  it("needs dipping again after lifting out too soon, but not when only too shallow", () => {
+    const half = stepDip(FRESH_DIP, { x: BOTTLE_X, y: BAND_TOP + 1 }, SOAK_S / 2, 1).dip;
+    expect(stepDip(half, { x: BOTTLE_X, y: INK_Y + 1 }, 0.1, 1).dip.soak).toBe(half.soak);
+    expect(stepDip(half, { x: BOTTLE_X, y: INK_Y - 1 }, 0.1, 1).dip.soak).toBe(0);
+  });
+
+  it("loses when the finger goes in too deep", () => {
+    expect(stepDip(FRESH_DIP, { x: BOTTLE_X, y: TOO_DEEP_Y }, 0.1, 1).dip.outcome).toBe("deep");
+  });
+
+  it("bumps the rim outside the mouth; one too many tips the bottle over", () => {
+    const rim = { x: BOTTLE_X + MOUTH_HALF, y: RIM_Y + 1 };
+    const once = stepDip(FRESH_DIP, rim, 0.1, bumpsAllowed(false));
+    expect(once.bumped).toBe(true);
+    expect(once.dip.outcome).toBe("dipping");
+    expect(stepDip(once.dip, rim, 0.1, bumpsAllowed(false)).dip.outcome).toBe("spilled");
+    expect(stepDip(once.dip, rim, 0.1, bumpsAllowed(true)).dip.outcome).toBe("dipping");
+  });
+
+  it("lets the finger rest on the desk away from the bottle", () => {
+    expect(restOnDesk({ x: 20, y: 90 })).toEqual({ x: 20, y: RIM_Y });
+    expect(restOnDesk({ x: BOTTLE_X, y: 90 })).toEqual({ x: BOTTLE_X, y: 90 });
+    expect(stepDip(FRESH_DIP, { x: 20, y: RIM_Y }, 0.1, 1).bumped).toBe(false);
   });
 });

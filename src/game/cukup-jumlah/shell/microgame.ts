@@ -46,7 +46,7 @@ export type MicrogameProps = {
  * counter the game draws; `raised` stands it centred and higher, head and shoulders above a
  * desk the game draws; `full` leaves it off so the game has the whole kelir.
  */
-export type StageLayout = "center" | "side" | "between" | "stall" | "raised" | "full";
+export type StageLayout = "center" | "side" | "between" | "stall" | "full";
 
 /** Mistakes a game forgives before the round is lost. */
 export function mistakesAllowed(talent: TalentId, base = 1): number {

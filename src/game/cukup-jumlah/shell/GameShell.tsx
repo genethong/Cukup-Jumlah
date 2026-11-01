@@ -430,11 +430,9 @@ function RoundStage({
               ? "relative h-[66%] w-[42%]"
               : layout === "stall"
                 ? "relative h-[62%] w-[38%] -translate-y-[24%]"
-                : layout === "raised"
-                  ? "relative h-[62%] w-[40%] -translate-y-[40%]"
-                  : layout === "between"
-                    ? "relative mb-[1%] h-[56%] w-[28%]"
-                    : "relative h-full w-[60%]"
+                : layout === "between"
+                  ? "relative mb-[1%] h-[56%] w-[28%]"
+                  : "relative h-full w-[60%]"
           }
         >
           <PuppetAvatar
