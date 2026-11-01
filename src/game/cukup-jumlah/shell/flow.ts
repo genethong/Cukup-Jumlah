@@ -20,7 +20,7 @@ export type RoundId =
   | "goreng_kueyteow"
   | "perang_speaker"
   | "turap_jalan"
-  | "potong_reben"
+  | "susun_manifesto"
   | "baling_risalah"
   | "payung_bos"
   | "cuci_longkang"
@@ -41,7 +41,7 @@ export const ACTS: Record<ActNo, { rounds: readonly RoundId[]; seatsPerWin: numb
       "goreng_kueyteow",
       "perang_speaker",
       "turap_jalan",
-      "potong_reben",
+      "susun_manifesto",
       "baling_risalah",
       "payung_bos",
       "cuci_longkang",

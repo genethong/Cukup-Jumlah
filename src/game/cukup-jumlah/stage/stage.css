@@ -129,6 +129,11 @@
   animation: machine-feed 600ms ease-in forwards;
 }
 
+/* A broken-off promise tumbling down. */
+.piece-fall {
+  animation: piece-fall 800ms ease-in forwards;
+}
+
 /* Villagers wincing at the amp's screech. */
 .ears-shake {
   animation: bottle-wobble 260ms ease-in-out 3;
@@ -288,6 +293,10 @@
   to { translate: 30cqw -2cqw; opacity: 0; scale: 0.6; }
 }
 
+@keyframes piece-fall {
+  to { translate: 0 40%; rotate: 8deg; opacity: 0; }
+}
+
 @keyframes bottle-tip {
   to { transform: rotate(-24deg); }
 }
@@ -320,6 +329,7 @@
   .bottle-wobble,
   .ears-shake,
   .crowd-walk,
+  .piece-fall,
   .note-riffle,
   .machine-shake,
   .machine-feed,
