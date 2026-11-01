@@ -18,8 +18,8 @@ export const COOL_RATE = 0.6;
 /** Seconds the amp is out after it trips, and the heat it comes back with. */
 export const TRIP_S = 1.2;
 export const TRIP_HEAT = 0.4;
-/** How far each villager walks off when the amp screeches. */
-export const SCREECH_PUSH = 0.12;
+/** How hard the crowd walks off while the amp is out, as a pull toward the rival. */
+export const WALK_OFF = 0.5;
 /** How fast villagers walk, in field widths per second at full pull. */
 export const WALK = 0.25;
 /** The rival's level while shouting, and while drinking water. */
@@ -36,12 +36,31 @@ export function needed(forgiving: boolean): number {
   return forgiving ? NEED - 1 : NEED;
 }
 
-/** Where the villagers start, 0 at your stage and 1 at the rival's: split down the middle. */
+/** Where the villagers start, 0 at your stage and 1 at the rival's: spread evenly across
+ *  the field, half on each side, so the far ones take a long time to win over. */
 export function startCrowd(random: () => number = Math.random): number[] {
-  return Array.from({ length: CROWD }, (_, i) => {
-    const side = i % 2 === 0 ? 0.4 : 0.6;
-    return side + (random() - 0.5) * 0.16;
-  });
+  return shuffled(
+    Array.from({ length: CROWD }, (_, i) => 0.12 + (0.76 * i) / (CROWD - 1)),
+    random,
+  );
+}
+
+/** How readily each villager walks, from the slow and stubborn to the easily swayed, so the
+ *  crowd drifts over one by one instead of in a lump. */
+export function startPaces(random: () => number = Math.random): number[] {
+  return shuffled(
+    Array.from({ length: CROWD }, (_, i) => 0.45 + (1.1 * i) / (CROWD - 1)),
+    random,
+  );
+}
+
+function shuffled(xs: number[], random: () => number): number[] {
+  const out = [...xs];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
 }
 
 export type Burst = { from: number; to: number };
@@ -73,11 +92,15 @@ export type Rally = {
   /** Seconds the amp has left before it comes back on; 0 when it works. */
   tripped: number;
   crowd: number[];
+  /** Each villager's walking pace (see startPaces). */
+  pace: number[];
   screeches: number;
+  /** Which way the crowd is drifting this frame: below 0 toward you, above 0 away. */
+  drift: number;
 };
 
-export function freshRally(crowd: number[]): Rally {
-  return { volume: 0, heat: 0, tripped: 0, crowd, screeches: 0 };
+export function freshRally(crowd: number[], pace: number[] = crowd.map(() => 1)): Rally {
+  return { volume: 0, heat: 0, tripped: 0, crowd, pace, screeches: 0, drift: 0 };
 }
 
 /** A tap on the mic: louder, unless the amp is out. */
@@ -88,7 +111,8 @@ export function shout(r: Rally): Rally {
 
 /**
  * One frame: the amp heats (or cools), may screech and trip, and the crowd walks toward
- * the louder stage.
+ * the louder stage, each villager at their own pace. While the amp is out the crowd walks
+ * off toward the rival.
  */
 export function stepRally(
   r: Rally,
@@ -99,19 +123,30 @@ export function stepRally(
   const volume = tripped > 0 ? 0 : Math.max(0, r.volume * (1 - VOLUME_DECAY * dt));
   // Cranking the amp to out-shout the rival heats it much faster.
   const rate = HEAT_RATE * (rival > RIVAL_QUIET ? CLASH_HEAT : 1);
-  let heat = Math.min(1, Math.max(0, r.heat + (volume * rate - (1 - volume) * COOL_RATE) * dt));
+  const heat = Math.min(1, Math.max(0, r.heat + (volume * rate - (1 - volume) * COOL_RATE) * dt));
   // Both stages blaring at once is just noise: the crowd hardly moves. Contrast moves it.
-  const pull = (volume - rival) * (1 - (CLASH * Math.min(volume, rival)) / RIVAL_LOUD);
-  let crowd = r.crowd.map((p) => Math.min(1, Math.max(0, p - pull * WALK * dt)));
+  const pull =
+    (volume - rival) * (1 - (CLASH * Math.min(volume, rival)) / RIVAL_LOUD) -
+    (tripped > 0 ? WALK_OFF : 0);
+  const crowd = r.crowd.map((p, i) =>
+    Math.min(1, Math.max(0, p - pull * WALK * (r.pace[i] ?? 1) * dt)),
+  );
+  const drift = -pull;
   if (heat >= 1 && tripped === 0) {
-    heat = TRIP_HEAT;
-    crowd = crowd.map((p) => Math.min(1, p + SCREECH_PUSH));
     return {
       screeched: true,
-      rally: { volume: 0, heat, tripped: TRIP_S, crowd, screeches: r.screeches + 1 },
+      rally: {
+        ...r,
+        volume: 0,
+        heat: TRIP_HEAT,
+        tripped: TRIP_S,
+        crowd,
+        drift,
+        screeches: r.screeches + 1,
+      },
     };
   }
-  return { screeched: false, rally: { ...r, volume, heat, tripped, crowd } };
+  return { screeched: false, rally: { ...r, volume, heat, tripped, crowd, drift } };
 }
 
 /** Villagers standing on your half of the field. */

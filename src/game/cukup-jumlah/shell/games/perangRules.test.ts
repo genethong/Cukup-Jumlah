@@ -13,6 +13,7 @@ import {
   rivalTell,
   shout,
   startCrowd,
+  startPaces,
   stepRally,
   yours,
 } from "./perangRules";
@@ -54,12 +55,23 @@ describe("Perang Speaker rules", () => {
     expect(0.5 - overRival).toBeLessThan((0.5 - intoPause) / 3);
   });
 
-  it("screeches and trips the amp when it overheats, pushing the crowd away", () => {
+  it("screeches and trips the amp when it overheats; the crowd walks off while it's out", () => {
     const hot = { ...freshRally(middle()), volume: 1, heat: 0.999 };
-    const { rally, screeched } = stepRally(hot, RIVAL_LOUD, 0.05);
+    const { rally, screeched } = stepRally(hot, RIVAL_QUIET, 0.05);
     expect(screeched).toBe(true);
     expect(rally.tripped).toBe(TRIP_S);
-    expect(rally.crowd[0]!).toBeGreaterThan(0.5);
     expect(shout(rally).volume).toBe(0);
+    const later = stepRally(rally, RIVAL_QUIET, 0.2).rally;
+    expect(later.crowd[0]!).toBeGreaterThan(rally.crowd[0]!);
+    expect(later.drift).toBeGreaterThan(0);
+  });
+
+  it("starts the crowd spread across the field, half each side, at mixed paces", () => {
+    const crowd = startCrowd();
+    expect(yours(crowd)).toBe(CROWD / 2);
+    expect(Math.min(...crowd)).toBeLessThan(0.2);
+    expect(Math.max(...crowd)).toBeGreaterThan(0.8);
+    const pace = startPaces();
+    expect(Math.max(...pace) / Math.min(...pace)).toBeGreaterThan(3);
   });
 });

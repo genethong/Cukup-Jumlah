@@ -318,6 +318,8 @@ export const GAME_TEXT = {
     howTo: { ms: "Laung masa lawan berhenti", en: "Shout while the rival pauses" },
     button: { ms: "LAUNG!", en: "SHOUT!" },
     amp: { ms: "Amp", en: "Amp" },
+    hot: { ms: "Amp panas!", en: "Amp overheating!" },
+    tripped: { ms: "Amp terpadam!", en: "Amp tripped!" },
     mine: { ms: "Undilah saya!", en: "Vote for me!" },
     screech: { ms: "NGIIING!", en: "SCREEEECH!" },
     rival: { ms: "Dengar sini!", en: "Listen here!" },

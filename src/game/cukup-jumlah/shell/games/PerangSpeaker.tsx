@@ -26,6 +26,7 @@ import {
   rivalTell,
   shout,
   startCrowd,
+  startPaces,
   stepRally,
   yours,
   type Rally,
@@ -67,7 +68,7 @@ export function PerangSpeaker({
   const party = PARTIES.find((p) => p.id === candidate.party);
 
   const [view, setView] = useState<View>(() => ({
-    rally: freshRally(startCrowd()),
+    rally: freshRally(startCrowd(), startPaces()),
     rival: "quiet",
   }));
   const [live, setLive] = useState(false);
@@ -260,10 +261,23 @@ export function PerangSpeaker({
         />
       )}
 
-      <Crowd crowd={rally.crowd} covering={out} key={`crowd-${screech}`} />
+      {screech > 0 && out && (
+        <div
+          key={`flash-${screech}`}
+          className="camera-flash pointer-events-none absolute inset-0 z-20 bg-[var(--sambal)]"
+        />
+      )}
+
+      <Crowd
+        crowd={rally.crowd}
+        pace={rally.pace}
+        drift={rally.drift}
+        covering={out}
+        key={`crowd-${screech}`}
+      />
 
       {/* The count: villagers on your half of the field, out of those needed. */}
-      <div className="pointer-events-none absolute top-[84.5%] left-1/2 flex -translate-x-1/2 items-center gap-[2cqw] rounded-sm bg-[#2b2522]/85 px-[2.4cqw] py-[0.5cqw] font-tally text-[3.4cqw] tracking-[0.06em] whitespace-nowrap text-[var(--cream)] uppercase">
+      <div className="pointer-events-none absolute top-[62.5%] left-1/2 flex -translate-x-1/2 items-center gap-[2cqw] rounded-sm bg-[#2b2522]/85 px-[2.4cqw] py-[0.5cqw] font-tally text-[3.4cqw] tracking-[0.06em] whitespace-nowrap text-[var(--cream)] uppercase">
         <span className={mine >= need ? "text-[#9be08a]" : ""}>
           {T.crowd[lang]} {mine}/{need}
         </span>
@@ -273,12 +287,14 @@ export function PerangSpeaker({
         </span>
       </div>
 
-      {/* The amp's heat. */}
-      <div className="pointer-events-none absolute top-[62.5%] left-[4%] flex w-[36%] items-center gap-[1.2cqw]">
-        <span className="font-tally text-[2.8cqw] tracking-[0.08em] text-[var(--ink)] uppercase">
-          {T.amp[lang]}
+      {/* The amp's heat, right above the mic so it's in view while mashing. */}
+      <div className="pointer-events-none absolute top-[84.5%] left-1/2 flex w-[64%] -translate-x-1/2 items-center gap-[1.4cqw]">
+        <span
+          className={`font-tally text-[3cqw] tracking-[0.08em] whitespace-nowrap uppercase ${hot || out ? "text-[var(--sambal)]" : "text-[var(--ink)]"}`}
+        >
+          {out ? T.tripped[lang] : hot ? T.hot[lang] : T.amp[lang]}
         </span>
-        <div className="h-[2cqw] flex-1 overflow-hidden rounded-full bg-[#2b2522]/25">
+        <div className="h-[2.4cqw] flex-1 overflow-hidden rounded-full bg-[#2b2522]/25">
           <div
             className={`h-full rounded-full ${hot || out ? "hold-glow bg-[var(--sambal)]" : "bg-[#e0a33a]"}`}
             style={{ width: `${Math.round(rally.heat * 100)}%` }}
@@ -300,7 +316,9 @@ export function PerangSpeaker({
           out
             ? "border-[#6b625c] bg-[#8d847d] text-[#e8e0d4]"
             : "border-[#5b1a14] bg-[var(--sambal)] text-[var(--cream)]"
-        } ${live && !outcome && !out ? "" : "opacity-80"}`}
+        } ${live && !outcome && !out ? "" : "opacity-80"} ${
+          live && !outcome && !out && !hot && rival !== "loud" ? "hold-glow" : ""
+        } ${hot && !out ? "ears-shake" : ""}`}
         style={{ touchAction: "manipulation" }}
       >
         <span aria-hidden="true">🎤</span>
@@ -399,8 +417,8 @@ function Bubble({
 }) {
   return (
     <p
-      className={`pointer-events-none absolute top-[45%] z-20 rounded-[2cqw] px-[2cqw] py-[0.6cqw] text-center font-display leading-[1.05] font-bold whitespace-nowrap italic shadow-[0_3px_6px_rgba(40,14,6,0.25)] ${
-        side === "left" ? "left-[35%]" : "right-[35%]"
+      className={`pointer-events-none absolute z-20 rounded-[2cqw] px-[2cqw] py-[0.6cqw] text-center font-display leading-[1.05] font-bold whitespace-nowrap italic shadow-[0_3px_6px_rgba(40,14,6,0.25)] ${
+        side === "left" ? "top-[43%] left-[31%]" : "top-[50%] right-[31%]"
       } ${loud ? "text-[4.4cqw]" : "text-[3.4cqw] opacity-85"} ${
         bad
           ? "bg-[var(--sambal)] text-[var(--cream)]"
@@ -414,8 +432,21 @@ function Bubble({
   );
 }
 
-/** The villagers on the field, as shadow figures; 0 is at your stage, 1 at the rival's. */
-function Crowd({ crowd, covering }: { crowd: number[]; covering: boolean }) {
+/**
+ * The villagers on the field, as shadow figures; 0 is at your stage, 1 at the rival's.
+ * Those on the move bob and lean the way they're walking, each at their own pace.
+ */
+function Crowd({
+  crowd,
+  pace,
+  drift,
+  covering,
+}: {
+  crowd: number[];
+  pace: number[];
+  drift: number;
+  covering: boolean;
+}) {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-[64%] h-[20%]">
       <div className="absolute top-[8%] bottom-[6%] left-1/2 border-l-[0.4cqw] border-dashed border-[#2b2522]/30" />
@@ -432,12 +463,23 @@ function Crowd({ crowd, covering }: { crowd: number[]; covering: boolean }) {
               zIndex: row,
             }}
           >
-            <Villager variant={i % 3} covering={covering} won={p < 0.5} />
+            <div
+              className={`h-full w-full ${walking(p, drift * (pace[i] ?? 1)) ? "crowd-walk" : ""}`}
+              style={{ transform: `skewX(${walking(p, drift) ? (drift < 0 ? 8 : -8) : 0}deg)` }}
+            >
+              <Villager variant={i % 3} covering={covering} won={p < 0.5} />
+            </div>
           </div>
         );
       })}
     </div>
   );
+}
+
+/** Walking unless the pull is faint, or they're already pressed up against a stage. */
+function walking(p: number, drift: number): boolean {
+  if (Math.abs(drift) < 0.08) return false;
+  return drift < 0 ? p > 0 : p < 1;
 }
 
 /** A villager in shadow; those on your half stand dark and solid, the rest faded. */
