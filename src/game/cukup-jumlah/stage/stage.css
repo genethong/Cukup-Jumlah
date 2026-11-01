@@ -110,6 +110,16 @@
   animation: hold-glow 480ms ease-in-out infinite alternate;
 }
 
+/* The ink bottle knocked by the finger. */
+.bottle-wobble {
+  animation: bottle-wobble 300ms ease-out;
+}
+
+/* The ink bottle knocked over. */
+.bottle-tip {
+  animation: bottle-tip 380ms cubic-bezier(0.5, 0, 0.8, 0.5) forwards;
+}
+
 /* A senduk working the wok. */
 .senduk-stir {
   animation: senduk-stir 360ms ease-in-out infinite alternate;
@@ -229,6 +239,16 @@
   to { box-shadow: 0 6px 0 rgba(40, 14, 6, 0.5), 0 0 0 3cqw rgba(228, 87, 46, 0); }
 }
 
+@keyframes bottle-wobble {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-4deg); }
+  60% { transform: rotate(3deg); }
+}
+
+@keyframes bottle-tip {
+  to { transform: rotate(-24deg); }
+}
+
 @keyframes senduk-stir {
   from { transform: rotate(-9deg); }
   to { transform: rotate(9deg); }
@@ -254,6 +274,8 @@
     opacity: 1;
     transform: translate(-50%, -50%) rotate(-8deg);
   }
+  .bottle-wobble,
+  .bottle-tip,
   .senduk-stir,
   .press-in,
   .hold-glow {
